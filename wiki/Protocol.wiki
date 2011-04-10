@@ -31,7 +31,7 @@
 = Usage instruction =
 
     Include your own header file and use the function inside to communicate.  The usage of functions should be rather easy and pretty well documented inside the header file, just read before use.
-    All transmissions are done in UTF-8.  For the purpose of simplicity, the function will only take wide character argument.  So make sure to handle all strings or at least convert them into wchar_t`* type before passing it to the library.
+    All transmissions are done in UTF-8.  For the purpose of simplicity, the function will only take wide character argument.  So make sure to handle all strings or at least convert them into wchar_t`* type` before passing it to the library.
 	For those who only want to use the library, this is all you need from this documentation.
 
 = Detail - Basis =
