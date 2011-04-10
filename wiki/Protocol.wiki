@@ -35,7 +35,7 @@
 	For those who only want to use the library, this is all you need from this documentation.
 
 = Detail - Basis =
-    All packets will start with two bytes of fixed binary data.
+    All packets will start with two bytes of fixed binary data.<br>
     The first byte will indicate the packet source, defined as follows:
 	server = 0 (the packet comes from server).
 	admin = 1, judge = 2, team = 3.
