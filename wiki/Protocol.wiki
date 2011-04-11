@@ -32,7 +32,7 @@
 
     Include your own header file and use the function inside to communicate.  The usage of functions should be rather easy and pretty well documented inside the header file, just read before use.
     All transmissions are done in UTF-8.  For the purpose of simplicity, the function will only take wide character argument.  So make sure to handle all strings or at least convert them into wchar_t`* type` before passing it to the library.
-	For those who only want to use the library, this is all you need from this documentation.
+    For those who only want to use the library, this is all you need from this documentation.
 
 = Detail - Basis =
     All packets will start with two bytes of fixed binary data.
@@ -56,18 +56,18 @@
 *Login* (SR = depend, ID = 00)
 || <font color=red> SRID </font> || account || password ||
     Whether the login client is team, judge, admin will be determined from SR byte.
-	
+  
 *Login Confirmation* (SR = 0, ID = 00)
-|| <font color=red> SRID </font>	|| confirmation ||
+|| <font color=red> SRID </font>  || confirmation ||
     If confirmation byte is 1, the account and password are valid.  If confirmation byte is 0, then the client program should block the user from proceeding.
-	
+  
 *Logout* (SR = depend, ID = 01)
-|| <font color=red> SRID </font>	|| account id ||
-	
+|| <font color=red> SRID </font>  || account id ||
+  
 *Logout Confirmation* (SR = 0, ID = 01)
-|| <font color=red> SRID </font>	|| confirmation ||
+|| <font color=red> SRID </font>  || confirmation ||
     Simply indicate that the server has received the logout request.  This message can be ignored by client.  It is however suggested that the client should handle this reply properly.
-	
+  
 ==Team and Server==
 *Team -> Server, submission* (SR = 3, ID = 10)
 || <font color=red> SRID </font>	|| account id || problem id	|| coding language ||
@@ -148,7 +148,7 @@ Operation id:
 || <font color=red> SRID </font>	||		||		||			||
 
 *Server -> Admin, contest site situation* (SR = 0, ID = 16)
-|| <font color=red>SRID</font> ||		||		||			||
+|| <font color=red> SRID </font> ||		||		||			||
 
 *Server -> Admin, clarification request* (SR = 0, ID = 17)
 || <font color=red> SRID </font> || clar id ||private || clarification message ||
