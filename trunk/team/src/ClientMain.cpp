@@ -1,4 +1,4 @@
-#include "../include/ClientMain.h"
+#include "ClientMain.h"
 
 BEGIN_EVENT_TABLE(ClientFrame, wxFrame)
     EVT_CLOSE(ClientFrame::OnClose)
