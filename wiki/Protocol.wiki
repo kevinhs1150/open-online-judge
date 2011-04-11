@@ -7,26 +7,26 @@
 = Functionalities requiring network communication =
 
     server
-	must cover all requirements below
+        must cover all requirements below
     team
-	submission
-	clarification
-	problem download
-	scoreboard update (listen)
-	runs result (listen)
+        submission
+        clarification
+        problem download
+        scoreboard update (listen)
+        runs result (listen)
     judge
-	receive run request (listen)
-	return run result
-	problem update (listen)
-	see clarification (listen)
+        receive run request (listen)
+        return run result
+        problem update (listen)
+        see clarification (listen)
     admin
-	manage account
-	manage problems
-	manage contest site
-	reply clarifications
-	global broadcast
-	set server property
-	see server status(ping, bandwidth test) (implement with other tools)
+        manage account
+        manage problems
+        manage contest site
+        reply clarifications
+        global broadcast
+        set server property
+        see server status(ping, bandwidth test) (implement with other tools)
 
 = Usage instruction =
 
@@ -37,8 +37,8 @@
 = Detail - Basis =
     All packets will start with two bytes of fixed binary data.
     The first byte will indicate the packet source, defined as follows:
-	server = 0 (the packet comes from server).
-	admin = 1, judge = 2, team = 3.
+        server = 0 (the packet comes from server).
+        admin = 1, judge = 2, team = 3.
     This byte will be named SR in the following documentation.
     The second byte is a unique identification to identify the purpose of the packet.  This byte will be named ID in the following documentation.
     All communications are done with pure string separated by null character “\0” unless specified explicitly.
@@ -51,7 +51,7 @@
 ==VSFTP Protocol==
 || file size || <font color=red> file content </font> ||
     This is a very, very simple file transfer protocol.  It will be used in the OOJ protocol for file transfer.
-	
+
 ==Account Management==
 *Login* (SR = depend, ID = 00)
 || <font color=red> SRID </font> || account || password ||
@@ -70,7 +70,7 @@
   
 ==Team and Server==
 *Team -> Server, submission* (SR = 3, ID = 10)
-|| <font color=red> SRID </font>	|| account id || problem id	|| coding language ||
+|| <font color=red> SRID </font> || account id || problem id || coding language ||
 || <font color=blue> source code file </font> ||
     A source file transfer will happen following the submission request. Note that server should wait for the file transfer.
     In reply, server should send a run result notification, with result string telling the team that this problem is being judged.
@@ -79,9 +79,9 @@
 || <font color=red> SRID </font> || account id ||private || clarification message ||
     The private byte will be enabled by 1 and disabled by 0.  If it is enabled, the clarification will be marked “private” on admin client.  If admin determines that this is a private message, the reply will not be broadcasted.
     In reply, server should send a clarification reply, with result string telling the team that this clarification is still being viewed by administrators.
-	
+  
 *Team -> Server, problem download* (SR = 3, ID = 12)
-|| <font color=red> SRID </font>	|| account id || problem id ||
+|| <font color=red> SRID </font> || account id || problem id ||
     Server should reply with the problem requested instantly.
 
 *Server -> Team, run result* (SR = 0, ID = 10)
@@ -100,7 +100,7 @@
 
 ==Judge and Server==
 *Judge -> Server, run result* (SR = 2, ID = 10)
-|| <font color=red> SRID </font>	|| run id || result string ||
+|| <font color=red> SRID </font>  || run id || result string ||
     The judge will not know the submitter.
 
 *Server -> Judge, run request* (SR = 0, ID = 14)
@@ -108,32 +108,32 @@
 || <font color=blue> source code file </font> ||
 
 *Server -> Judge, problem update* (SR = 0, ID = 15)
-|| <font color=red>SRID</font>	|| problem id ||
-|| <font color=blue>problem description</font> || <font color=blue>input data</font> || <font color=blue>correct answer</font> ||
+|| <font color=red> SRID </font> || problem id ||
+|| <font color=blue> problem description </font> || <font color=blue> input data </font> || <font color=blue> correct answer </font> ||
     If the problem does not exist, the judge client should add a new problem entry.
 
 == Admin and Server ==
 *Admin -> Server, account management* (SR = 1, ID = 10)
-|| <font color=red> SRID </font> || operation id	|| parameters ||
+|| <font color=red> SRID </font> || operation id || parameters ||
 Operation id:
     # add, parameters
-		|| type || account || password ||
+        || type || account || password ||
     # delete, parameters
-		|| account || id ||
+        || account || id ||
     # modify, parameters: no type change allowed
-		|| account id || new account || new password ||
+        || account id || new account || new password ||
     # update: no parameter.  Server sends all account information to requested administrator.
-	
+  
 *Admin -> Server, problem management* (SR = 1, ID = 11)
 || <font color=red> SRID </font> || operation id || problem id || parameters ||
     Operation id:
     # add
-	parameters
-	|| <font color=blue> problem description </font> || <font color=blue> input data </font> || <font color=blue> correct answer </font> ||
+        parameters
+        || <font color=blue> problem description </font> || <font color=blue> input data </font> || <font color=blue> correct answer </font> ||
     # delete: no parameter
     # modify
-	parameters
-	|| <font color=blue> problem description </font> || <font color=blue> input data </font> || <font color=blue> correct answer </font> ||
+        parameters
+        || <font color=blue> problem description </font> || <font color=blue> input data </font> || <font color=blue> correct answer </font> ||
     # update: no parameter.  Server sends all problem information to requested administrator.
 
 *Admin -> Server, clarification reply* (SR = 1, ID = 12)
@@ -145,10 +145,10 @@ Operation id:
     Make use of clarification reply and fix clarification id.  Private status is also fixed to 0 for the message to be globally broadcasted.
 
 *Admin -> Server, property settings* (SR = 1, ID = 13)
-|| <font color=red> SRID </font>	||		||		||			||
+|| <font color=red> SRID </font> ||     ||     ||               ||
 
 *Server -> Admin, contest site situation* (SR = 0, ID = 16)
-|| <font color=red> SRID </font> ||		||		||			||
+|| <font color=red> SRID </font> ||     ||     ||               ||
 
 *Server -> Admin, clarification request* (SR = 0, ID = 17)
 || <font color=red> SRID </font> || clar id ||private || clarification message ||
@@ -173,4 +173,4 @@ _version 0.2_
     Implemented account ID.
     File transfer changed into a tiny protocol.  In the implementation, files will be transferred through another function rather than embedded into original message.
     Added two protocols to back transfer account information and problem information to administrator. (two proto added between admin and server)
-	
+  
