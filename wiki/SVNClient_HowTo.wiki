@@ -54,4 +54,4 @@
     * [http://svnbook.red-bean.com/nightly/en/index.html SVN Book(Version Control with Subversion)]
 
 　_可以利用以下頁面進行測試_
-    * [https://kevin-project-test.googlecode.com/svn/ kevin-project-test]
+    * [http://code.google.com/p/kevin-project-test/ kevin-project-test]
