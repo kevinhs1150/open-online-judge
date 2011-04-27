@@ -1,0 +1,5 @@
+>> Open Online Judge Protocol Implementation <<
+
+protocol 0 revision 0 (follow specification 0.2)
+released on 2011.04.23
+ + Initial release version.
