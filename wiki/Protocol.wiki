@@ -1,6 +1,9 @@
 #summary OOJ Network Communication Protocol (Specification)
 #labels Phase-Design
 
+== NOTE ==
+A new version of protocol in docx(Microsoft Word 2007/2010) format is uploaded and available at [http://code.google.com/p/open-online-judge/downloads/list Downloads] section.
+
 = Protocol =
 <wiki:toc max_depth="2" /> 
 
