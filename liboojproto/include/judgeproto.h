@@ -24,11 +24,13 @@ void judgeproto_cbreg_logout_confirm( void (*cbfunc)( int confirm_code ) );
  * The path_code should be filled with the path to store source code.
  * Source code will then be downloaded to that location. */
 void judgeproto_cbreg_run_request( void (*cbfunc)( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code ) );
+void judgeproto_cbreg_run_request_dlfin( void (*cbfunc)( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code ) );
 
 /* Callback for problem update. (from server)
  * Pass the problem id to judge client.
  * The rest three strings should be filled with path to store "problem description", "input data" and "correct answer" respectively. */
 void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
+void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
 
 
 /* listen thread

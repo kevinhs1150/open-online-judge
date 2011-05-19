@@ -12,7 +12,8 @@ static int serverproto_cbcheck( void );
 /* callback functions */
 void (*cb_login_request)( char *srcip, short srctype, wchar_t *account, char *password )                                                = NULL;
 void (*cb_logout_request)( char *srcip, short srctype, unsigned int account_id )                                                        = NULL;
-void (*cb_submission_request)( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code ) = NULL;
+void (*cb_submission_request)( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )      = NULL;
+void (*cb_submission_request_dlfin)( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code ) = NULL;
 void (*cb_clar_request)( char *srcip, unsigned int account_id, int private, wchar_t *clarmsg )                                          = NULL;
 void (*cb_pd_request)( char *srcip, unsigned int account_id, unsigned int problem_id )                                                  = NULL;
 void (*cb_run_result_notify)( char *srcip, unsigned int run_id, wchar_t *result )                                                       = NULL;
@@ -20,9 +21,11 @@ void (*cb_account_add)( char *srcip, unsigned int type, wchar_t *account, char *
 void (*cb_account_del)( char *srcip, unsigned int account_id )                                                                          = NULL;
 void (*cb_account_mod)( char *srcip, unsigned int account_id, wchar_t *new_account, char *new_password )                                = NULL;
 void (*cb_account_update)( char *srcip )                                                                                                = NULL;
-void (*cb_problem_add)( char *srcip, unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) = NULL;
+void (*cb_problem_add)( char *srcip, unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )    = NULL;
+void (*cb_problem_add_dlfin)( char *srcip, unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
 void (*cb_problem_del)( char *srcip, unsigned int problem_id )                                                                          = NULL;
-void (*cb_problem_mod)( char *srcip, unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) = NULL;
+void (*cb_problem_mod)( char *srcip, unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )    = NULL;
+void (*cb_problem_mod_dlfin)( char *srcip, unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
 void (*cb_problem_update)( char *srcip )                                                                                                = NULL;
 void (*cb_clar_result)( char *srcip, unsigned int clar_id, int private, wchar_t *result_string )                                        = NULL;
 
@@ -182,7 +185,12 @@ void *serverproto_reqhand_thread( void *args )
 
 				(*cb_problem_add)( src_ipaddr, problem_id, &path_description, &path_input, &path_answer );
 
-				/* TODO: Download files. */
+				/* download files */
+				filerecv( sockfd, path_description );
+				filerecv( sockfd, path_input );
+				filerecv( sockfd, path_answer );
+
+				(*cb_problem_add_dlfin)( src_ipaddr, problem_id, path_description, path_input, path_answer );
 
 				free( problem_id_str );
 				free( path_description );
@@ -208,7 +216,12 @@ void *serverproto_reqhand_thread( void *args )
 
 				(*cb_problem_mod)( src_ipaddr, problem_id, &path_description, &path_input, &path_answer );
 
-				/* TODO: Download files. */
+				/* download files */
+				filerecv( sockfd, path_description );
+				filerecv( sockfd, path_input );
+				filerecv( sockfd, path_answer );
+
+				(*cb_problem_mod_dlfin)( src_ipaddr, problem_id, path_description, path_input, path_answer );
 
 				free( problem_id_str );
 				free( path_description );
@@ -284,7 +297,10 @@ void *serverproto_reqhand_thread( void *args )
 
 			(*cb_submission_request)( src_ipaddr, account_id, problem_id, coding_language, &path_code );
 
-			/* TODO: Download files. */
+			/* download file */
+			filerecv( sockfd, path_code );
+
+			(*cb_submission_request_dlfin)( src_ipaddr, account_id, problem_id, coding_language, path_code );
 
 			free( account_id_str );
 			free( problem_id_str );
@@ -337,7 +353,7 @@ void *serverproto_reqhand_thread( void *args )
 	}
 
 	free( src_ipaddr );
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	pthread_exit( NULL );
 }
 
@@ -378,7 +394,7 @@ int serverproto_login_reply( char *destip, short srctype, int confirmation, unsi
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( confirmation_str );
 	free( account_id_str );
 
@@ -420,7 +436,7 @@ int serverproto_logout_reply( char *destip, short srctype, int confirmation )
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( confirmation_str );
 
 	return 0;
@@ -448,7 +464,7 @@ int serverproto_run_reply( char *destip, unsigned int run_id, wchar_t *result )
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( run_id_str );
 	free( result_mb );
 
@@ -477,7 +493,7 @@ int serverproto_clar_reply( char *destip, unsigned int clar_id, wchar_t *result 
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( clar_id_str );
 	free( result_mb );
 
@@ -510,7 +526,7 @@ int serverproto_sb_update( char *destip, unsigned int upd_acc_id, wchar_t *new_a
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( upd_acc_id_str );
 	free( new_account_mb );
 	free( new_accept_count_str );
@@ -537,9 +553,10 @@ int serverproto_problem_upload( char *destip, wchar_t *path_description )
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	/* TODO: upload files */
+	/* upload files */
+	filesend( sockfd, path_description );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 
 	return 0;
 }
@@ -568,9 +585,10 @@ int serverproto_run_request( char *destip, unsigned int run_id, unsigned int pro
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	/* TODO: upload files */
+	/* upload files */
+	filesend( sockfd, path_code );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( run_id_str );
 	free( problem_id_str );
 	free( coding_language_mb );
@@ -602,7 +620,7 @@ int serverproto_account_info( char *destip, unsigned int account_id, unsigned in
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( account_id_str );
 	free( type_str );
 	free( account_mb );
@@ -630,9 +648,12 @@ int serverproto_problem_info( char *destip, unsigned int problem_id, wchar_t *pa
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	/* TODO: upload files. */
+	/* upload files */
+	filesend( sockfd, path_description );
+	filesend( sockfd, path_input );
+	filesend( sockfd, path_answer );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( problem_id_str );
 
 	return 0;
@@ -662,7 +683,7 @@ int serverproto_clar_request( char *destip, unsigned int clar_id, int private, w
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( clar_id_str );
 	free( private_byte_str );
 	free( clarmsg_mb );
@@ -673,7 +694,8 @@ int serverproto_clar_request( char *destip, unsigned int clar_id, int private, w
 /* callback registration functions */
 void serverproto_cbreg_login_request( void (*cbfunc)( char*, short, wchar_t*, char* ) )  { cb_login_request = cbfunc; }
 void serverproto_cbreg_logout_request( void (*cbfunc)( char*, short, unsigned int ) )           { cb_logout_request = cbfunc; }
-void serverproto_cbreg_submission_request( void (*cbfunc)( char*, unsigned int, unsigned int, wchar_t*, wchar_t** ) ) { cb_submission_request = cbfunc; }
+void serverproto_cbreg_submission_request( void (*cbfunc)( char*, unsigned int, unsigned int, wchar_t*, wchar_t** ) )      { cb_submission_request = cbfunc; }
+void serverproto_cbreg_submission_request_dlfin( void (*cbfunc)( char*, unsigned int, unsigned int, wchar_t*, wchar_t* ) ) { cb_submission_request_dlfin = cbfunc; }
 void serverproto_cbreg_clar_request( void (*cbfunc)( char*, unsigned int, int, wchar_t* ) )     { cb_clar_request = cbfunc; }
 void serverproto_cbreg_pd_request( void (*cbfunc)( char*, unsigned int, unsigned int ) )        { cb_pd_request = cbfunc; }
 void serverproto_cbreg_run_result_notify( void (*cbfunc)( char*, unsigned int, wchar_t* ) )     { cb_run_result_notify = cbfunc; }
@@ -681,9 +703,11 @@ void serverproto_cbreg_account_add( void (*cbfunc)( char*, unsigned int, wchar_t
 void serverproto_cbreg_account_del( void (*cbfunc)( char*, unsigned int ) )                     { cb_account_del = cbfunc; }
 void serverproto_cbreg_account_mod( void (*cbfunc)( char*, unsigned int, wchar_t*, char* ) )    { cb_account_mod = cbfunc; }
 void serverproto_cbreg_account_update( void (*cbfunc)( char* ) )                                { cb_account_update = cbfunc; }
-void serverproto_cbreg_problem_add( void (*cbfunc)( char*, unsigned int, wchar_t**, wchar_t**, wchar_t** ) ) { cb_problem_add = cbfunc; }
+void serverproto_cbreg_problem_add( void (*cbfunc)( char*, unsigned int, wchar_t**, wchar_t**, wchar_t** ) )    { cb_problem_add = cbfunc; }
+void serverproto_cbreg_problem_add_dlfin( void (*cbfunc)( char*, unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_add_dlfin = cbfunc; }
 void serverproto_cbreg_problem_del( void (*cbfunc)( char*, unsigned int ) )                     { cb_problem_del = cbfunc; }
-void serverproto_cbreg_problem_mod( void (*cbfunc)( char*, unsigned int, wchar_t**, wchar_t**, wchar_t** ) ) { cb_problem_mod = cbfunc; }
+void serverproto_cbreg_problem_mod( void (*cbfunc)( char*, unsigned int, wchar_t**, wchar_t**, wchar_t** ) )    { cb_problem_mod = cbfunc; }
+void serverproto_cbreg_problem_mod_dlfin( void (*cbfunc)( char*, unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_mod_dlfin = cbfunc; }
 void serverproto_cbreg_problem_update( void (*cbfunc)( char* ) )                                { cb_problem_update = cbfunc; }
 void serverproto_cbreg_clar_result( void (*cbfunc)( char*, unsigned int, int, wchar_t* ) )      { cb_clar_result = cbfunc; }
 
@@ -691,9 +715,11 @@ void serverproto_cbreg_clar_result( void (*cbfunc)( char*, unsigned int, int, wc
 static int serverproto_cbcheck( void )
 {
 	if( cb_login_request == NULL || cb_logout_request == NULL || cb_submission_request == NULL ||
-		cb_clar_request == NULL || cb_pd_request == NULL || cb_run_result_notify == NULL ||
-		cb_account_add == NULL || cb_account_del == NULL || cb_account_mod == NULL || cb_account_update == NULL ||
-		cb_problem_add == NULL || cb_problem_del == NULL || cb_problem_mod == NULL || cb_problem_update == NULL ||
+		cb_submission_request_dlfin == NULL || cb_clar_request == NULL || cb_pd_request == NULL ||
+		cb_run_result_notify == NULL || cb_account_add == NULL || cb_account_del == NULL ||
+		cb_account_mod == NULL || cb_account_update == NULL ||
+		cb_problem_add == NULL || cb_problem_add_dlfin == NULL || cb_problem_del == NULL ||
+		cb_problem_mod == NULL || cb_problem_mod_dlfin == NULL || cb_problem_update == NULL ||
 		cb_clar_result == NULL )
 		return 0;
 	else

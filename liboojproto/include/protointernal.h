@@ -38,12 +38,18 @@ int tcp_connect( char *conn_address, unsigned short conn_port );
 /* use this function to get ip address of existing connection */
 char *tcp_getaddr( int sockfd );
 
-/* file transfer
+/* file transfer -- given connected socket
  * note that file name should be Unicode string */
-int filesend( wchar_t *filepath, char *conn_address, unsigned short conn_port );
-int filerecv( wchar_t *filepath, char *bind_address, unsigned short bind_port );
+int filesend( int sockfd, wchar_t *filepath );
+int filerecv( int sockfd, wchar_t *filepath );
 /* file open function with cross platform unicode support*/
 FILE *fopen_sp( wchar_t *filename, wchar_t *mode );
+/* send and recv function wrapper
+ * remember to free memory after using the received buffer
+ * if recv_sp retrieved a NULL pointer to buffer, size will be returned but the message will not be stored */
+size_t send_sp( int sockfd, char *buffer, size_t length );
+size_t recv_sp( int sockfd, char **buffer );
+int shutdown_wr_sp( int sockfd );
 
 /* split SR,ID byte from packet
  * function returns a pointer which points to the start of message byte */

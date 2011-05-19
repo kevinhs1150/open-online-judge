@@ -9,6 +9,16 @@
 
 /* callback registration functions */
 
+/* Callback for login confirmation. (from server)
+ * Pass the confirmation code and account id to judge client.
+ * Judge client should allow or deny user login according to confirmation code. */
+void teamproto_cbreg_login_confirm( void (*cbfun)( int confirm_code, unsigned int account_id ) );
+
+/* Callback for logout confirmation. (from server)
+ * Pass the confirmation code to judge client.
+ * Judge client can ignore this message, since it is currently noot meaningful.*/
+void teamproto_cbreg_logout_confirm( void (*cbfunc)( int confirm_code ) );
+
 /* Callback for run result reply. (from server)
  * Pass the run id and result string to team client.
  * Team client should notify the user about the result. */
@@ -27,6 +37,7 @@ void teamproto_cbreg_sb_update( void (*cbfunc)( unsigned int updated_account_id,
 /* Callback for problem upload request. (from server, due to a previous problem download request)
  * Team client should fill the string with the path where problem description will be stored. */
 void teamproto_cbreg_pu_request( void (*cbfunc)( wchar_t **path_description ) );
+void teamproto_cbreg_pu_request_dlfin( void (*cbfunc)( wchar_t *path_description ) );
 
 /* listen thread
  * This function should be called in initial routine.  It listens for data from server. */

@@ -34,6 +34,7 @@ void adminproto_cbreg_account_info( void (*account_info)( unsigned int account_i
  * The three string should be filled respectively with path where "problem description", "input data" and "correct answer" will be stored.
  * Administrator client should store the files and update its own list of problems. */
 void adminproto_cbreg_problem_info( void (*problem_info)( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
+void adminproto_cbreg_problem_info_dlfin( void (*problem_info_dlfin)( unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
 
 /* listen thread
  * This function should be called in initial routine.  It listens for data from server. */

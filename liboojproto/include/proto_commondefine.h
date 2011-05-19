@@ -29,7 +29,7 @@
 
 /* team -> server */
 #define OPID_SUBMISSION		10	/* submission */
-#define OPID_CLAR			11	/* clarification */
+#define OPID_CLAR		11	/* clarification */
 #define OPID_PD_REQUEST		12	/* problem download request */
 /* server -> team */
 #define OPID_RUN_REPLY		10	/* run result reply */
@@ -39,8 +39,10 @@
 
 /* judge -> server */
 #define OPID_RUN_RESULT		10	/* run result */
+#define OPID_CLAR_RESULT	12	/* clarification result */
 /* server -> judge */
 #define OPID_RUN_REQUEST	14	/* run request */
+#define OPID_CLAR_REQUEST	17	/* clarification request */
 #define OPID_PUPDATE		15	/* problem update */
 
 /* admin -> server */
@@ -50,15 +52,22 @@
 	#define ACC_OPID_MOD		2	/* modify account */
 	#define ACC_OPID_UPDATE		3	/* update account info */
 #define OPID_P_MANAGE		11	/* problem management */
-	#define P_OPID_ADD			0	/* add problem */
-	#define P_OPID_DEL			1	/* delete problem */
-	#define P_OPID_MOD			2	/* modify problem */
+	#define P_OPID_ADD		0	/* add problem */
+	#define P_OPID_DEL		1	/* delete problem */
+	#define P_OPID_MOD		2	/* modify problem */
 	#define P_OPID_UPDATE		3	/* update problem info */
 #define OPID_CLAR_RESULT	12	/* clarification result */
 /* server -> admin */
 #define OPID_CLAR_REQUEST	17	/* clarification request */
 #define OPID_ACC_INFO		18	/* account information */
-#define OPID_P_INFO			19	/* problem information */
+#define OPID_P_INFO		19	/* problem information */
 
+
+/* login/logout confirmation code */
+#define LOGIN_VALID		1
+#define LOGIN_ACC_NOTEXIST	2
+#define LOGIN_PASS_WRONG	3
+#define LOGOUT_OK		1
+#define LOGOUT_FAIL		2
 
 #endif

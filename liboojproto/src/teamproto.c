@@ -11,6 +11,7 @@ void (*cb_run_reply)( unsigned int run_id, wchar_t *result_string )   = NULL;
 void (*cb_clar_reply)( unsigned int clar_id, wchar_t *result_string ) = NULL;
 void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ) = NULL;
 void (*cb_pu_request)( wchar_t **path_description )                   = NULL;
+void (*cb_pu_request_dlfin)( wchar_t *path_description )              = NULL;
 
 /* callback functions extern-ed from protointernal.c */
 extern void (*cb_login_confirm)( int confirm_code, unsigned int account_id );
@@ -142,7 +143,7 @@ void *teamproto_reqhand_thread( void *args )
 			unsigned int updated_account_id = atoi( updated_account_id_str );
 			wchar_t *new_account = proto_str_postrecv( new_account_mb );
 			unsigned int new_accept_count = atoi( new_accept_count_str );
-			unsigned int new_time = atoi( new_time_str );\
+			unsigned int new_time = atoi( new_time_str );
 
 			(*cb_sb_update)( updated_account_id, new_account, new_accept_count, new_time );
 
@@ -158,7 +159,10 @@ void *teamproto_reqhand_thread( void *args )
 
 			(*cb_pu_request)( &path_description );
 
-			/* TODO: Download file. */
+			/* download file */
+			filerecv( sockfd, path_description );
+
+			(*cb_pu_request_dlfin)( path_description );
 
 			free( path_description );
 		}
@@ -176,7 +180,7 @@ void *teamproto_reqhand_thread( void *args )
 #endif
 	}
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	pthread_exit( NULL );
 }
 
@@ -214,9 +218,10 @@ int teamproto_submission( char *destip, unsigned int account_id, unsigned int pr
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	/* TODO: Upload files. */
+	/* upload files */
+	filesend( sockfd, path_code );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( account_id_str );
 	free( problem_id_str );
 	free( coding_language_mb );
@@ -248,7 +253,7 @@ int teamproto_clar( char *destip, unsigned int account_id, int private_byte, wch
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( account_id_str );
 	free( private_byte_str );
 	free( clarmsg_mb );
@@ -278,22 +283,26 @@ int teamproto_problem_download( char *destip, unsigned int account_id, unsigned 
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( account_id_str );
 	free( problem_id_str );
 
 	return 0;
 }
 
+void teamproto_cbreg_login_confirm( void (*cbfunc)( int, unsigned int ) )   { cb_login_confirm = cbfunc; }
+void teamproto_cbreg_logout_confirm( void( *cbfunc )( int ) )               { cb_logout_confirm = cbfunc; }
 void teamproto_cbreg_run_reply( void (*cbfunc)( unsigned int, wchar_t* ) )  { cb_run_reply = cbfunc; }
 void teamproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t* ) ) { cb_clar_reply = cbfunc; }
 void teamproto_cbreg_sb_update( void (*cbfunc)( unsigned int, wchar_t*, unsigned int, unsigned int ) ) { cb_sb_update = cbfunc; }
 void teamproto_cbreg_pu_request( void (*cbfunc)( wchar_t** ) )              { cb_pu_request = cbfunc; }
+void teamproto_cbreg_pu_request_dlfin( void (*cbfunc)( wchar_t*) )          { cb_pu_request_dlfin = cbfunc; }
 
 static int teamproto_cbcheck( void )
 {
 	if( cb_run_reply == NULL || cb_clar_reply == NULL || cb_sb_update == NULL ||
-		cb_pu_request == NULL || cb_login_confirm == NULL || cb_logout_confirm == NULL )
+		cb_pu_request == NULL || cb_pu_request_dlfin == NULL ||
+		cb_login_confirm == NULL || cb_logout_confirm == NULL )
 		return 0;
 	else
 		return 1;
