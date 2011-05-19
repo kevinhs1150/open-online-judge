@@ -9,7 +9,8 @@ static int adminproto_cbcheck( void );
 /* callback functions */
 void (*cb_clar_request)( unsigned int clar_id, int private, wchar_t *clarmsg )             = NULL;
 void (*cb_account_info)( unsigned int account_id, unsigned int type, wchar_t *account )    = NULL;
-void (*cb_problem_info)( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) = NULL;
+void (*cb_problem_info)( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )    = NULL;
+void (*cb_problem_info_dlfin)( unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
 
 /* callback functions extern-ed from protointernal.c */
 extern void (*cb_login_confirm)( int confirm_code, unsigned int account_id );
@@ -74,7 +75,7 @@ void *adminproto_reqhand_thread( void *args )
 	/* receive and interpret message */
 	recv( sockfd, recvbuf, BUFLEN, 0 );
 	msgptr = proto_srid_split( recvbuf, &RQSR, &RQID );
-	
+
 	/* request handling */
 	/* part 1. login/logout confirmation */
 	if( RQID == OPID_LOGIN_REPLY )
@@ -93,7 +94,7 @@ void *adminproto_reqhand_thread( void *args )
 	else if( RQID == OPID_LOGOUT_REPLY )
 	{
 		char *confirm_code_str = proto_str_split( msgptr, NULL );
-		
+
 		int confirm_code = atoi( confirm_code_str );
 
 		(*cb_logout_confirm)( confirm_code );
@@ -146,7 +147,12 @@ void *adminproto_reqhand_thread( void *args )
 
 			(*cb_problem_info)( problem_id, &path_description, &path_input, &path_answer );
 
-			/* TODO: Download files. */
+			/* download files */
+			filerecv( sockfd, path_description );
+			filerecv( sockfd, path_input );
+			filerecv( sockfd, path_answer );
+
+			(*cb_problem_info_dlfin)( problem_id, path_description, path_input, path_answer );
 
 			free( problem_id_str );
 			free( path_description );
@@ -167,7 +173,7 @@ void *adminproto_reqhand_thread( void *args )
 #endif
 	}
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	pthread_exit( NULL );
 }
 
@@ -206,7 +212,7 @@ int adminproto_account_add( char *destip, unsigned int type, wchar_t *account, c
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( acc_opid_str );
 	free( type_str );
 	free( account_mb );
@@ -236,7 +242,7 @@ int adminproto_account_del( char *destip, unsigned int account_id )
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( acc_opid_str );
 	free( account_id_str );
 
@@ -268,7 +274,7 @@ int adminproto_account_mod( char *destip, unsigned int account_id, wchar_t *new_
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( acc_opid_str );
 	free( account_id_str );
 	free( new_account_mb );
@@ -296,7 +302,7 @@ int adminproto_account_update( char *destip )
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( acc_opid_str );
 
 	return 0;
@@ -324,9 +330,12 @@ int adminproto_problem_add( char *destip, unsigned int problem_id, wchar_t *path
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	/* TODO: Upload files. */
+	/* upload files */
+	filesend( sockfd, path_description );
+	filesend( sockfd, path_input );
+	filesend( sockfd, path_answer );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( p_opid_str );
 	free( problem_id_str );
 
@@ -355,7 +364,7 @@ int adminproto_problem_del( char *destip, unsigned int problem_id )
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( p_opid_str );
 	free( problem_id_str );
 
@@ -384,9 +393,12 @@ int adminproto_problem_mod( char *destip, unsigned int problem_id, wchar_t *path
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	/* TODO: Upload files. */
+	/* upload files */
+	filesend( sockfd, path_description );
+	filesend( sockfd, path_input );
+	filesend( sockfd, path_answer );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( p_opid_str );
 	free( problem_id_str );
 
@@ -413,7 +425,7 @@ int adminproto_problem_update( char *destip )
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( p_opid_str );
 
 	return 0;
@@ -443,7 +455,7 @@ int adminproto_clar_result( char *destip, unsigned int clar_id, int private_byte
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( clar_id_str );
 	free( private_byte_str );
 	free( result_string_mb );
@@ -457,17 +469,17 @@ int adminproto_broadcast()
 }
 
 
-
 void adminproto_cbreg_login_confirm( void (*cbfunc)( int, unsigned int ) )                            { cb_login_confirm = cbfunc; }
 void adminproto_cbreg_logout_confirm( void (*cbfunc)( int ) )                                         { cb_logout_confirm = cbfunc; }
 void adminproto_cbreg_clar_request( void (*cbfunc)( unsigned int, int, wchar_t* ) )                   { cb_clar_request = cbfunc; }
 void adminproto_cbreg_account_info( void (*cbfunc)( unsigned int, unsigned int, wchar_t* ) )          { cb_account_info = cbfunc; }
 void adminproto_cbreg_problem_info( void (*cbfunc)( unsigned int, wchar_t**, wchar_t**, wchar_t** ) ) { cb_problem_info = cbfunc; }
+void adminproto_cbreg_problem_info_dlfin( void (*cbfunc)( unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_info_dlfin = cbfunc; }
 
 static int adminproto_cbcheck( void )
 {
 	if( cb_clar_request == NULL || cb_account_info == NULL || cb_problem_info == NULL ||
-		cb_login_confirm == NULL || cb_logout_confirm == NULL )
+		cb_problem_info_dlfin == NULL || cb_login_confirm == NULL || cb_logout_confirm == NULL )
 		return 0;
 	else
 		return 1;

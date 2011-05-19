@@ -27,6 +27,7 @@ void serverproto_cbreg_logout_request( void (*cbfunc)( char *srcip, short srctyp
  * Server should record those information into db and redirect the submission to judge.  Also note that all submission should be assigned a "run id".
  * The path_code string should be filled with the path where code will be stored. */
 void serverproto_cbreg_submission_request( void (*cbfunc)( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code ) );
+void serverproto_cbreg_submission_request_dlfin( void (*cbfunc)( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code ) );
 
 /* Callback for clarification request. (from team)
  * Pass the "requester's team account", "whether this is a private message", and "clarification message" to server program.
@@ -67,6 +68,7 @@ void serverproto_cbreg_account_update( void (*cbfunc)( char *srcip ) );
  * The three string should be filled respectively with path where "problem description", "input data" and "correct answer" will be stored.
  * Server should record the new data into db. */
 void serverproto_cbreg_problem_add( void (*cbfunc)( char *srcip, unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
+void serverproto_cbreg_problem_add_dlfin( void (*cbfunc)( char *srcip, unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
 
 /* Callback for problem delete request. (from admin)
  * Pass "problem id" to server program.
@@ -78,6 +80,7 @@ void serverproto_cbreg_problem_del( void (*cbfunc)( char *srcip, unsigned int pr
  * Server should modify the record in db and store new files.
  * The three strings is the same as problem_add(). */
 void serverproto_cbreg_problem_mod( void (*cbfunc)( char *srcip, unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
+void serverproto_cbreg_problem_mod_dlfin( void(*cbfunc)( char *srcip, unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
 
 /* Callback for problem update request. (from admin)
  * Server should reply immediately all problem information to requested administrator. */

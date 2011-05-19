@@ -1,5 +1,29 @@
->> Open Online Judge Protocol Implementation <<
+>> Open Online Judge Protocol Implementation Change Log <<
 
 protocol 0 revision 0 (follow specification 0.2)
-released on 2011.04.23
+released on 2011.04.23   by Infinity
  + Initial release version.
+
+
+protocol 0 revision 1 (follow specification 0.2)
+released on 2011.05.19   by Infinity
+ + protointernal: send_sp(), recv_sp(), shutdown_wr_sp() function.  All functions
+ related to send(), recv() and close() will be affected.  Please help report bugs.
+ + protointernal: filerecv(), filesend() function.
+
+ * teamproto: Fixed a problem where team clients' were not able to register
+ their login_confirm and logout_confirm callback functions.
+
+ * judgeproto: Fixed a problem where judge clients' callback register functions
+ were not defined.
+ * judgeproto: Fixed a problem where judge clients do not receive message at all.
+
+ + common: Added a notification callback to notify file download completion.
+ This applies to all functions involving file receiving.
+ * common: Login/logout confirmation code defined.  Refer to
+ proto_commondefine.h for their defined names.  Do not use your own definition
+ as it might break client-server communication.
+
+ * makefile: Seperated Win32 and Linux into two makefiles and shortened the
+ naming scheme.
+ * sourcecode: Directory structure altered for easier file management.

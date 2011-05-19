@@ -121,73 +121,71 @@ char *tcp_getaddr( int sockfd )
 	return addr_str;
 }
 
-int filesend( wchar_t *filepath, char *conn_address, unsigned short conn_port )
+int filesend( int sockfd, wchar_t *filepath )
 {
-	int sockfd;
+	char *recvbuf;
 	FILE *fptr;
+	char sendbuf[BUFLEN];
+	int filesize;
 
-#ifdef _WIN32
-	if( win32_sock_init() < 0 )
+	fptr = fopen_sp( filepath, L"rb" );
+
+	/* collect file spec */
+	fseek( fptr, 0, SEEK_END );
+	filesize = ftell( fptr );
+	fseek( fptr, 0, SEEK_SET );
+
+	/* sync: wait for receiver to standby */
+	recv_sp( sockfd, NULL );
+
+	/* send file spec */
+	sprintf( sendbuf, "%d", filesize );
+	send_sp( sockfd, sendbuf, BUFLEN );
+
+	/* enter file transfer loop */
+	while( !feof( fptr ) )
 	{
-	#if PROTO_DBG > 0
-		printf("[filesend()] win32_sock_init() call failed.\n");
-	#endif
-		return -1;
+		/* sync: wait for receiver to standby */
+		recv_sp( sockfd, NULL );
+
+		/* read 1KB(BUFLEN=1024bytes) block and send */
+		fread( sendbuf, BUFLEN, 1, fptr );
+		send_sp( sockfd, sendbuf, BUFLEN );
 	}
-#endif
-
-	if( ( sockfd = tcp_connect( conn_address, conn_port ) ) < 0 )
-	{
-#if PROTO_DBG > 0
-		printf("[filesend()] tcp_connect() call failed.\n");
-#endif
-		return -1;
-	}
-
-	if( ( fptr = fopen_sp( filepath, L"rb" ) ) == NULL )
-	{
-#if PROTO_DBG > 0
-		printf("[filesend()] fopen_sp() call failed.\n");
-#endif
-		close( sockfd );
-		return -1;
-	}
-
-
 
 	return 0;
 }
 
-int filerecv( wchar_t *filepath, char *bind_address, unsigned short bind_port )
+int filerecv( int sockfd, wchar_t *filepath )
 {
-	int listenfd, sockfd;
+	char *recvbuf;
+	size_t recvsize;
 	FILE *fptr;
+	char sendbuf[BUFLEN];
+	int filesize;
+	int a_recvbyte = 0, recvbyte;
 
-#ifdef _WIN32
-	if( win32_sock_init() < 0 )
-	{
-	#if PROTO_DBG > 0
-		printf("[filerecv()] win32_sock_init() call failed.\n");
-	#endif
-		return -1;
-	}
-#endif
+	fptr = fopen_sp( filepath, L"wb" );
 
-	if( ( listenfd = tcp_listen( bind_address, bind_port ) ) < 0 )
-	{
-#if PROTO_DBG > 0
-		printf("[filerecv()] tcp_listen() call failed.\n");
-#endif
-		return -1;
-	}
+	/* sync: standby ready, setup (wwwww */
+	sprintf( sendbuf, "VSFTPREADY" );
+	send_sp( sockfd, sendbuf, BUFLEN );
 
-	if( ( fptr = fopen_sp( filepath, L"wb" ) ) == NULL )
+	/* receive file spec */
+	recvsize = recv_sp( sockfd, &recvbuf );
+	filesize = atoi( recvbuf );
+
+	/* enter file transfer loop */
+	while( a_recvbyte != filesize )
 	{
-#if PROTO_DBG < 0
-		printf("[filerecv()] fopen_sp call failed.\n");
-#endif
-		close( listenfd );
-		return -1;
+		/* sync: standby ready */
+		send_sp( sockfd, sendbuf, BUFLEN );
+
+		/* recieve block and write */
+		recvbyte = recv_sp( sockfd, &recvbuf );
+		fwrite( recvbuf, BUFLEN, 1, fptr );
+		free( recvbuf );
+		a_recvbyte = a_recvbyte + recvbyte;
 	}
 
 	return 0;
@@ -206,6 +204,49 @@ FILE *fopen_sp( wchar_t *filename, wchar_t *mode )
 	free( filename_mb );
 	free( mode_mb );
 	return fptr;
+#endif
+}
+
+size_t send_sp( int sockfd, char *buffer, size_t length )
+{
+	return send( sockfd, buffer, length, 0 );
+}
+
+size_t recv_sp( int sockfd, char **buffer )
+{
+	size_t a_recv = 0; /* received bytes cumulated */
+	size_t pa_recv = 0; /* received bytes cumulated, previous state */
+	size_t r_recv; /* received bytes each time */
+	char buftmp[BUFLEN];
+	int count;
+
+	/* receive until socket closed */
+	while( ( r_recv = recv( sockfd, buftmp, BUFLEN, 0 ) ) > 0 )
+	{
+		pa_recv = a_recv;
+		a_recv = a_recv + r_recv;
+
+		if( buffer != NULL )
+		{
+			*buffer = (char *)realloc( *buffer, a_recv * sizeof( char ) );
+
+			for( count = 0; count < r_recv; count++ )
+				(*buffer)[pa_recv+count] = buftmp[count];
+		}
+	}
+
+	if( r_recv < 0 )
+		return r_recv;
+
+	return a_recv;
+}
+
+int shutdown_wr_sp( int sockfd )
+{
+#ifdef _WIN32
+	return shutdown( sockfd, SD_SEND );
+#elif __linux
+	return shutdown( sockfd, SHUT_WR );
 #endif
 }
 
@@ -313,7 +354,7 @@ int proto_login( char *destip, short src, wchar_t *account, char *password )
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( account_mb );
 
 	return 0;
@@ -339,7 +380,7 @@ int proto_logout( char *destip, short src, unsigned int account_id )
 
 	send( sockfd, sendbuf, BUFLEN, 0 );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( account_id_str );
 	return 0;
 }

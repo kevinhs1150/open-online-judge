@@ -7,8 +7,10 @@
 static int judgeproto_cbcheck( void );
 
 /* callback functions */
-void (*cb_run_request)( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code ) = NULL;
-void (*cb_problem_update)( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) = NULL;
+void (*cb_run_request)( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )         = NULL;
+void (*cb_run_request_dlfin)( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )    = NULL;
+void (*cb_problem_update)( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )    = NULL;
+void (*cb_problem_update_dlfin)( unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
 
 /* callback functions extern-ed from protointernal.c */
 extern void (*cb_login_confirm)( int confirm_code, unsigned int account_id );
@@ -59,7 +61,7 @@ int judgeproto_stop_listen( void )
 void *judgeproto_reqhand_thread( void *args )
 {
 	int sockfd;
-	char recvbuf[BUFLEN];
+	char *recvbuf = NULL;
 //	char *src_ipaddr;
 	short RQSR, RQID;
 	char *msgptr = NULL;
@@ -69,6 +71,10 @@ void *judgeproto_reqhand_thread( void *args )
 	sockfd = *((int *)args);
 	pthread_cond_signal( &proto_sockfd_pass_cv );
 	pthread_mutex_unlock( &proto_sockfd_pass_mutex );
+
+	/* receive and interpret message */
+	recv_sp( sockfd, &recvbuf );
+	msgptr = proto_srid_split( recvbuf, &RQSR, &RQID );
 
 	/* request handling */
 	/* part 1. login/logout confirmation */
@@ -90,7 +96,7 @@ void *judgeproto_reqhand_thread( void *args )
 		char *confirm_code_str = proto_str_split( msgptr, NULL );
 
 		int confirm_code = atoi( confirm_code_str );
-		
+
 		(*cb_logout_confirm)( confirm_code );
 
 		free( confirm_code_str );
@@ -111,7 +117,10 @@ void *judgeproto_reqhand_thread( void *args )
 
 			(*cb_run_request)( run_id, problem_id, coding_language, &path_code );
 
-			/* TODO: Download file. */
+			/* download file */
+			filerecv( sockfd, path_code );
+
+			(*cb_run_request_dlfin)( run_id, problem_id, coding_language, path_code );
 
 			free( run_id_str );
 			free( problem_id_str );
@@ -128,7 +137,12 @@ void *judgeproto_reqhand_thread( void *args )
 
 			(*cb_problem_update)( problem_id, &path_description, &path_input, &path_answer );
 
-			/* TODO: Download file. */
+			/* download file */
+			filerecv( sockfd, path_description );
+			filerecv( sockfd, path_input );
+			filerecv( sockfd, path_answer );
+
+			(*cb_problem_update_dlfin)( problem_id, path_description, path_input, path_answer );
 
 			free( problem_id_str );
 			free( path_description );
@@ -149,7 +163,9 @@ void *judgeproto_reqhand_thread( void *args )
 #endif
 	}
 
-	close( sockfd );
+	free( recvbuf );
+
+	shutdown_wr_sp( sockfd );
 	pthread_exit( NULL );
 }
 
@@ -184,20 +200,26 @@ int judgeproto_judge_result( char *destip, unsigned int run_id, wchar_t *result_
 		return -1;
 	}
 
-	send( sockfd, sendbuf, BUFLEN, 0 );
+	send_sp( sockfd, sendbuf, BUFLEN );
 
-	close( sockfd );
+	shutdown_wr_sp( sockfd );
 	free( run_id_str );
 	free( result_string_mb );
 
 	return 0;
 }
 
-
+void judgeproto_cbreg_login_confirm( void (*cbfunc)( int, unsigned int ) ) { cb_login_confirm = cbfunc; }
+void judgeproto_cbreg_logout_confirm( void (*cbfunc)( int ) )              { cb_logout_confirm = cbfunc; }
+void judgeproto_cbreg_run_request( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t** ) )      { cb_run_request = cbfunc; }
+void judgeproto_cbreg_run_request_dlfin( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t* ) ) { cb_run_request_dlfin = cbfunc; }
+void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int, wchar_t**, wchar_t**, wchar_t** ) )    { cb_problem_update = cbfunc; }
+void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_update_dlfin = cbfunc; }
 
 static int judgeproto_cbcheck( void )
 {
-	if( cb_run_request == NULL || cb_problem_update == NULL ||
+	if( cb_run_request == NULL || cb_run_request_dlfin == NULL ||
+		cb_problem_update == NULL || cb_problem_update_dlfin == NULL ||
 		cb_login_confirm == NULL || cb_logout_confirm == NULL )
 		return 0;
 	else
