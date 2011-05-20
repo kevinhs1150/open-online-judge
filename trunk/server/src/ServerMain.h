@@ -11,9 +11,7 @@ class ServerFrame: public ServerGUI
         ServerFrame(wxFrame *frame);
         ~ServerFrame();
     private:
-        //void OnClose(wxCloseEvent& event);
-        //DECLARE_EVENT_TABLE()
 };
 
 
-#endif // CLIENTMAIN_H_
+#endif // _SERVERMAIN_H_
