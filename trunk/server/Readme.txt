@@ -1,5 +1,5 @@
 Suggest using CMake to target "build" directory for building files.
 
-1.¦w¸Ëcmake
-2.¦bbuild¸ê®Æ§¨¤U«ü¥O:" cmake -G "MinGW Makefiles" .. "¡A§Y¥i²£¥ÍMinGW¥ÎªºMakefile
-3.­Y­n­«·s²£¥ÍMakefile¡A²MªÅbuild¸ê®Æ§¨«á­«·s¨Ï¥Îcmake
+1.å®‰è£cmake
+2.åœ¨buildè³‡æ–™å¤¾ä¸‹æŒ‡ä»¤:" cmake -G "MinGW Makefiles" .. "ï¼Œå³å¯ç”¢ç”ŸMinGWç”¨çš„Makefile
+3.è‹¥è¦é‡æ–°ç”¢ç”ŸMakefileï¼Œæ¸…ç©ºbuildè³‡æ–™å¤¾å¾Œé‡æ–°ä½¿ç”¨cmake
