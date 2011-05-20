@@ -5,7 +5,7 @@ BEGIN_EVENT_TABLE(ClientFrame, wxFrame)
 END_EVENT_TABLE()
 
 ClientFrame::ClientFrame(wxFrame *frame)
-    : ClientGUI(frame)
+    : TeamGUI(frame)
 {
 }
 
