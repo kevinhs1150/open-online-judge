@@ -3,9 +3,9 @@
 
 #include <wx/wx.h>
 #include "ClientApp.h"
-#include "ClientGUI.h"
+#include "gui.h"
 
-class ClientFrame: public ClientGUI
+class ClientFrame: public TeamGUI
 {
     public:
         ClientFrame(wxFrame *frame);
