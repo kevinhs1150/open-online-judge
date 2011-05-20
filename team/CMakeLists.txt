@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-PROJECT(Client)
+PROJECT(Team)
 INCLUDE_DIRECTORIES("../gui")
 
 # modify your wxWidgets directory HERE!
@@ -9,5 +9,5 @@ FIND_PACKAGE(wxWidgets COMPONENTS core base REQUIRED)
 INCLUDE(${wxWidgets_USE_FILE})
 
 SET(srcs src/ClientApp.cpp src/ClientMain.cpp ../gui/gui.cpp)
-ADD_EXECUTABLE(Client WIN32 ${srcs})
-TARGET_LINK_LIBRARIES(Client ${wxWidgets_LIBRARIES})
+ADD_EXECUTABLE(Team WIN32 ${srcs})
+TARGET_LINK_LIBRARIES(Team ${wxWidgets_LIBRARIES})
