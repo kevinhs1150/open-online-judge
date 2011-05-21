@@ -4,6 +4,7 @@
 #include <wx/wx.h>
 #include "JudgeApp.h"
 #include "gui.h"
+#include "judgeproto.h"
 
 class JudgeFrame: public JudgeGUI
 {
@@ -11,7 +12,6 @@ class JudgeFrame: public JudgeGUI
         JudgeFrame(wxFrame *frame);
         ~JudgeFrame();
     private:
-
 };
 
 
