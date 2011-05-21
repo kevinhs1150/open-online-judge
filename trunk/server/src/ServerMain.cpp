@@ -57,7 +57,6 @@ ServerFrame::~ServerFrame()
 
 void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 {
-
 	/* start listen socket */
 	if( serverproto_listen("0.0.0.0") < 0 )
 	{
@@ -66,12 +65,12 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 #endif
 		wxMessageBox( wxT("Server start failed.\nStage: start listen socket."), wxT("Fatal Error"), wxOK|wxICON_ERROR, this );
 	}
-
-
 }
 
 void ServerFrame::OnButtonClickStop( wxCommandEvent& event )
 {
+	if( serverproto_active() )
+		serverproto_stop_listen();
 }
 
 
