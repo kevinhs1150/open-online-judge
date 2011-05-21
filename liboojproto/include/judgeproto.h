@@ -20,7 +20,7 @@ void judgeproto_cbreg_login_confirm( void (*cbfun)( int confirm_code, unsigned i
 void judgeproto_cbreg_logout_confirm( void (*cbfunc)( int confirm_code ) );
 
 /* Callback for run request. (from server)
- * Pass the run id, problem is and its coding language to judge client.
+ * Pass the run id, problem id and its coding language to judge client.
  * The path_code should be filled with the path to store source code.
  * Source code will then be downloaded to that location. */
 void judgeproto_cbreg_run_request( void (*cbfunc)( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code ) );
@@ -37,6 +37,8 @@ void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int problem
  * This function should be called in initial routine.  It listens for data from server. */
 int judgeproto_listen( char *localaddr );
 int judgeproto_stop_listen( void );
+/* This function checks whether the listen socket is currently active or not. */
+int judgeproto_active( void );
 
 /* login */
 int judgeproto_login( char *destip, wchar_t *account, char *password );

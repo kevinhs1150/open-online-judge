@@ -43,6 +43,8 @@ void teamproto_cbreg_pu_request_dlfin( void (*cbfunc)( wchar_t *path_description
  * This function should be called in initial routine.  It listens for data from server. */
 int teamproto_listen( char *localaddr );
 int teamproto_stop_listen( void );
+/* This function checks whether listen socket is currently active or not. */
+int teamproto_active( void );
 
 /* login
  * send account and password to server */

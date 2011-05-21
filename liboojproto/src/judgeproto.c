@@ -58,6 +58,11 @@ int judgeproto_stop_listen( void )
 	return 0;
 }
 
+int judgeproto_active( void )
+{
+	return proto_active();
+}
+
 void *judgeproto_reqhand_thread( void *args )
 {
 	int sockfd;

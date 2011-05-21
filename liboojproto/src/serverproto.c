@@ -14,7 +14,7 @@ void (*cb_login_request)( char *srcip, short srctype, wchar_t *account, char *pa
 void (*cb_logout_request)( char *srcip, short srctype, unsigned int account_id )                                                        = NULL;
 void (*cb_submission_request)( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )      = NULL;
 void (*cb_submission_request_dlfin)( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code ) = NULL;
-void (*cb_clar_request)( char *srcip, unsigned int account_id, int private, wchar_t *clarmsg )                                          = NULL;
+void (*cb_clar_request)( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg )                                     = NULL;
 void (*cb_pd_request)( char *srcip, unsigned int account_id, unsigned int problem_id )                                                  = NULL;
 void (*cb_run_result_notify)( char *srcip, unsigned int run_id, wchar_t *result )                                                       = NULL;
 void (*cb_account_add)( char *srcip, unsigned int type, wchar_t *account, char *password )                                              = NULL;
@@ -27,7 +27,7 @@ void (*cb_problem_del)( char *srcip, unsigned int problem_id )                  
 void (*cb_problem_mod)( char *srcip, unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )    = NULL;
 void (*cb_problem_mod_dlfin)( char *srcip, unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
 void (*cb_problem_update)( char *srcip )                                                                                                = NULL;
-void (*cb_clar_result)( char *srcip, unsigned int clar_id, int private, wchar_t *result_string )                                        = NULL;
+void (*cb_clar_result)( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string )                                   = NULL;
 
 /* thread function */
 void *serverproto_reqhand_thread( void *args );
@@ -67,6 +67,11 @@ int serverproto_stop_listen( void )
 	}
 
 	return 0;
+}
+
+int serverproto_active( void )
+{
+	return proto_active();
 }
 
 void *serverproto_reqhand_thread( void *args )
@@ -659,13 +664,13 @@ int serverproto_problem_info( char *destip, unsigned int problem_id, wchar_t *pa
 	return 0;
 }
 
-int serverproto_clar_request( char *destip, unsigned int clar_id, int private, wchar_t *clarmsg )
+int serverproto_clar_request( char *destip, unsigned int clar_id, int private_byte, wchar_t *clarmsg )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *clar_id_str = uint2str( clar_id );
-	char *private_byte_str = int2str( private );
+	char *private_byte_str = int2str( private_byte );
 	char *clarmsg_mb = proto_str_presend( clarmsg );
 
 	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_CLAR_REQUEST );

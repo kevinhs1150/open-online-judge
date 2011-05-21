@@ -27,3 +27,15 @@ released on 2011.05.19   by Infinity
  * makefile: Seperated Win32 and Linux into two makefiles and shortened the
  naming scheme.
  * sourcecode: Directory structure altered for easier file management.
+
+
+protocol 0 revision 2 (follow specification 0.2)
+ongoing   by Infinity and Fishy
+ + common: Now able to test if a socket is listening. (Infinity)
+
+ * judgeproto: Fixed a comment typo.
+ * common: Changed some variables named "private" to "private_byte" to prevent
+ C++ keywords problem. (Infinity)
+
+ * makefile: Implement CMake auto makefile generation.  The old Makefile.win32
+ and Makefile.linux are now deprecated. (Fishy)

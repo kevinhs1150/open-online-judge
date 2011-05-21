@@ -3,6 +3,10 @@
 
 #include <wx/app.h>
 
+
+/* set server program debug level */
+#define SERVER_DBG 1
+
 class ServerApp : public wxApp
 {
     public:

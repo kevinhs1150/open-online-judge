@@ -59,6 +59,11 @@ int teamproto_stop_listen( void )
 	return 0;
 }
 
+int teamproto_active( void )
+{
+	return proto_active();
+}
+
 void *teamproto_reqhand_thread( void *args )
 {
 	int sockfd;

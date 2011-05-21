@@ -7,7 +7,7 @@
 static int adminproto_cbcheck( void );
 
 /* callback functions */
-void (*cb_clar_request)( unsigned int clar_id, int private, wchar_t *clarmsg )             = NULL;
+void (*cb_clar_request)( unsigned int clar_id, int private_byte, wchar_t *clarmsg )        = NULL;
 void (*cb_account_info)( unsigned int account_id, unsigned int type, wchar_t *account )    = NULL;
 void (*cb_problem_info)( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )    = NULL;
 void (*cb_problem_info_dlfin)( unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
@@ -56,6 +56,11 @@ int adminproto_stop_listen( void )
 	}
 
 	return 0;
+}
+
+int adminproto_active( void )
+{
+	return proto_active();
 }
 
 void *adminproto_reqhand_thread( void *args )

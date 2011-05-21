@@ -32,7 +32,7 @@ void serverproto_cbreg_submission_request_dlfin( void (*cbfunc)( char *srcip, un
 /* Callback for clarification request. (from team)
  * Pass the "requester's team account", "whether this is a private message", and "clarification message" to server program.
  * Server should record those information into db and redirect the request to admin. */
-void serverproto_cbreg_clar_request( void (*cbfunc)( char *srcip, unsigned int account_id, int private, wchar_t *clarmsg ) );
+void serverproto_cbreg_clar_request( void (*cbfunc)( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg ) );
 
 /* Callback for problem download request. (from team)
  * Pass the "requester's team account", "requested problem id" to server program.
@@ -89,13 +89,15 @@ void serverproto_cbreg_problem_update( void (*cbfunc)( char *srcip ) );
 /* Callback for clarification result. (from admin)
  * Pass "clarification id", "private message indicator" and "result string" to server program.
  * Server should update information in db and reply to all or one team, according to how private byte is set. */
-void serverproto_cbreg_clar_result( void (*cbfunc)( char *srcip, unsigned int clar_id, int private, wchar_t *result_string ) );
+void serverproto_cbreg_clar_result( void (*cbfunc)( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string ) );
 
 
 /* listen thread
  * This function should be called in initial routine.  It listens for data from clients. */
 int serverproto_listen( char *localaddr );
 int serverproto_stop_listen( void );
+/* This function checks whether listen socket is currently active or not. */
+int serverproto_active( void );
 
 /* login reply */
 int serverproto_login_reply( char *destip, short srctype, int confirmation, unsigned int account_id );
@@ -128,6 +130,6 @@ int serverproto_problem_info( char *destip, unsigned int problem_id, wchar_t *pa
 /* contest site situation -- not implemented yet */
 
 /* clarification request (to admin) */
-int serverproto_clar_request( char *destip, unsigned int clar_id, int private, wchar_t *clarmsg );
+int serverproto_clar_request( char *destip, unsigned int clar_id, int private_byte, wchar_t *clarmsg );
 
 #endif
