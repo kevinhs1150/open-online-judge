@@ -30,7 +30,7 @@ released on 2011.05.19   by Infinity
 
 
 protocol 0 revision 2 (follow specification 0.2)
-ongoing   by Infinity and Fishy
+released on 2011.05.21   by Infinity and Fishy
  + common: Now able to test if a socket is listening. (Infinity)
 
  * judgeproto: Fixed a comment typo.
@@ -39,3 +39,8 @@ ongoing   by Infinity and Fishy
 
  * makefile: Implement CMake auto makefile generation.  The old Makefile.win32
  and Makefile.linux are now deprecated. (Fishy)
+
+
+protocol 0 revision 2 (follow specification 0.3)
+ongoing   by Infinity
+
