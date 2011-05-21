@@ -69,6 +69,11 @@ int proto_listen( char *localaddr, unsigned short bind_port, void *(*cbthread)( 
 	return 0;
 }
 
+int proto_active( void )
+{
+	return !proto_stop;	
+}
+
 int proto_stop_listen( void )
 {
 	int sockfd;

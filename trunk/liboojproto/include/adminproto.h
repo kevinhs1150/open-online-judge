@@ -22,7 +22,7 @@ void adminproto_cbreg_logout_confirm( void (*logout_confirm)( int confirm_cod ) 
 /* Callback for clarification request. (from server)
  * Pass "clarification id", "whether this is a private message" and "clarification message" to administrator client.
  * Administrator client should notify the administrator.  Administrator should then reply the clarification. */
-void adminproto_cbreg_clar_request( void (*clar_request)( unsigned int clar_id, int private, wchar_t *clarmsg ) );
+void adminproto_cbreg_clar_request( void (*clar_request)( unsigned int clar_id, int private_byte, wchar_t *clarmsg ) );
 
 /* Callback for account information update. (from server)
  * Pass "account id", "account type" and "account name(possibly updated one)" to administrator client.
@@ -40,6 +40,8 @@ void adminproto_cbreg_problem_info_dlfin( void (*problem_info_dlfin)( unsigned i
  * This function should be called in initial routine.  It listens for data from server. */
 int adminproto_listen( char *localaddr );
 int adminproto_stop_listen( void );
+/* This function checks whether listen socket is currently active or not. */
+int adminproto_active( void );
 
 /* login
  * send account and password to server */

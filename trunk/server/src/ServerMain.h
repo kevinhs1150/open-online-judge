@@ -5,13 +5,16 @@
 #include "ServerApp.h"
 #include "gui.h"
 
+/* Server GUI class. */
 class ServerFrame: public ServerGUI
 {
     public:
         ServerFrame(wxFrame *frame);
         ~ServerFrame();
-    private:
-};
 
+    private:
+		void OnButtonClickStart( wxCommandEvent& event );
+		void OnButtonClickStop( wxCommandEvent& event );
+};
 
 #endif // _SERVERMAIN_H_

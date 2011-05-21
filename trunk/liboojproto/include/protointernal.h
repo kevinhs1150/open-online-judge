@@ -79,6 +79,7 @@ wchar_t *proto_str_postrecv( const char *src );
 /* internal common listen functions
  * function defined in protointernal_listen.c */
 int proto_listen( char *localaddr, unsigned short bind_port, void *(*cbthread)( void *) );
+int proto_activated( void );
 int proto_stop_listen( void );
 
 /* internal common login & logout functions */
