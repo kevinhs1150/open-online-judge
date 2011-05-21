@@ -302,6 +302,8 @@ class JudgeGUI : public wxFrame
 		wxStaticText* m_staticTextName;
 		wxButton* m_buttonLogout;
 		wxChoice* m_choiceFilter;
+		
+		wxStaticText* m_staticTextNewUnjudgeCount;
 		wxListCtrl* m_listCtrlRuns;
 		wxListCtrl* m_listCtrlClars;
 		
@@ -313,6 +315,81 @@ class JudgeGUI : public wxFrame
 		
 		JudgeGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 643,468 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		~JudgeGUI();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class JudgementConfirmGUI
+///////////////////////////////////////////////////////////////////////////////
+class JudgementConfirmGUI : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticTextTitle;
+		wxStaticLine* m_staticlineUp;
+		wxStaticText* m_staticTextJudgement;
+		wxStaticText* m_staticTextJudgementVal;
+		wxStaticLine* m_staticlineDown;
+		
+		wxButton* m_buttonYes;
+		wxButton* m_buttonNo;
+		
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnButtonClickYes( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickNo( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		JudgementConfirmGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+		~JudgementConfirmGUI();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class JudgeSubmission
+///////////////////////////////////////////////////////////////////////////////
+class JudgeSubmission : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticTextProblemNumber;
+		wxStaticText* m_staticTextProblemNumberValue;
+		wxStaticText* m_staticTextTeam;
+		wxStaticText* m_staticTextTeamValue;
+		wxStaticText* m_staticTextSubmission;
+		wxStaticText* m_staticTextSubmissionValue;
+		wxStaticText* m_staticTextInputStatus;
+		wxStaticText* m_staticTextInputStatusValue;
+		
+		wxButton* m_buttonShowInputData;
+		wxStaticText* m_staticTextSourceStatus;
+		wxStaticText* m_staticTextSourceStatusValue;
+		
+		wxButton* m_buttonShowSource;
+		
+		wxButton* m_buttonRun;
+		wxButton* m_buttonStop;
+		
+		wxStaticLine* m_staticline1;
+		wxStaticText* m_staticTextRunStatus;
+		wxStaticLine* m_staticline2;
+		
+		wxChoice* m_choiceJudgement;
+		
+		
+		wxButton* m_buttonJudge;
+		wxButton* m_buttonCancel;
+		
+		wxStaticLine* m_staticline3;
+	
+	public:
+		
+		JudgeSubmission( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Judge"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE );
+		~JudgeSubmission();
 	
 };
 
