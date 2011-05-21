@@ -946,12 +946,22 @@ JudgeGUI::JudgeGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	sbSizerRuns = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Runs") ), wxVERTICAL );
 	
 	wxBoxSizer* bSizerFilter;
-	bSizerFilter = new wxBoxSizer( wxVERTICAL );
+	bSizerFilter = new wxBoxSizer( wxHORIZONTAL );
 	
 	wxArrayString m_choiceFilterChoices;
 	m_choiceFilter = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceFilterChoices, 0 );
 	m_choiceFilter->SetSelection( 0 );
 	bSizerFilter->Add( m_choiceFilter, 0, wxALL, 5 );
+	
+	
+	bSizerFilter->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_staticTextNewUnjudgeCount = new wxStaticText( this, wxID_ANY, wxT("guy"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextNewUnjudgeCount->Wrap( -1 );
+	m_staticTextNewUnjudgeCount->SetFont( wxFont( 9, 74, 90, 92, false, wxT("Arial") ) );
+	m_staticTextNewUnjudgeCount->SetForegroundColour( wxColour( 255, 0, 0 ) );
+	
+	bSizerFilter->Add( m_staticTextNewUnjudgeCount, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	sbSizerRuns->Add( bSizerFilter, 0, wxEXPAND, 5 );
 	
@@ -986,6 +996,247 @@ JudgeGUI::~JudgeGUI()
 	
 }
 
+JudgementConfirmGUI::JudgementConfirmGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizerMain;
+	bSizerMain = new wxBoxSizer( wxVERTICAL );
+	
+	m_staticTextTitle = new wxStaticText( this, wxID_ANY, wxT("Confirm Clarification"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
+	m_staticTextTitle->Wrap( -1 );
+	m_staticTextTitle->SetFont( wxFont( 16, 74, 90, 92, false, wxT("Arial") ) );
+	
+	bSizerMain->Add( m_staticTextTitle, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticlineUp = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+	bSizerMain->Add( m_staticlineUp, 0, wxEXPAND|wxALL, 5 );
+	
+	wxBoxSizer* bSizerJudgement;
+	bSizerJudgement = new wxBoxSizer( wxVERTICAL );
+	
+	m_staticTextJudgement = new wxStaticText( this, wxID_ANY, wxT("Judgement:"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
+	m_staticTextJudgement->Wrap( -1 );
+	m_staticTextJudgement->SetFont( wxFont( 14, 74, 90, 90, false, wxT("Arial") ) );
+	
+	bSizerJudgement->Add( m_staticTextJudgement, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticTextJudgementVal = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
+	m_staticTextJudgementVal->Wrap( -1 );
+	m_staticTextJudgementVal->SetFont( wxFont( 14, 74, 90, 90, false, wxT("Arial") ) );
+	
+	bSizerJudgement->Add( m_staticTextJudgementVal, 0, wxALL|wxEXPAND, 5 );
+	
+	bSizerMain->Add( bSizerJudgement, 0, wxEXPAND, 5 );
+	
+	m_staticlineDown = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+	bSizerMain->Add( m_staticlineDown, 0, wxEXPAND|wxALL, 5 );
+	
+	wxBoxSizer* bSizerButton;
+	bSizerButton = new wxBoxSizer( wxHORIZONTAL );
+	
+	
+	bSizerButton->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_buttonYes = new wxButton( this, wxID_ANY, wxT("Yes"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButton->Add( m_buttonYes, 0, wxALL, 5 );
+	
+	m_buttonNo = new wxButton( this, wxID_ANY, wxT("No"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButton->Add( m_buttonNo, 0, wxALL, 5 );
+	
+	
+	bSizerButton->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	bSizerMain->Add( bSizerButton, 0, wxBOTTOM|wxEXPAND, 5 );
+	
+	this->SetSizer( bSizerMain );
+	this->Layout();
+	bSizerMain->Fit( this );
+	
+	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_buttonYes->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgementConfirmGUI::OnButtonClickYes ), NULL, this );
+	m_buttonNo->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgementConfirmGUI::OnButtonClickNo ), NULL, this );
+}
+
+JudgementConfirmGUI::~JudgementConfirmGUI()
+{
+	// Disconnect Events
+	m_buttonYes->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgementConfirmGUI::OnButtonClickYes ), NULL, this );
+	m_buttonNo->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgementConfirmGUI::OnButtonClickNo ), NULL, this );
+	
+}
+
+JudgeSubmission::JudgeSubmission( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizerMain;
+	bSizerMain = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizerProblem;
+	bSizerProblem = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextProblemNumber = new wxStaticText( this, wxID_ANY, wxT("Problem:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextProblemNumber->Wrap( -1 );
+	bSizerProblem->Add( m_staticTextProblemNumber, 0, wxALL, 5 );
+	
+	m_staticTextProblemNumberValue = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextProblemNumberValue->Wrap( -1 );
+	bSizerProblem->Add( m_staticTextProblemNumberValue, 0, wxALL, 5 );
+	
+	bSizerMain->Add( bSizerProblem, 0, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerTeam;
+	bSizerTeam = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextTeam = new wxStaticText( this, wxID_ANY, wxT("Team:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextTeam->Wrap( -1 );
+	bSizerTeam->Add( m_staticTextTeam, 0, wxALL, 5 );
+	
+	m_staticTextTeamValue = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextTeamValue->Wrap( -1 );
+	bSizerTeam->Add( m_staticTextTeamValue, 0, wxALL, 5 );
+	
+	bSizerMain->Add( bSizerTeam, 0, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerSubmissionNumber;
+	bSizerSubmissionNumber = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextSubmission = new wxStaticText( this, wxID_ANY, wxT("Submission Number:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextSubmission->Wrap( -1 );
+	bSizerSubmissionNumber->Add( m_staticTextSubmission, 0, wxALL, 5 );
+	
+	m_staticTextSubmissionValue = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextSubmissionValue->Wrap( -1 );
+	bSizerSubmissionNumber->Add( m_staticTextSubmissionValue, 0, wxALL, 5 );
+	
+	bSizerMain->Add( bSizerSubmissionNumber, 0, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerInput;
+	bSizerInput = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextInputStatus = new wxStaticText( this, wxID_ANY, wxT("Input Data Status:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextInputStatus->Wrap( -1 );
+	bSizerInput->Add( m_staticTextInputStatus, 0, wxALIGN_CENTER|wxALL, 5 );
+	
+	m_staticTextInputStatusValue = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextInputStatusValue->Wrap( -1 );
+	bSizerInput->Add( m_staticTextInputStatusValue, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	
+	bSizerInput->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_buttonShowInputData = new wxButton( this, wxID_ANY, wxT("Show"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerInput->Add( m_buttonShowInputData, 0, wxALIGN_CENTER|wxALL, 5 );
+	
+	bSizerMain->Add( bSizerInput, 0, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerSourceCode;
+	bSizerSourceCode = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextSourceStatus = new wxStaticText( this, wxID_ANY, wxT("Source Code Status:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextSourceStatus->Wrap( -1 );
+	bSizerSourceCode->Add( m_staticTextSourceStatus, 0, wxALIGN_CENTER|wxALL, 5 );
+	
+	m_staticTextSourceStatusValue = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextSourceStatusValue->Wrap( -1 );
+	bSizerSourceCode->Add( m_staticTextSourceStatusValue, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	
+	bSizerSourceCode->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_buttonShowSource = new wxButton( this, wxID_ANY, wxT("Show"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerSourceCode->Add( m_buttonShowSource, 0, wxALIGN_CENTER|wxALL, 5 );
+	
+	bSizerMain->Add( bSizerSourceCode, 0, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerRunAndStop;
+	bSizerRunAndStop = new wxBoxSizer( wxHORIZONTAL );
+	
+	
+	bSizerRunAndStop->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_buttonRun = new wxButton( this, wxID_ANY, wxT("Run"), wxDefaultPosition, wxSize( 150,50 ), 0 );
+	m_buttonRun->SetFont( wxFont( 12, 74, 90, 92, false, wxEmptyString ) );
+	
+	bSizerRunAndStop->Add( m_buttonRun, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
+	
+	m_buttonStop = new wxButton( this, wxID_ANY, wxT("Stop"), wxDefaultPosition, wxSize( 150,50 ), 0 );
+	m_buttonStop->SetFont( wxFont( 12, 74, 90, 92, false, wxEmptyString ) );
+	
+	bSizerRunAndStop->Add( m_buttonStop, 0, wxALL, 5 );
+	
+	
+	bSizerRunAndStop->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	bSizerMain->Add( bSizerRunAndStop, 0, wxEXPAND, 5 );
+	
+	m_staticline1 = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+	bSizerMain->Add( m_staticline1, 0, wxEXPAND | wxALL, 5 );
+	
+	wxBoxSizer* bSizerRunStatus;
+	bSizerRunStatus = new wxBoxSizer( wxVERTICAL );
+	
+	m_staticTextRunStatus = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
+	m_staticTextRunStatus->Wrap( -1 );
+	m_staticTextRunStatus->SetFont( wxFont( 12, 74, 90, 90, false, wxEmptyString ) );
+	
+	bSizerRunStatus->Add( m_staticTextRunStatus, 0, wxALL|wxEXPAND, 5 );
+	
+	bSizerMain->Add( bSizerRunStatus, 0, wxEXPAND, 5 );
+	
+	m_staticline2 = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+	bSizerMain->Add( m_staticline2, 0, wxEXPAND | wxALL, 5 );
+	
+	wxBoxSizer* bSizer69;
+	bSizer69 = new wxBoxSizer( wxHORIZONTAL );
+	
+	
+	bSizer69->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	wxArrayString m_choiceJudgementChoices;
+	m_choiceJudgement = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxSize( 150,-1 ), m_choiceJudgementChoices, 0 );
+	m_choiceJudgement->SetSelection( 0 );
+	bSizer69->Add( m_choiceJudgement, 0, wxALL, 5 );
+	
+	
+	bSizer69->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	bSizerMain->Add( bSizer69, 0, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerJudgement;
+	bSizerJudgement = new wxBoxSizer( wxHORIZONTAL );
+	
+	
+	bSizerJudgement->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_buttonJudge = new wxButton( this, wxID_ANY, wxT("Judge"), wxDefaultPosition, wxSize( 150,-1 ), 0 );
+	bSizerJudgement->Add( m_buttonJudge, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_buttonCancel = new wxButton( this, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxSize( 150,-1 ), 0 );
+	bSizerJudgement->Add( m_buttonCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	
+	bSizerJudgement->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	bSizerMain->Add( bSizerJudgement, 0, wxEXPAND, 5 );
+	
+	m_staticline3 = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+	bSizerMain->Add( m_staticline3, 0, wxEXPAND | wxALL, 5 );
+	
+	this->SetSizer( bSizerMain );
+	this->Layout();
+	bSizerMain->Fit( this );
+	
+	this->Centre( wxBOTH );
+}
+
+JudgeSubmission::~JudgeSubmission()
+{
+}
+
 ServerGUI::ServerGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
@@ -995,7 +1246,7 @@ ServerGUI::ServerGUI( wxWindow* parent, wxWindowID id, const wxString& title, co
 	
 	StaticTextStatus = new wxStaticText( this, wxID_ANY, wxT("Not Running"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
 	StaticTextStatus->Wrap( -1 );
-	StaticTextStatus->SetFont( wxFont( 48, 74, 90, 90, false, wxEmptyString ) );
+	StaticTextStatus->SetFont( wxFont( 36, 74, 90, 90, false, wxT("Arial") ) );
 	
 	bSizer34->Add( StaticTextStatus, 0, wxALL|wxEXPAND, 5 );
 	
