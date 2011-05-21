@@ -19,17 +19,11 @@ LoginGUI::LoginGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxBoxSizer* bSizerTitle;
 	bSizerTitle = new wxBoxSizer( wxHORIZONTAL );
 	
-	
-	bSizerTitle->Add( 0, 0, 1, wxEXPAND, 5 );
-	
-	m_staticTextTitle = new wxStaticText( this, wxID_ANY, wxT("Open Online Judge"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextTitle = new wxStaticText( this, wxID_ANY, wxT("Open Online Judge"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
 	m_staticTextTitle->Wrap( -1 );
 	m_staticTextTitle->SetFont( wxFont( 20, 74, 90, 92, false, wxEmptyString ) );
 	
-	bSizerTitle->Add( m_staticTextTitle, 0, wxALL, 5 );
-	
-	
-	bSizerTitle->Add( 0, 0, 1, wxEXPAND, 5 );
+	bSizerTitle->Add( m_staticTextTitle, 1, wxALL, 5 );
 	
 	bSizerMain->Add( bSizerTitle, 0, wxEXPAND, 5 );
 	
@@ -98,11 +92,9 @@ LoginGUI::LoginGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	bSizerMain->Add( bSizerButton, 0, wxEXPAND, 5 );
 	
-	m_staticlineDown = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
-	bSizerMain->Add( m_staticlineDown, 0, wxEXPAND|wxALL, 5 );
-	
 	this->SetSizer( bSizerMain );
 	this->Layout();
+	bSizerMain->Fit( this );
 	
 	this->Centre( wxBOTH );
 	
@@ -206,7 +198,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelAccounts->SetSizer( bSizerAccountPage );
 	m_panelAccounts->Layout();
 	bSizerAccountPage->Fit( m_panelAccounts );
-	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), false );
+	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), true );
 	m_panelContestInfo = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerContestInfoPage;
 	bSizerContestInfoPage = new wxBoxSizer( wxVERTICAL );
@@ -483,7 +475,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelProblems->SetSizer( bSizerProblemsPage );
 	m_panelProblems->Layout();
 	bSizerProblemsPage->Fit( m_panelProblems );
-	m_notebook->AddPage( m_panelProblems, wxT("Problems"), true );
+	m_notebook->AddPage( m_panelProblems, wxT("Problems"), false );
 	m_panel4 = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	m_notebook->AddPage( m_panel4, wxT("a page"), false );
 	
@@ -956,7 +948,7 @@ JudgeGUI::JudgeGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	bSizerFilter->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	m_staticTextNewUnjudgeCount = new wxStaticText( this, wxID_ANY, wxT("guy"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextNewUnjudgeCount = new wxStaticText( this, wxID_ANY, wxT("UNJudgeNum"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextNewUnjudgeCount->Wrap( -1 );
 	m_staticTextNewUnjudgeCount->SetFont( wxFont( 9, 74, 90, 92, false, wxT("Arial") ) );
 	m_staticTextNewUnjudgeCount->SetForegroundColour( wxColour( 255, 0, 0 ) );

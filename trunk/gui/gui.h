@@ -44,9 +44,7 @@ class LoginGUI : public wxDialog
 	private:
 	
 	protected:
-		
 		wxStaticText* m_staticTextTitle;
-		
 		wxStaticLine* m_staticlineTop;
 		wxStaticText* m_staticTextID;
 		wxTextCtrl* m_textCtrlID;
@@ -59,7 +57,6 @@ class LoginGUI : public wxDialog
 		wxButton* m_buttonOK;
 		wxButton* m_buttonCancel;
 		
-		wxStaticLine* m_staticlineDown;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnTextEnterPassword( wxCommandEvent& event ) { event.Skip(); }
@@ -69,7 +66,7 @@ class LoginGUI : public wxDialog
 	
 	public:
 		
-		LoginGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Login"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 350,-1 ), long style = wxCAPTION|wxCLOSE_BOX|wxSTAY_ON_TOP|wxSYSTEM_MENU );
+		LoginGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Login"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxCAPTION|wxCLOSE_BOX|wxSTAY_ON_TOP|wxSYSTEM_MENU );
 		~LoginGUI();
 	
 };
