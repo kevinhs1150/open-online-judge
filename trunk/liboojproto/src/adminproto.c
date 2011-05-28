@@ -112,7 +112,7 @@ void *adminproto_reqhand_thread( void *args )
 		else if( RQID == OPID_P_INFO )
 		{
 			char *problem_id_str = proto_str_split( msgptr, &msgptr );
-			wchar_t *path_description, *path_input, *path_answer;
+			wchar_t *path_description = NULL, *path_input = NULL, *path_answer = NULL;
 
 			unsigned int problem_id = atoi( problem_id_str );
 

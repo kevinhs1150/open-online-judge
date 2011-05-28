@@ -252,7 +252,7 @@ void *serverproto_reqhand_thread( void *args )
 				char *problem_id_str = proto_str_split( msgptr, NULL );
 
 				unsigned int problem_id = atoi( problem_id_str );
-				wchar_t *path_description, *path_input, *path_answer;
+				wchar_t *path_description = NULL, *path_input = NULL, *path_answer = NULL;
 
 				(*cb_problem_add)( src_ipaddr, problem_id, &path_description, &path_input, &path_answer );
 
@@ -283,7 +283,7 @@ void *serverproto_reqhand_thread( void *args )
 				char *problem_id_str = proto_str_split( msgptr, NULL );
 
 				unsigned int problem_id = atoi( problem_id_str );
-				wchar_t *path_description, *path_input, *path_answer;
+				wchar_t *path_description = NULL, *path_input = NULL, *path_answer = NULL;
 
 				(*cb_problem_mod)( src_ipaddr, problem_id, &path_description, &path_input, &path_answer );
 
@@ -361,7 +361,7 @@ void *serverproto_reqhand_thread( void *args )
 			unsigned int account_id = atoi( account_id_str );
 			unsigned int problem_id = atoi( problem_id_str );
 			wchar_t *coding_language = proto_str_postrecv( coding_language_mb );
-			wchar_t *path_code;
+			wchar_t *path_code = NULL;
 
 			(*cb_submission_request)( src_ipaddr, account_id, problem_id, coding_language, &path_code );
 
