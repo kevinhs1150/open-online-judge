@@ -27,6 +27,8 @@ void cb_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_
 ServerFrame::ServerFrame(wxFrame *frame)
     : ServerGUI(frame)
 {
+	/* cb_submission_request() needs subdirectory to store submit files */
+	system("mkdir submit_temp");
 	/* register callback functions */
 	serverproto_cbreg_login_request( cb_login_request );
 	serverproto_cbreg_logout_request( cb_logout_request );
@@ -78,14 +80,33 @@ void ServerFrame::OnButtonClickStop( wxCommandEvent& event )
 /* Server callback function definition. */
 void cb_login_request( char *srcip, short srctype, wchar_t *account, char *password )
 {
+	char insertsql[100];
+	char account_char[20];
+	
+	wcstombs(account_char, account, 20);
+	sprintf(insertsql, "INSERT INTO user VALUES(NULL, '%s', '%s', '%d', '%s', 'yes');", account_char, password, &srctype, scrip);
+	sqlite3_exec(db, insertsql, 0, 0, &errMsg);
 }
 
 void cb_logout_request( char *srcip, short srctype, unsigned int account_id )
 {
+	char insertsql[100];
+	sprintf(insertsql, "UPDATE user SET logged_in = 'no' WHERE account_id = '%d';", &account_id);
+	sqlite3_exec(db, insertsql, 0, 0, &errMsg);
 }
 
+//the function needs a subdirectory "submit_temp/"
 void cb_submission_request( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )
 {
+	char insertsql[100];
+	char coding_language_char[10];
+	char path_code_char[30];
+	
+	sprintf(path_code_char, "submit_temp/submit%d.txt", sqlite3_last_insert_rowid(db) + 1);
+	wcstombs(coding_language_char, coding_language, 10);
+	sprintf(insertsql, "INSERT INTO submission(NULL, '%d', '%d', '%s', %s, NULL);", &account_id, &problem_id, coding_language_char, path_code_char);
+	sqlite3_exec(db, insertsql, 0, 0, &errMsg);
+	mbstowcs( *path_code, path_code_char, 30 );
 }
 
 void cb_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
