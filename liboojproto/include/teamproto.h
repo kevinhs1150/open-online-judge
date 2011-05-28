@@ -19,6 +19,16 @@ void teamproto_cbreg_login_confirm( void (*cbfun)( int confirm_code, unsigned in
  * Judge client can ignore this message, since it is currently noot meaningful.*/
 void teamproto_cbreg_logout_confirm( void (*cbfunc)( int confirm_code ) );
 
+/* Callback for timer set. (from server)
+ * Pass time components(hr, min, sec) to server program.
+ * Client should update its timer at once. */
+void teamproto_cbreg_timer_set( void (*cbfunc)( unsigned int hours, unsigned int minutes, unsigned int seconds ) );
+
+/* Callback for contest start/stop. (from server)
+ * Client should update its contest state at once. */
+void teamproto_cbreg_contest_start( void (*cbfunc)( void ) );
+void teamproto_cbreg_contest_stop( void (*cbfunc)( void ) );
+
 /* Callback for run result reply. (from server)
  * Pass the run id and result string to team client.
  * Team client should notify the user about the result. */

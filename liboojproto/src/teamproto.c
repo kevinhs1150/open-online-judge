@@ -9,13 +9,16 @@ static int teamproto_cbcheck( void );
 /* callback functions */
 void (*cb_run_reply)( unsigned int run_id, wchar_t *result_string )   = NULL;
 void (*cb_clar_reply)( unsigned int clar_id, wchar_t *result_string ) = NULL;
-void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ) = NULL;
 void (*cb_pu_request)( wchar_t **path_description )                   = NULL;
 void (*cb_pu_request_dlfin)( wchar_t *path_description )              = NULL;
 
 /* callback functions extern-ed from protointernal.c */
 extern void (*cb_login_confirm)( int confirm_code, unsigned int account_id );
 extern void (*cb_logout_confirm)( int confirm_code );
+extern void (*cb_timer_set)( unsigned int hours, unsigned int minutes, unsigned int seconds );
+extern void (*cb_contest_start)( void );
+extern void (*cb_contest_stop)( void );
+extern void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
 
 /* thread function */
 void *teamproto_reqhand_thread( void *args );
@@ -82,33 +85,8 @@ void *teamproto_reqhand_thread( void *args )
 	recv( sockfd, recvbuf, BUFLEN, 0 );
 	msgptr = proto_srid_split( recvbuf, &RQSR, &RQID );
 
-	/* request handling */
-	/* part 1. login/logout confirmation */
-	if( RQID == OPID_LOGIN_REPLY )
-	{
-		char *confirm_code_str = proto_str_split( msgptr, &msgptr );
-		char *account_id_str = proto_str_split( msgptr, NULL );
-
-		int confirm_code = atoi( confirm_code_str );
-		unsigned int account_id = atoi( account_id_str );
-
-		(*cb_login_confirm)( confirm_code, account_id );
-
-		free( confirm_code_str );
-		free( account_id_str );
-	}
-	else if( RQID == OPID_LOGOUT_REPLY )
-	{
-		char *confirm_code_str = proto_str_split( msgptr, NULL );
-
-		int confirm_code = atoi( confirm_code_str );
-
-		(*cb_logout_confirm)( confirm_code );
-
-		free( confirm_code_str );
-	}
-	/* part 2. other requests */
-	else if( RQSR == OPSR_SERVER )
+	/* request handling -- if not common, go special */
+	if( proto_commonreq( RQSR, RQID, msgptr ) == 0 && RQSR == OPSR_SERVER )
 	{
 		if( RQID == OPID_RUN_REPLY )
 		{
@@ -140,23 +118,7 @@ void *teamproto_reqhand_thread( void *args )
 		}
 		else if( RQID == OPID_SB_UPDATE )
 		{
-			char *updated_account_id_str = proto_str_split( msgptr, &msgptr );
-			char *new_account_mb = proto_str_split( msgptr, &msgptr );
-			char *new_accept_count_str = proto_str_split( msgptr, &msgptr );
-			char *new_time_str = proto_str_split( msgptr, &msgptr );
-
-			unsigned int updated_account_id = atoi( updated_account_id_str );
-			wchar_t *new_account = proto_str_postrecv( new_account_mb );
-			unsigned int new_accept_count = atoi( new_accept_count_str );
-			unsigned int new_time = atoi( new_time_str );
-
-			(*cb_sb_update)( updated_account_id, new_account, new_accept_count, new_time );
-
-			free( updated_account_id_str );
-			free( new_account_mb );
-			free( new_accept_count_str );
-			free( new_time_str );
-			free( new_account );
+			proto_sb_update( msgptr );
 		}
 		else if( RQID == OPID_PUPLOAD )
 		{
@@ -221,7 +183,7 @@ int teamproto_submission( char *destip, unsigned int account_id, unsigned int pr
 		return -1;
 	}
 
-	send( sockfd, sendbuf, BUFLEN, 0 );
+	send_sp( sockfd, sendbuf, BUFLEN );
 
 	/* upload files */
 	filesend( sockfd, path_code );
@@ -256,7 +218,7 @@ int teamproto_clar( char *destip, unsigned int account_id, int private_byte, wch
 		return -1;
 	}
 
-	send( sockfd, sendbuf, BUFLEN, 0 );
+	send_sp( sockfd, sendbuf, BUFLEN );
 
 	shutdown_wr_sp( sockfd );
 	free( account_id_str );
@@ -286,7 +248,7 @@ int teamproto_problem_download( char *destip, unsigned int account_id, unsigned 
 		return -1;
 	}
 
-	send( sockfd, sendbuf, BUFLEN, 0 );
+	send_sp( sockfd, sendbuf, BUFLEN );
 
 	shutdown_wr_sp( sockfd );
 	free( account_id_str );
@@ -295,19 +257,23 @@ int teamproto_problem_download( char *destip, unsigned int account_id, unsigned 
 	return 0;
 }
 
-void teamproto_cbreg_login_confirm( void (*cbfunc)( int, unsigned int ) )   { cb_login_confirm = cbfunc; }
-void teamproto_cbreg_logout_confirm( void( *cbfunc )( int ) )               { cb_logout_confirm = cbfunc; }
+void teamproto_cbreg_login_confirm( void (*cbfunc)( int, unsigned int ) ) { cb_login_confirm = cbfunc; }
+void teamproto_cbreg_logout_confirm( void( *cbfunc )( int ) ) { cb_logout_confirm = cbfunc; }
+void teamproto_cbreg_timer_set( void (*cbfunc)( unsigned int, unsigned int, unsigned int ) ) { cb_timer_set = cbfunc; }
+void teamproto_cbreg_contest_start( void (*cbfunc)( void ) )  { cb_contest_start = cbfunc; }
+void teamproto_cbreg_contest_stop( void (*cbfunc)( void ) )   { cb_contest_stop = cbfunc; }
 void teamproto_cbreg_run_reply( void (*cbfunc)( unsigned int, wchar_t* ) )  { cb_run_reply = cbfunc; }
 void teamproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t* ) ) { cb_clar_reply = cbfunc; }
 void teamproto_cbreg_sb_update( void (*cbfunc)( unsigned int, wchar_t*, unsigned int, unsigned int ) ) { cb_sb_update = cbfunc; }
-void teamproto_cbreg_pu_request( void (*cbfunc)( wchar_t** ) )              { cb_pu_request = cbfunc; }
-void teamproto_cbreg_pu_request_dlfin( void (*cbfunc)( wchar_t*) )          { cb_pu_request_dlfin = cbfunc; }
+void teamproto_cbreg_pu_request( void (*cbfunc)( wchar_t** ) )     { cb_pu_request = cbfunc; }
+void teamproto_cbreg_pu_request_dlfin( void (*cbfunc)( wchar_t*) ) { cb_pu_request_dlfin = cbfunc; }
 
 static int teamproto_cbcheck( void )
 {
-	if( cb_run_reply == NULL || cb_clar_reply == NULL || cb_sb_update == NULL ||
-		cb_pu_request == NULL || cb_pu_request_dlfin == NULL ||
-		cb_login_confirm == NULL || cb_logout_confirm == NULL )
+	if( cb_login_confirm == NULL || cb_logout_confirm == NULL ||
+		cb_timer_set == NULL || cb_contest_start == NULL || cb_contest_stop == NULL ||
+		cb_run_reply == NULL || cb_clar_reply == NULL || cb_sb_update == NULL ||
+		cb_pu_request == NULL || cb_pu_request_dlfin == NULL )
 		return 0;
 	else
 		return 1;

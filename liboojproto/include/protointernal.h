@@ -70,6 +70,10 @@ char *proto_str_comb( char *arr, char *msg );
 char *int2str( int input );
 char *uint2str( unsigned int input );
 
+/* other tool functions */
+/* between test, closed low_value, opened high_value */
+int between( int test_value, int low_value, int high_value );
+
 /* wcs(wide character string) and mbs(multi-byte character string) conversion
  * presend: wcs -> mbs
  * postreceive: mbs -> wcs */
@@ -82,8 +86,22 @@ int proto_listen( char *localaddr, unsigned short bind_port, void *(*cbthread)( 
 int proto_activated( void );
 int proto_stop_listen( void );
 
+/* internal common listen request function -- handle requests common to all clients
+ * serverproto should not use this function as its requests are different from other clients
+ * return 1 if the request is handled inside, otherwise 0*/
+int proto_commonreq( int rqsr, int rqid, char *msgptr );
+
+/* internal common clarification request function -- common to admin and judge clients */
+void proto_clar_request( char *msgptr );
+
+/* internal common scoreboard update request function -- common to team and admin */
+void proto_sb_update( char *msgptr );
+
 /* internal common login & logout functions */
 int proto_login( char *destip, short src, wchar_t *account, char *password );
 int proto_logout( char *destip, short src, unsigned int account_id );
+
+/* internal clarification result function common to administrator client and judge client */
+int proto_clar_result( char *destip, short srctype, unsigned int clar_id, int private_byte, wchar_t *result_string );
 
 #endif
