@@ -1,0 +1,11 @@
+#labels Phase-Design
+#SQL DDL in Server Database
+
+= Table Definition =
+
+* user(account_id, account, password, account_type, ipaddress, logged_in)
+* problem(problem_id, description, correct_input_filename, correct_output_filename)
+* submission(run_id, account_id, problem_id, lang, path_code, judge_id)
+* clarification(clar_id, msg)
+* scoreboard(account_id, time, score)
+* judge_type(judge_id, sentence)
