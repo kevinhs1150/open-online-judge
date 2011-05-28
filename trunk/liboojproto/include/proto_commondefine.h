@@ -75,10 +75,14 @@
 
 
 /* login/logout confirmation code */
-#define LOGIN_VALID		1
+#define LOGIN_VALID			1
 #define LOGIN_ACC_NOTEXIST	2
 #define LOGIN_PASS_WRONG	3
-#define LOGOUT_OK		1
-#define LOGOUT_FAIL		2
+#define LOGOUT_OK			1
+#define LOGOUT_FAIL			2
+
+/* take success code */
+#define TAKE_FAIL		0
+#define TAKE_SUCCESS	1
 
 #endif
