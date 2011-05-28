@@ -1,16 +1,28 @@
+#summary SQL DDL in Server Database
 #labels Phase-Design
-#SQL DDL in Server Database
 
 = Table Definition =
 
-* user(account_id, account, password, account_type, ipaddress, logged_in)
+  * user(account_id, account, password, account_type, ipaddress, logged_in)
 
-* problem(problem_id, description, correct_input_filename, correct_output_filename)
+  create table user(account_id int, account varchar(20), password varchar(10), account_type int, ipaddress, varchar(20), logged_in varchar(5), primary key(account_id));
+ 
+  * problem(problem_id, description, correct_input_filename, correct_output_filename)
+ 
+  create table problem(problem_id int, description blob(5MB), correct_input_filename varchar(10), correct_output_filename varchar(10), primary key(problem_id));
+ 
+  * submission(run_id, account_id, problem_id, lang, path_code, judge_id)
 
-* submission(run_id, account_id, problem_id, lang, path_code, judge_id)
-
-* clarification(clar_id, msg)
-
-* scoreboard(account_id, time, score)
-
-* judge_type(judge_id, sentence)
+  create table submission(run_id int, account_id int, problem_id int, lang varchar(10), path_code varchar(50), judge_id, char(5), primary key(run_id), foreign key(account_id) references user, foreign key(problem_id) references problem, foreign key(judge_id) references judge_type);
+ 
+  * clarification(clar_id, msg)
+  
+  create table clarification(clar_id int, msg varchar(50), primary key(clar_id));
+  
+  * scoreboard(account_id, time, score)
+  
+  create table scoreboard(account_id int, time int, score int, primary key(account_id), foreign key(account_id) references user);
+  
+  * judge_type(judge_id, sentence)
+  
+  create table judge_type(judge_id int, sentence varchar(20), primary key(judge_id));
