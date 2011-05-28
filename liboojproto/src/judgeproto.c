@@ -94,7 +94,7 @@ void *judgeproto_reqhand_thread( void *args )
 			char *run_id_str = proto_str_split( msgptr, &msgptr );
 			char *problem_id_str = proto_str_split( msgptr, &msgptr );
 			char *coding_language_mb = proto_str_split( msgptr, &msgptr );
-			wchar_t *path_code;
+			wchar_t *path_code = NULL;
 
 			unsigned int run_id = atoi( run_id_str );
 			unsigned int problem_id = atoi( problem_id_str );
@@ -116,7 +116,7 @@ void *judgeproto_reqhand_thread( void *args )
 		else if( RQID == OPID_PUPDATE )
 		{
 			char *problem_id_str = proto_str_split( msgptr, &msgptr );
-			wchar_t *path_description, *path_input, *path_answer;
+			wchar_t *path_description = NULL, *path_input = NULL, *path_answer = NULL;
 
 			unsigned int problem_id = atoi( problem_id_str );
 

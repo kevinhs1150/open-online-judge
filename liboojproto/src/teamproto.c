@@ -122,7 +122,7 @@ void *teamproto_reqhand_thread( void *args )
 		}
 		else if( RQID == OPID_PUPLOAD )
 		{
-			wchar_t *path_description;
+			wchar_t *path_description = NULL;
 
 			(*cb_pu_request)( &path_description );
 
