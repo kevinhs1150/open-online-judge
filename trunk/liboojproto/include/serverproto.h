@@ -22,6 +22,22 @@ void serverproto_cbreg_login_request( void (*cbfunc)( char *srcip, short srctype
  * Server should give the client a reply and mark the account as logged out. */
 void serverproto_cbreg_logout_request( void (*cbfunc)( char *srcip, short srctype, unsigned int account_id ) );
 
+/* Callback for password change request. (from everyone)
+ * Pass "account id" to server program.
+ * Server should store the changed password into database.
+ * TODO: Note that server should ignore invalid password for now.  A reply function will probably be added in next specification. */
+void serverproto_cbreg_password_change( void (*cbfunc)( char *srcip, unsigned int account_id, char *password ) );
+
+/* Callback for timer set. (from admin)
+ * Pass time components(hr, min, sec) to server program.
+ * Server should transfer this setting to all clients. */
+void serverproto_cbreg_admin_timer_set( void (*cbfunc)( char *srcip, unsigned int hours, unsigned int minutes, unsigned int seconds ) );
+
+/* Callback for contest start/stop. (from admin)
+ * Server should transfer this notification to all clients at once. */
+void serverproto_cbreg_admin_contest_start( void (*cbfunc)( char *srcip ) );
+void serverproto_cbreg_admin_contest_stop( void (*cbfunc)( char *srcip ) );
+
 /* Callback for submission request. (from team)
  * Pass the "requester's team account", "submit problem id", and "coding language" to server program.
  * Server should record those information into db and redirect the submission to judge.  Also note that all submission should be assigned a "run id".
@@ -43,6 +59,14 @@ void serverproto_cbreg_pd_request( void (*cbfunc)( char *srcip, unsigned int acc
  * Pass the "run id" and "result string" to server program.
  * Server should record those information into db and redirect the result to corresponding team. */
 void serverproto_cbreg_run_result_notify( void (*cbfunc)( char *srcip, unsigned int run_id, wchar_t *result ) );
+
+/* Callback for run update request. (from judge)
+ * Server should immediately re-send all run information to the requesting judge client. */
+void serverproto_cbreg_run_update_request( void (*cbfunc)( char *srcip ) );
+
+/* Callback for judge to take run. (from judge)
+ * Server should mark the judge as taken and notify all judges about this take (including the requesting client). */
+void serverproto_cbreg_take_run( void (*cbfunc)( char *srcip, unsigned int run_id ) );
 
 /* Callback for account add request. (from admin)
  * Pass the "account type", "account name", and "password" to server program.  Note that password is passed using ANSI string.
@@ -86,7 +110,7 @@ void serverproto_cbreg_problem_mod_dlfin( void(*cbfunc)( char *srcip, unsigned i
  * Server should reply immediately all problem information to requested administrator. */
 void serverproto_cbreg_problem_update( void (*cbfunc)( char *srcip ) );
 
-/* Callback for clarification result. (from admin)
+/* Callback for clarification result. (from admin or judge)
  * Pass "clarification id", "private message indicator" and "result string" to server program.
  * Server should update information in db and reply to all or one team, according to how private byte is set. */
 void serverproto_cbreg_clar_result( void (*cbfunc)( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string ) );
@@ -105,6 +129,15 @@ int serverproto_login_reply( char *destip, short srctype, int confirmation, unsi
 /* logout reply */
 int serverproto_logout_reply( char *destip, short srctype, int confirmation );
 
+/* timer set function (to clients)
+ * please give destination client type(admin,judge,team) for me to determine the connecting port */
+int serverproto_timer_set( char *destip, short desttype, unsigned int hours, unsigned int minutes, unsigned int seconds );
+
+/* contest start/stop functions (to clients)
+ * please give destination client type for the same reason as above */
+int serverproto_contest_start( char *destip, short desttype );
+int serverproto_contest_stop( char *destip, short desttype );
+
 /* run result reply (to team)
  * Initial state (waiting for run) should also be notofied with this function. */
 int serverproto_run_reply( char *destip, unsigned int run_id, wchar_t *result );
@@ -112,14 +145,17 @@ int serverproto_run_reply( char *destip, unsigned int run_id, wchar_t *result );
 /* clarification reply (to team) */
 int serverproto_clar_reply( char *destip, unsigned int clar_id, wchar_t *result );
 
-/* scoreboard update */
+/* scoreboard update (to team and admin) */
 int serverproto_sb_update( char *destip, unsigned int upd_acc_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
 
-/* problem upload */
+/* problem upload (to team) */
 int serverproto_problem_upload( char *destip, wchar_t *path_description );
 
 /* run request (to judge) */
 int serverproto_run_request( char *destip, unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code );
+
+/* take result (to judge) */
+int serverproto_take_result( char *destip, unsigned int run_id, int success );
 
 /* account information update (to admin) */
 int serverproto_account_info( char *destip, unsigned int account_id, unsigned int type, wchar_t *account );
@@ -129,7 +165,7 @@ int serverproto_problem_info( char *destip, unsigned int problem_id, wchar_t *pa
 
 /* contest site situation -- not implemented yet */
 
-/* clarification request (to admin) */
+/* clarification request (to admin and judge) */
 int serverproto_clar_request( char *destip, unsigned int clar_id, int private_byte, wchar_t *clarmsg );
 
 #endif

@@ -41,6 +41,30 @@ released on 2011.05.21   by Infinity and Fishy
  and Makefile.linux are now deprecated. (Fishy)
 
 
-protocol 0 revision 2 (follow specification 0.3)
-ongoing   by Infinity
+protocol 0 revision 3 (follow specification 0.3)
+released on 2011.05.28   by Infinity
+ + common: Three callbacks are added for server and all clients.  This adds
+ the functionality of timer/start/stop to the program.
+ + server: Added one callback for programmer to implement password changing
+ functionality for all clients.
+ + server: Added two callbacks for judge to be able to request run update and
+ take run.
+ + server&admin: Added three functions respectively for them to set timer,
+ start/stop contest.  Admin's set function will send the request to server,
+ and server's set function will direct the request to all clients.
+ + admin: Added one callback for admin client to receive scoreboard update.
+ + judge: Added two callbacks, one for server to notify take result and one
+ for server to request clarification.
+ + judge: Added two functions, one for run taking and one for clar result.
 
+ * common: Fixed a truck of bugs (serious and not serious ones).
+ I won't list them as it  would make the change log messy.
+ * common: Improved commenting on header file to help programmer program more
+ easily.
+ * common: Generalized scoreboard update for admin and team.
+ * common: Generalized clarification result for admin and judge.
+ * internal: Moved all common requests of client into a separate function in
+ protointernal to improve code reusability.
+
+ NOTE: Implementation of global broadcasting is postponed due to some
+ definition glitches.

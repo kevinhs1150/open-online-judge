@@ -12,16 +12,26 @@
 /* Callback for login confirmation. (from server)
  * Pass the confirmation code and account id to administrator client.
  * Administrator client should allow or deny user login according to confirmation code. */
-void adminproto_cbreg_login_confirm( void (*login_confirm)( int confirm_code, unsigned int account_id ) );
+void adminproto_cbreg_login_confirm( void (*cbfunc)( int confirm_code, unsigned int account_id ) );
 
 /* Callback for logout confirmation. (from server)
  * Pass the confirmation code to administrator client.
  * Administrator client can ignore this message, since it is currently not meaningful. */
-void adminproto_cbreg_logout_confirm( void (*logout_confirm)( int confirm_cod ) );
+void adminproto_cbreg_logout_confirm( void (*cbfunc)( int confirm_code ) );
+
+/* Callback for timer set. (from server)
+ * Pass time components(hr, min, sec) to server program.
+ * Client should update its timer at once. */
+void adminproto_cbreg_timer_set( void (*cbfunc)( unsigned int hours, unsigned int minutes, unsigned int seconds ) );
+
+/* Callback for contest start/stop. (from server)
+ * Client should update its contest state at once. */
+void adminproto_cbreg_contest_start( void (*cbfunc)( void ) );
+void adminproto_cbreg_contest_stop( void (*cbfunc)( void ) );
 
 /* Callback for clarification request. (from server)
  * Pass "clarification id", "whether this is a private message" and "clarification message" to administrator client.
- * Administrator client should notify the administrator.  Administrator should then reply the clarification. */
+ * Client should notify the administrator.  Administrator should then reply the clarification. */
 void adminproto_cbreg_clar_request( void (*clar_request)( unsigned int clar_id, int private_byte, wchar_t *clarmsg ) );
 
 /* Callback for account information update. (from server)
@@ -35,6 +45,12 @@ void adminproto_cbreg_account_info( void (*account_info)( unsigned int account_i
  * Administrator client should store the files and update its own list of problems. */
 void adminproto_cbreg_problem_info( void (*problem_info)( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
 void adminproto_cbreg_problem_info_dlfin( void (*problem_info_dlfin)( unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
+
+/* Callback for scoreboard update. (from server)
+ * Pass the "account id whose record is going to be updated", the new account name, the new accept count and the new time. 
+ * Administrator client should notify the user about the result. */
+void adminproto_cbreg_sb_update( void (*cbfunc)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ) );
+
 
 /* listen thread
  * This function should be called in initial routine.  It listens for data from server. */
@@ -66,10 +82,11 @@ int adminproto_problem_update( char *destip );
 /* clarification reply */
 int adminproto_clar_result( char *destip, unsigned int clar_id, int private_byte, wchar_t *result_string );
 
-/* global broadcast */
-//int adminproto_broadcast();
+/* timer set function */
+int adminproto_timer_set( char *destip, unsigned int hours, unsigned int minutes, unsigned int seconds );
 
-
-/* property setting -- not implemented yet */
+/* contest start/stop function */
+int adminproto_contest_start( char *destip );
+int adminproto_contest_stop( char *destip );
 
 #endif

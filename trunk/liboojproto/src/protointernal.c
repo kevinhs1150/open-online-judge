@@ -3,6 +3,13 @@
 /* variables used globally over liboojproto */
 void (*cb_login_confirm)( int confirm_code, unsigned int account_id ) = NULL;
 void (*cb_logout_confirm)( int confirm_code ) = NULL;
+void (*cb_timer_set)( unsigned int hours, unsigned int minutes, unsigned int seconds ) = NULL;
+void (*cb_contest_start)( void ) = NULL;
+void (*cb_contest_stop)( void ) = NULL;
+
+/* callback common to admin and judge */
+void (*cb_clar_request)( unsigned int clar_id, int private_byte, wchar_t *clarmsg ) = NULL;
+void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ) = NULL;
 
 /* utility function implementation */
 #if _WIN32
@@ -308,6 +315,14 @@ char *uint2str( unsigned int input )
 	return out;
 }
 
+int between( int test_value, int low_value, int high_value )
+{
+	if( low_value <= test_value && test_value < high_value )
+		return 1;
+	else
+		return 0;
+}
+
 char *proto_str_presend( const wchar_t *src )
 {
 	int mbsize;
@@ -330,6 +345,110 @@ wchar_t *proto_str_postrecv( const char *src )
 	mbstowcs( str, src, wcsize );
 
 	return str;
+}
+
+int proto_commonreq( int rqid, int rqsr, char *msgptr )
+{
+	/* part 1. login/logout confirmation */
+	if( between( RQID, 0, 10 ) && RQSR == OPSR_SERVER )
+	{
+		if( RQID == OPID_LOGIN_REPLY )
+		{
+			char *confirm_code_str = proto_str_split( msgptr, &msgptr );
+			char *account_id_str = proto_str_split( msgptr, NULL );
+
+			int confirm_code = atoi( confirm_code_str );
+			unsigned int account_id = atoi( account_id_str );
+
+			(*cb_login_confirm)( confirm_code, account_id );
+
+			free( confirm_code_str );
+			free( account_id_str );
+		}
+		else if( RQID == OPID_LOGOUT_REPLY )
+		{
+			char *confirm_code_str = proto_str_split( msgptr, NULL );
+
+			int confirm_code = atoi( confirm_code_str );
+
+			(*cb_logout_confirm)( confirm_code );
+
+			free( confirm_code_str );
+		}
+
+		return 1;
+	}
+	/* part 2. time control & start and stop */
+	else if( between( RQID, 200, 210 ) && RQSR == OPSR_SERVER )
+	{
+		if( RQID == OPID_TIMER_SET )
+		{
+			char *hours_str = proto_str_split( msgptr, &msgptr );
+			char *minutes_str = proto_str_split( msgptr, &msgptr );
+			char *seconds_str = proto_str_split( msgptr, NULL );
+
+			unsigned int hours = atoi( hours_str );
+			unsigned int minutes = atoi( minutes_str );
+			unsigned int seconds = atoi( seconds_str );
+
+			(*cb_timer_set)( hours, minutes, seconds );
+
+			free( hours_str );
+			free( minutes_str );
+			free( seconds_str );
+		}
+		else if( RQID == OPID_CONTEST_START )
+		{
+			(*cb_contest_start)();
+		}
+		else if( RQID == OPID_CONTEST_STOP )
+		{
+			(*cb_contest_stop)();
+		}
+		
+		return 1;
+	}
+
+	return 0;
+}
+
+void proto_clar_request( char *msgptr )
+{
+	char *clar_id_str = proto_str_split( msgptr, &msgptr );
+	char *private_byte_str = proto_str_split( msgptr, &msgptr );
+	char *clarmsg_mb = proto_str_split( msgptr, NULL );
+
+	unsigned int clar_id = atoi( clar_id_str );
+	int private_byte = atoi( private_byte_str );
+	wchar_t *clarmsg = proto_str_postrecv( clarmsg_mb );
+
+	(*cb_clar_request)( clar_id, private_byte, clarmsg );
+
+	free( clar_id_str );
+	free( private_byte_str );
+	free( clarmsg_mb );
+	free( clarmsg );
+}
+
+void proto_sb_update( char *msgptr )
+{
+	char *updated_account_id_str = proto_str_split( msgptr, &msgptr );
+	char *new_account_mb = proto_str_split( msgptr, &msgptr );
+	char *new_accept_count_str = proto_str_split( msgptr, &msgptr );
+	char *new_time_str = proto_str_split( msgptr, NULL );
+
+	unsigned int updated_account_id = atoi( updated_account_id_str );
+	wchar_t *new_account = proto_str_postrecv( new_account_mb );
+	unsigned int new_accept_count = atoi( new_accept_count_str );
+	unsigned int new_time = atoi( new_time_str );
+
+	(*cb_sb_update)( updated_account_id, new_account, new_accept_count, new_time );
+
+	free( updated_account_id );
+	free( new_account_mb );
+	free( new_accept_count_str );
+	free( new_time_str );
+	free( new_account );
 }
 
 /* common function implementation */
@@ -382,6 +501,38 @@ int proto_logout( char *destip, short src, unsigned int account_id )
 
 	shutdown_wr_sp( sockfd );
 	free( account_id_str );
+	return 0;
+}
+
+int proto_clar_result( char *destip, short srctype, unsigned int clar_id, int private_byte, wchar_t *result_string )
+{
+	int sockfd;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL
+	char *clar_id_str = uint2str( clar_id );
+	char *private_byte_str = int2str( private_byte );
+	char *result_string_mb = proto_str_presend( result_string );
+
+	msgptr = proto_srid_comb( sendbuf, srctype, OPID_CLAR_RESULT );
+	msgptr = proto_str_comb( msgptr, clar_id_str );
+	msgptr = proto_str_comb( msgptr, private_byte_str );
+	msgptr = proto_str_comb( msgptr, result_string_mb );
+
+	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_SERVER ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[proto_clar_result()] tcp_connect() call failed.\n");
+#endif
+		return -1;
+	}
+
+	send_sp( sockfd, sendbuf, BUFLEN );
+
+	shutdown_wr_sp( sockfd );
+	free( clar_id_str );
+	free( private_byte_str );
+	free( result_string_mb );
+
 	return 0;
 }
 

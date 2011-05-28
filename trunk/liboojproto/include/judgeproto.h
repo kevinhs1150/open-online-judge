@@ -19,6 +19,16 @@ void judgeproto_cbreg_login_confirm( void (*cbfun)( int confirm_code, unsigned i
  * Judge client can ignore this message, since it is currently noot meaningful.*/
 void judgeproto_cbreg_logout_confirm( void (*cbfunc)( int confirm_code ) );
 
+/* Callback for timer set. (from server)
+ * Pass time components(hr, min, sec) to server program.
+ * Client should update its timer at once.*/
+void judgeproto_cbreg_timer_set( void (*cbfunc)( unsigned int hours, unsigned int minutes, unsigned int seconds ) );
+
+/* Callback for contest start/stop. (from server)
+ * Client should update its contest state at once.*/
+void judgeproto_cbreg_contest_start( void (*cbfunc)( void ) );
+void judgeproto_cbreg_contest_stop( void (*cbfunc)( void ) );
+
 /* Callback for run request. (from server)
  * Pass the run id, problem id and its coding language to judge client.
  * The path_code should be filled with the path to store source code.
@@ -31,6 +41,15 @@ void judgeproto_cbreg_run_request_dlfin( void (*cbfunc)( unsigned int run_id, un
  * The rest three strings should be filled with path to store "problem description", "input data" and "correct answer" respectively. */
 void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
 void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
+
+/* Callback for take result. (from server)
+ * Pass the run id and success indicator to judge client. */
+void judgeproto_cbreg_take_result( void (*cbfunc)( unsigned int run_id, int success ) );
+
+/* Callback for clarification request. (from server)
+ * Pass "clarification id", "whether this is a private message" and "clarification message" to administrator client.
+ * Client should notify the judge.  Judge should then reply the clarification. */
+void judgeproto_cbreg_clar_request( void (*cbfunc)( unsigned int clar_id, int private_byte, wchar_t *clarmsg ) );
 
 
 /* listen thread
@@ -48,5 +67,14 @@ int judgeproto_logout( char *destip, unsigned int account_id );
 
 /* run result */
 int judgeproto_judge_result( char *destip, unsigned int run_id, wchar_t *result_string );
+
+/* run update request */
+int judgeproto_run_update( char *destip );
+
+/* run take */
+int judgeproto_take_run( char *destip, unsigned int run_id );
+
+/* clarification reply */
+int judgeproto_clar_result( char *destip, unsigned int clar_id, int private_byte, wchar_t *result_string );
 
 #endif
