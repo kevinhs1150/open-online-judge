@@ -89,7 +89,7 @@ int proto_stop_listen( void );
 /* internal common listen request function -- handle requests common to all clients
  * serverproto should not use this function as its requests are different from other clients
  * return 1 if the request is handled inside, otherwise 0*/
-int proto_commonreq( int rqsr, int rqid, char *msgptr );
+int proto_commonreq( int RQSR, int RQID, char *msgptr );
 
 /* internal common clarification request function -- common to admin and judge clients */
 void proto_clar_request( char *msgptr );

@@ -347,7 +347,7 @@ wchar_t *proto_str_postrecv( const char *src )
 	return str;
 }
 
-int proto_commonreq( int rqid, int rqsr, char *msgptr )
+int proto_commonreq( int RQSR, int RQID, char *msgptr )
 {
 	/* part 1. login/logout confirmation */
 	if( between( RQID, 0, 10 ) && RQSR == OPSR_SERVER )
@@ -444,7 +444,7 @@ void proto_sb_update( char *msgptr )
 
 	(*cb_sb_update)( updated_account_id, new_account, new_accept_count, new_time );
 
-	free( updated_account_id );
+	free( updated_account_id_str );
 	free( new_account_mb );
 	free( new_accept_count_str );
 	free( new_time_str );
@@ -508,7 +508,7 @@ int proto_clar_result( char *destip, short srctype, unsigned int clar_id, int pr
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
-	char *msgptr = NULL
+	char *msgptr = NULL;
 	char *clar_id_str = uint2str( clar_id );
 	char *private_byte_str = int2str( private_byte );
 	char *result_string_mb = proto_str_presend( result_string );
