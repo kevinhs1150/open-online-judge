@@ -792,7 +792,7 @@ int serverproto_take_result( char *destip, unsigned int run_id, int success )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
-	char *msgptr = NULL
+	char *msgptr = NULL;
 	char *run_id_str = uint2str( run_id );
 	char *success_str = int2str( success );
 
@@ -916,10 +916,10 @@ int serverproto_clar_request( char *destip, unsigned int clar_id, int private_by
 /* callback registration functions */
 void serverproto_cbreg_login_request( void (*cbfunc)( char*, short, wchar_t*, char* ) )  { cb_login_request = cbfunc; }
 void serverproto_cbreg_logout_request( void (*cbfunc)( char*, short, unsigned int ) )    { cb_logout_request = cbfunc; }
-void serverproto_cbreg_password_change( void (*cbfunc)( char*, unsigned int, char* ) )   { cb_password_change = cbfund; }
+void serverproto_cbreg_password_change( void (*cbfunc)( char*, unsigned int, char* ) )   { cb_password_change = cbfunc; }
 void serverproto_cbreg_admin_timer_set( void (*cbfunc)( char*, unsigned int, unsigned int, unsigned int ) ) { cb_admin_timer_set = cbfunc; }
 void serverproto_cbreg_admin_contest_start( void (*cbfunc)( char* ) ) { cb_admin_contest_start = cbfunc; }
-void serverproto_cbreg_admin_contest_stop( void (*cbfunc)( char* ) )  { cb_admin_contest_stop = cbrunc; }
+void serverproto_cbreg_admin_contest_stop( void (*cbfunc)( char* ) )  { cb_admin_contest_stop = cbfunc; }
 void serverproto_cbreg_submission_request( void (*cbfunc)( char*, unsigned int, unsigned int, wchar_t*, wchar_t** ) )      { cb_submission_request = cbfunc; }
 void serverproto_cbreg_submission_request_dlfin( void (*cbfunc)( char*, unsigned int, unsigned int, wchar_t*, wchar_t* ) ) { cb_submission_request_dlfin = cbfunc; }
 void serverproto_cbreg_clar_request( void (*cbfunc)( char*, unsigned int, int, wchar_t* ) )  { cb_clar_request = cbfunc; }

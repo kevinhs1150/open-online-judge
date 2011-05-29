@@ -68,3 +68,7 @@ released on 2011.05.28   by Infinity
 
  NOTE: Implementation of global broadcasting is postponed due to some
  definition glitches.
+
+
+protocol 0 revision 4 (follow specification 0.3)
+ongoing
