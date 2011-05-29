@@ -23,7 +23,7 @@ void problem_update_dlfin(unsigned int problem_id, wchar_t *path_description, wc
 void take_result( unsigned int run_id, int success );
 void clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg );
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language);
-run_request_id *search_type(unsigned int run_id);
+run_request_id *search(unsigned int run_id);
 int compile(char [], char []);
 int complie_result(void);
 int judge(unsigned int problem_id);
@@ -153,8 +153,8 @@ void problem_update( unsigned int problem_id, wchar_t **path_description, wchar_
     *path_answer = new wchar_t [ strlen(path)+1 ];
 
     wsprintf(*path_description, L"%s.pdf", path );
-    wsprintf(*path_input, L"%s.txt", path );
-    wsprintf(*path_answer, L"%s.txt", path );
+    wsprintf(*path_input, L"%s_input.txt", path );
+    wsprintf(*path_answer, L"%s_answer.txt", path );
 }
 
 void problem_update_dlfin(unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
@@ -170,7 +170,7 @@ void take_result( unsigned int run_id, int success )
     if(/**auto judge**/){
         if(success == TAKE_SUCCESS){
             /**TODO:show message**/
-            run_request_id *proptr = search_type(run_id);
+            run_request_id *proptr = search(run_id);
             sprintf(file_name, "%s", run_id);
             strcpy(type, proptr->coding_language);
             errtyp = compile(file_name, type);
@@ -217,7 +217,7 @@ void take_result( unsigned int run_id, int success )
     }
     else{
         if(success == TAKE_SUCCESS){
-            run_request_id *proptr = search_type(run_id);
+            run_request_id *proptr = search(run_id);
             sprintf(file_name, "%s", run_id);
             strcpy(type, proptr->coding_language);
             errtyp = compile(file_name, type);
@@ -254,7 +254,7 @@ void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_lan
 	}
 }
 
-run_request_id *search_type(unsigned int run_id)
+run_request_id *search(unsigned int run_id)
 {
     run_request_id *tptr = pptr;
 
@@ -281,8 +281,8 @@ int compile(char file_name[], char type[])
         DeleteFile("out.exe");
     }
 
-    fptr1=fopen(file_name,"r");        /* 開啟檔案 */
-    if(fptr1!=NULL)     /* 檔案開啟成功 */
+    fptr1=fopen(file_name,"r");
+    if(fptr1!=NULL)
     {
         if(!(strcmp(type, "c"))){
             strcpy(call, "gcc -o out.exe ");
@@ -300,13 +300,13 @@ int compile(char file_name[], char type[])
             return(complie_result());
         }
         else{
-            printf("Error: type error!!!\n");
+            //printf("Error: type error!!!\n");
             return TYPE_ERROR;
         }
-        fclose(fptr1); /* 關閉檔案 */
+        fclose(fptr1);
     }
-    else{ /* 檔案開啟失敗 */
-        printf("Error: file opening failure!!\n");
+    else{
+        //printf("Error: file opening failure!!\n");
         return FILE_OPEN_ERROR;
     }
 }
@@ -317,33 +317,33 @@ int complie_result(){
     int result = SUCCESS;
 
     fptr1 = fopen("out.exe","r");
-    fptr2 = fopen("output.txt","r");        /* 開啟檔案 */
+    fptr2 = fopen("output.txt","r");
     if(fptr1 != NULL){
-        if(fptr2 != NULL)     /* 檔案開啟成功 */
+        if(fptr2 != NULL)
         {
-            while((ch = getc(fptr2))!= EOF){     /* 判斷是否到達檔尾 */
+            while((ch = getc(fptr2))!= EOF){
                 result = SUCCESS_WITH_WARNING;
-                printf("%c",ch);     /* 一次印出一個字元 */
+                printf("%c",ch);
             }
-            fclose(fptr2); /* 關閉檔案 */
+            fclose(fptr2);
         }
-        else{ /* 檔案開啟失敗 */
-            printf("Error: output.txt opening failure!!\n");
+        else{
+            //printf("Error: output.txt opening failure!!\n");
             result = OUTPUT_OPEN_ERROR;
         }
-        fclose(fptr1); /* 關閉檔案 */
+        fclose(fptr1);
     }
     else{
         result = COMPLIE_ERROR;
-        if(fptr2 != NULL)     /* 檔案開啟成功 */
+        if(fptr2 != NULL)
         {
-            while((ch = getc(fptr2))!= EOF){     /* 判斷是否到達檔尾 */
-                printf("%c",ch);     /* 一次印出一個字元 */
+            while((ch = getc(fptr2))!= EOF){
+                printf("%c",ch);
             }
-            fclose(fptr2); /* 關閉檔案 */
+            fclose(fptr2);
         }
-        else{ /* 檔案開啟失敗 */
-            printf("Error: output.txt opening failure!!\n");
+        else{
+            //printf("Error: output.txt opening failure!!\n");
             result = OUTPUT_OPEN_ERROR;
         }
     }
@@ -384,18 +384,18 @@ int judge(unsigned int problem_id){
     char a;
     char o;
 	char problem_ans[50];
-	
-    sprintf(problem_ans, "%s.txt", problem_id);
+
+    sprintf(problem_ans, "problem/%s_answer.txt", problem_id);
 
     fptr1 = fopen(problem_ans,"r");
-    fptr2 = fopen("ans.txt","r");        /* 開啟檔案 */
+    fptr2 = fopen("ans.txt","r");
     if(fptr1 != NULL){
-        if(fptr2 != NULL)     /* 檔案開啟成功 */
+        if(fptr2 != NULL)
         {
             while(1){
                 o = getc(fptr2);
                 a = getc(fptr1);
-                if(o != EOF && a != EOF){     /* 判斷是否到達檔尾 */
+                if(o != EOF && a != EOF){
                     if(o != a){
                         return -1;
                     }
@@ -407,16 +407,16 @@ int judge(unsigned int problem_id){
                     break;
                 }
             }
-            fclose(fptr2); /* 關閉檔案 */
+            fclose(fptr2);
         }
-        else{ /* 檔案開啟失敗 */
-            printf("Error: ans.txt opening failure\n");
+        else{
+            //printf("Error: ans.txt opening failure\n");
             return -1;
         }
-        fclose(fptr1); /* 關閉檔案 */
+        fclose(fptr1);
     }
     else{
-        printf("Error: Q1.txt opening failure\n");
+        //printf("Error: problem/%s_answer.txt opening failure\n");
         return -1;
     }
 
