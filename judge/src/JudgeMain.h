@@ -26,12 +26,15 @@ class JudgeFrame: public JudgeGUI
         void timer(unsigned int hours, unsigned int minutes, unsigned int seconds);
         void start();
         void stop();
+        void IP_set();
+        char *IP_get();
 
     private:
         unsigned int timer_hours;
         unsigned int timer_minutes;
         unsigned int timer_seconds;
         unsigned int state;
+        char *IP;
 };
 
 
