@@ -24,6 +24,7 @@ void take_result( unsigned int run_id, int success );
 void clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg );
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language);
 run_request_id *search(unsigned int run_id);
+void id_delete(unsigned int run_id);
 int compile(char [], char []);
 int complie_result(void);
 int judge(unsigned int problem_id);
@@ -48,6 +49,7 @@ JudgeFrame::JudgeFrame(wxFrame *frame)
     if(loginframe->ShowModal() == -1){
         Destroy();
     }
+    IP_set();
 
     mainFrame = this;
 }
@@ -72,6 +74,19 @@ JudgeFrame::start()
 JudgeFrame::stop()
 {
     state = STOP;
+}
+
+JudgeFrame::IP_set()
+{
+    FILE *fptr1;
+
+    fptr1=fopen("config.txt","r");
+    fscanf (fptr1, "%s", IP);
+}
+
+char *JudgeFrame::IP_get()
+{
+    return IP;
 }
 
 void OnButtonClickLogout( wxCommandEvent& event )
@@ -171,6 +186,7 @@ void take_result( unsigned int run_id, int success )
         if(success == TAKE_SUCCESS){
             /**TODO:show message**/
             run_request_id *proptr = search(run_id);
+            id_delete(run_id);
             sprintf(file_name, "%s", run_id);
             strcpy(type, proptr->coding_language);
             errtyp = compile(file_name, type);
@@ -213,11 +229,14 @@ void take_result( unsigned int run_id, int success )
             }
         }
         else{
+            id_delete(run_id);
+            judgeproto_take_run(mainFrame->IP_get(),pptr->run_id);
         }
     }
     else{
         if(success == TAKE_SUCCESS){
             run_request_id *proptr = search(run_id);
+            id_delete(run_id);
             sprintf(file_name, "%s", run_id);
             strcpy(type, proptr->coding_language);
             errtyp = compile(file_name, type);
@@ -270,6 +289,31 @@ run_request_id *search(unsigned int run_id)
         tptr = tptr->next;
     }
 }
+
+void id_delete(unsigned int run_id)
+{
+    run_request_id *cptr = pptr;
+    run_request_id *dptr = pptr;
+    run_request_id *nptr = pptr;
+
+    if(dptr->run_id == run_id){
+        *pptr = pptr->next;
+        delete(dptr);
+        return;
+    }
+
+    while( dptr->next != NULL ){
+        *cptr = dptr;
+        *dptr = dptr->next;
+        if(dptr->run_id == run_id){
+            *nptr = dptr->next;
+            delete(dptr);
+            cptr->next = nptr;
+            break;
+        }
+    }
+}
+
 int compile(char file_name[], char type[])
 {
     FILE *fptr1;
