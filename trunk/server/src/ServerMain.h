@@ -12,52 +12,47 @@ class ServerFrame: public ServerGUI
 		/* Sqlite variable */
 		sqlite3 *db;
 		char *errMsg = NULL;
-		/* SQL DDL "create table" */
-		char *create_user = "create table user("
-			"account_id   int,"
-			"account      varchar(20),"
-			"password     varchar(10),"
-			"account_type int"
-			"ipaddress    varchar(20)"
-			"logged_in    varchar(5),"
-			"primary key(account_id));";
+		char **result;
+		/* SQL DDL "CREATE TABLE" char string */
+		char *create_user = "CREATE TABLE user("
+			"account_id   INTEGER PRIMARY KEY,"
+			"account      VARCHAR(20),"
+			"password     VARCHAR(10),"
+			"account_type INTEGER,"
+			"ipaddress    VARCHAR(20),"
+			"logged_in    VARCHAR(5));"
 			
-		char *create_problem = "create table problem("
-			"problem_id					int,"
-			"description				blob(5MB),"
-			"correct_input_filename     varchar(10),"
-			"correct_output_filename    varchar(10),"
-			"primary key(problem_id));";
+		char *create_problem = "CREATE TABLE problem("
+			"problem_id					INTEGER PRIMARY KEY,"
+			"path_description			VARCHAR(50),"
+			"correct_input_filename     VARCHAR(10),"
+			"correct_output_filename    VARCHAR(10));"
 
-		char *create_submission = "create table submission("
-			"run_id      int,"
-			"account_id  int,"
-			"problem_id  int,"
-			"lang        varchar(10),"
-			"path_code	 varchar(50),"
-			"judge_id	 char(5)"
-			"primary key(run_id),"
-			"foreign key(account_id) references user,"
-			"foreign key(problem_id) references problem,"
-			"foreign key(judge_id) references judge_type);";
+		char *create_submission = "CREATE TABLE submission("
+			"run_id      INTEGER PRIMARY KEY,"
+			"account_id  INTEGER,"
+			"problem_id  INTEGER,"
+			"lang        VARCHAR(10),"
+			"path_code	 VARCHAR(50),"
+			"judge_id	 INTEGER,"
+			"FOREIGN KEY(account_id) REFERENCES user(account_id),"
+			"FOREIGN KEY(problem_id) REFERENCES problem(problem_id),"
+			"FOREIGN KEY(judge_id) REFERENCES judge_type(judge_id));";
 
-		char *create_clarification = "create table clarification("
-			"clar_id       int,"
-			"msg         varchar(50),"
-			"primary key(clar_id));";
+		char *create_clarification = "CREATE TABLE clarification("
+			"clar_id       INTEGER PRIMARY KEY,"
+			"msg         VARCHAR(100),"
+			"private_byte INTEGER);";
 
-		char *create_scoreboard = "create table scoreboard("
-			"account_id		int,"
-			"time			int,"
-			"score			int,"
-			"primary key(account_id),"
-			"foreign key(account_id) references user);";
+		char *create_scoreboard = "CREATE TABLE scoreboard("
+			"account_id		INTEGER PRIMARY KEY,"
+			"time			INTEGER,"
+			"score			INTEGER,"
+			"FOREIGN KEY(account_id) REFERENCES user(account_id));";
 
-		char *create_judge_type = "create table judge_type("
-			"judge_id		int,"
-			"sentence		varchar(20),"
-			"primary key(judge_id));"		
-	
+		char *create_judge_type = "CREATE TABLE judge_type("
+			"judge_id		INTEGER PRIMARY KEY,"
+			"sentence		VARCHAR(20));";
     public:
         ServerFrame(wxFrame *frame);
         ~ServerFrame();
