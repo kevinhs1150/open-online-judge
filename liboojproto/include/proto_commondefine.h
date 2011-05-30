@@ -15,6 +15,11 @@
 	#error "Currently only Windows and Linux are supported."
 #endif
 
+/* SRC Type Definition */
+#define SRC_ADMIN 1
+#define SRC_JUDGE 2
+#define SRC_TEAM  3
+
 /* SR Byte Definition */
 #define OPSR_SERVER	0
 #define OPSR_ADMIN	1
