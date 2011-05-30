@@ -59,6 +59,7 @@ class LoginGUI : public wxDialog
 		
 		
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
 		virtual void OnTextEnterPassword( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickLogin( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickExit( wxCommandEvent& event ) { event.Skip(); }
@@ -375,7 +376,9 @@ class JudgeSubmission : public wxDialog
 		wxStaticText* m_staticTextRunStatus;
 		wxStaticLine* m_staticline2;
 		
+		wxStaticText* m_staticTextResult;
 		wxChoice* m_choiceJudgement;
+		wxButton* m_button35;
 		
 		
 		wxButton* m_buttonJudge;
@@ -387,6 +390,25 @@ class JudgeSubmission : public wxDialog
 		
 		JudgeSubmission( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Judge"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE );
 		~JudgeSubmission();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class JudgeCompare
+///////////////////////////////////////////////////////////////////////////////
+class JudgeCompare : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxTextCtrl* m_textCtrlOfficialOutput;
+		wxTextCtrl* m_textCtrlUserOutput;
+		wxButton* m_buttonClose;
+	
+	public:
+		
+		JudgeCompare( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Compare Outputs"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+		~JudgeCompare();
 	
 };
 
