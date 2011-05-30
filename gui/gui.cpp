@@ -99,6 +99,7 @@ LoginGUI::LoginGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	this->Centre( wxBOTH );
 	
 	// Connect Events
+	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( LoginGUI::OnClose ) );
 	m_textCtrlPassword->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( LoginGUI::OnTextEnterPassword ), NULL, this );
 	m_buttonOK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( LoginGUI::OnButtonClickLogin ), NULL, this );
 	m_buttonCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( LoginGUI::OnButtonClickExit ), NULL, this );
@@ -107,6 +108,7 @@ LoginGUI::LoginGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 LoginGUI::~LoginGUI()
 {
 	// Disconnect Events
+	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( LoginGUI::OnClose ) );
 	m_textCtrlPassword->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( LoginGUI::OnTextEnterPassword ), NULL, this );
 	m_buttonOK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( LoginGUI::OnButtonClickLogin ), NULL, this );
 	m_buttonCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( LoginGUI::OnButtonClickExit ), NULL, this );
@@ -198,7 +200,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelAccounts->SetSizer( bSizerAccountPage );
 	m_panelAccounts->Layout();
 	bSizerAccountPage->Fit( m_panelAccounts );
-	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), true );
+	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), false );
 	m_panelContestInfo = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerContestInfoPage;
 	bSizerContestInfoPage = new wxBoxSizer( wxVERTICAL );
@@ -475,7 +477,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelProblems->SetSizer( bSizerProblemsPage );
 	m_panelProblems->Layout();
 	bSizerProblemsPage->Fit( m_panelProblems );
-	m_notebook->AddPage( m_panelProblems, wxT("Problems"), false );
+	m_notebook->AddPage( m_panelProblems, wxT("Problems"), true );
 	m_panel4 = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	m_notebook->AddPage( m_panel4, wxT("a page"), false );
 	
@@ -1188,10 +1190,17 @@ JudgeSubmission::JudgeSubmission( wxWindow* parent, wxWindowID id, const wxStrin
 	
 	bSizer69->Add( 0, 0, 1, wxEXPAND, 5 );
 	
+	m_staticTextResult = new wxStaticText( this, wxID_ANY, wxT("Result:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextResult->Wrap( -1 );
+	bSizer69->Add( m_staticTextResult, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
 	wxArrayString m_choiceJudgementChoices;
 	m_choiceJudgement = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxSize( 150,-1 ), m_choiceJudgementChoices, 0 );
 	m_choiceJudgement->SetSelection( 0 );
-	bSizer69->Add( m_choiceJudgement, 0, wxALL, 5 );
+	bSizer69->Add( m_choiceJudgement, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_button35 = new wxButton( this, wxID_ANY, wxT("Show Output"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer69->Add( m_button35, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	
 	bSizer69->Add( 0, 0, 1, wxEXPAND, 5 );
@@ -1226,6 +1235,48 @@ JudgeSubmission::JudgeSubmission( wxWindow* parent, wxWindowID id, const wxStrin
 }
 
 JudgeSubmission::~JudgeSubmission()
+{
+}
+
+JudgeCompare::JudgeCompare( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizerMain;
+	bSizerMain = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizerInputOutput;
+	bSizerInputOutput = new wxBoxSizer( wxHORIZONTAL );
+	
+	wxStaticBoxSizer* sbSizerOfficialOutput;
+	sbSizerOfficialOutput = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Official Output") ), wxVERTICAL );
+	
+	m_textCtrlOfficialOutput = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 300,400 ), wxTE_MULTILINE );
+	sbSizerOfficialOutput->Add( m_textCtrlOfficialOutput, 0, wxALL, 5 );
+	
+	bSizerInputOutput->Add( sbSizerOfficialOutput, 1, wxEXPAND, 5 );
+	
+	wxStaticBoxSizer* sbSizerUserOutput;
+	sbSizerUserOutput = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("User Output") ), wxVERTICAL );
+	
+	m_textCtrlUserOutput = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 300,400 ), wxTE_MULTILINE );
+	sbSizerUserOutput->Add( m_textCtrlUserOutput, 0, wxALL, 5 );
+	
+	bSizerInputOutput->Add( sbSizerUserOutput, 1, wxEXPAND, 5 );
+	
+	bSizerMain->Add( bSizerInputOutput, 1, wxEXPAND, 5 );
+	
+	m_buttonClose = new wxButton( this, wxID_ANY, wxT("Close"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerMain->Add( m_buttonClose, 0, wxALL|wxEXPAND, 5 );
+	
+	this->SetSizer( bSizerMain );
+	this->Layout();
+	bSizerMain->Fit( this );
+	
+	this->Centre( wxBOTH );
+}
+
+JudgeCompare::~JudgeCompare()
 {
 }
 

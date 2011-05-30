@@ -5,11 +5,11 @@ IMPLEMENT_APP(AdminApp);
 
 bool AdminApp::OnInit()
 {
-	LoginDialog* loginDialog = new LoginDialog(NULL);
-	loginDialog->Show();
-	//delete loginDialog;
-    //AdminFrame* frame = new AdminFrame(0L);
-    //frame->Show();
-
+	AdminFrame* adminMain = new AdminFrame(NULL);
+	if(adminMain->isLogin)
+		adminMain->Show();
+	else
+		adminMain->Destroy();
+	
     return true;
 }

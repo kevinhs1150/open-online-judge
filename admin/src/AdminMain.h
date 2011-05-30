@@ -10,6 +10,8 @@ class AdminFrame: public AdminGUI
     public:
         AdminFrame(wxFrame *frame);
         ~AdminFrame();
+		
+		bool isLogin;
 	
     private:
 
