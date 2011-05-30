@@ -2,6 +2,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(Team)
 INCLUDE_DIRECTORIES("../gui")
 
-SET(srcs src/TeamApp.cpp src/TeamMain.cpp ../gui/gui.cpp)
+SET(srcs src/TeamApp.cpp src/TeamMain.cpp)
 ADD_EXECUTABLE(Team WIN32 ${srcs})
-TARGET_LINK_LIBRARIES(Team ${wxWidgets_LIBRARIES})
+TARGET_LINK_LIBRARIES(Team ${wxWidgets_LIBRARIES} gui)
