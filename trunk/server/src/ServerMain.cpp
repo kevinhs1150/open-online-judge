@@ -96,8 +96,11 @@ void cb_login_request( char *srcip, short srctype, wchar_t *account, char *passw
 	
 	/* update only team (check it!) */
 	wcstombs(account_char, account, 20);
-	sprintf(sqlquery, "UPDATE user SET logged_in = 'no' WHERE account = '%s' and password = '%s' and srctype = '%d';", account_char, password, &account_type);
+	sprintf(sqlquery, "UPDATE user SET logged_in = 'yes' WHERE account = '%s' and password = '%s' and srctype = '%d';", account_char, password, &account_type);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	
+	//serverproto_login_reply( char *destip, short srctype, int confirmation, unsigned int account_id )
+	//serverproto_login_reply( srcip, srctype, LOGIN_VALID,  );
 }
 
 void cb_logout_request( char *srcip, short srctype, unsigned int account_id )
@@ -115,16 +118,16 @@ void cb_submission_request( char *srcip, unsigned int account_id, unsigned int p
 	char coding_language_char[10];
 	char path_code_char[30];
 	
-	wcstombs(coding_language_char, coding_language, 10);
+	//wcstombs(coding_language_char, coding_language, 10);
 	sprintf(path_code_char, "submit_temp/submit%d.%s", sqlite3_last_insert_rowid(db) + 1, coding_language_char);
-	sprintf(sqlquery, "INSERT INTO submission(NULL, '%d', '%d', '%s', %s, NULL);", &account_id, &problem_id, coding_language_char, path_code_char);
-	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	//sprintf(sqlquery, "INSERT INTO submission(NULL, '%d', '%d', '%s', %s, NULL);", &account_id, &problem_id, coding_language_char, path_code_char);
+	//sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 	mbstowcs( *path_code, path_code_char, 30 );
 }
 
 void cb_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
 {
-	
+	//add contents to db
 }
 
 void cb_clar_request( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg )
@@ -138,11 +141,14 @@ void cb_clar_request( char *srcip, unsigned int account_id, int private_byte, wc
 
 void cb_pd_request( char *srcip, unsigned int account_id, unsigned int problem_id )
 {
-	
+	//call problem upload
+	//send problem to team
 }
 
 void cb_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result )
 {
+	//add result to db
+	//call function, transfer the result to original submit team
 }
 
 void cb_account_add( char *srcip, unsigned int type, wchar_t *account, char *password )
@@ -172,8 +178,10 @@ void cb_account_mod( char *srcip, unsigned int account_id, wchar_t *new_account,
 
 void cb_account_update( char *srcip )
 {
+	//serverproto_account_info
 }
 
+//admin below
 void cb_problem_add( char *srcip, unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
 {
 }

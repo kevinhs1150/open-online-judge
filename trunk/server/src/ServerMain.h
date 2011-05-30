@@ -4,6 +4,7 @@
 #include <wx/wx.h>
 #include "ServerApp.h"
 #include "gui.h"
+#include "sqlite3.h"
 
 /* Server GUI class. */
 class ServerFrame: public ServerGUI
