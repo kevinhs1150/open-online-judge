@@ -1,15 +1,29 @@
 #include "JudgeMain.h"
+#include "JudgeLogin.h"
 
-struct run_problem_id{
+extern "C"
+{
+    #include "judgeproto.h"
+}
+
+typedef struct run_problem_id{
     unsigned int run_id;
     unsigned int problem_id;
     wchar_t *coding_language;
     struct run_problem_id *next;
 } run_request_id;
 
-JudgeLoginFrame* loginframe;
+typedef struct clar{
+    unsigned int clar_id;
+    int private_byte;
+    wchar_t *clarmsg;
+    struct clar *next;
+}clar_request_id;
+
+JudgeLoginFrame *loginframe;
 JudgeFrame *mainFrame = NULL;
 run_request_id *pptr = NULL;
+clar_request_id *clar_hptr = NULL;
 
 void login_confirm( int confirm_code, unsigned int account_id );
 void logout_confirm( int confirm_code );
@@ -25,10 +39,13 @@ void clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg );
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language);
 run_request_id *search(unsigned int run_id);
 void id_delete(unsigned int run_id);
-int compile(char [], char []);
+int compile(wchar_t [], wchar_t []);
 int complie_result(void);
 int judge(unsigned int problem_id);
 int time(void);
+void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg);
+clar_request_id *clar_search(unsigned int clar_id);
+void clar_delete(unsigned int clar_id);
 
 JudgeFrame::JudgeFrame(wxFrame *frame)
     : JudgeGUI(frame)
@@ -44,8 +61,9 @@ JudgeFrame::JudgeFrame(wxFrame *frame)
     judgeproto_cbreg_problem_update_dlfin(problem_update_dlfin);
     judgeproto_cbreg_take_result(take_result);
     judgeproto_cbreg_clar_request(clar_request);
+    judgeproto_listen("0.0.0.0");
 
-    loginframe = new JudgeLoginFrame(0L)
+    loginframe = new JudgeLoginFrame(0L);
     if(loginframe->ShowModal() == -1){
         Destroy();
     }
@@ -59,29 +77,30 @@ JudgeFrame::~JudgeFrame()
 {
 }
 
-JudgeFrame::timer(unsigned int hours, unsigned int minutes, unsigned int seconds)
+void JudgeFrame::timer(unsigned int hours, unsigned int minutes, unsigned int seconds)
 {
     timer_hours = hours;
     timer_minutes = minutes;
     timer_seconds = seconds;
 }
 
-JudgeFrame::start()
+void JudgeFrame::start()
 {
     state = START;
 }
 
-JudgeFrame::stop()
+void JudgeFrame::stop()
 {
     state = STOP;
 }
 
-JudgeFrame::IP_set()
+void JudgeFrame::IP_set()
 {
     FILE *fptr1;
 
     fptr1=fopen("config.txt","r");
     fscanf (fptr1, "%s", IP);
+    fclose(fptr1);
 }
 
 char *JudgeFrame::IP_get()
@@ -99,7 +118,7 @@ void login_confirm( int confirm_code, unsigned int account_id )
     if( confirm_code == LOGIN_VALID )
         loginframe->EndModal(0);
     else{
-        wxMessageBox("Login Error.\nPromble: account NOTEXIST or password WRONG.","Login Error",wxOK|wxICON_EXCLAMATION);
+        wxMessageBox( wxT("Login Error.\nPromble: account NOTEXIST or password WRONG."), wxT("Login Error"),wxOK|wxICON_EXCLAMATION);
         loginframe->cleanPassword();
     }
 }
@@ -107,7 +126,7 @@ void login_confirm( int confirm_code, unsigned int account_id )
 void logout_confirm( int confirm_code )
 {
     if(confirm_code == LOGOUT_OK){
-        Destroy();
+        mainFrame->Destroy();
     }
 }
 
@@ -130,11 +149,11 @@ void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_
 {
     char filename[50];
 
-    if(!strcmp(coding_language,"c"))
+    if( !wcscmp(coding_language, L"c") )
     {
         sprintf(filename, "%u.c", run_id);
     }
-    else if(!strcmp(coding_language,"c++"))
+    else if(!wcscmp(coding_language,L"c++"))
     {
         sprintf(filename, "%u.cpp", run_id);
     }
@@ -179,16 +198,17 @@ void problem_update_dlfin(unsigned int problem_id, wchar_t *path_description, wc
 
 void take_result( unsigned int run_id, int success )
 {
-    char file_name[50];
+    wchar_t file_name[50];
     int errtyp;
+    wchar_t type[20];
 
-    if(/**auto judge**/){
+    if(1/**auto judge**/){
         if(success == TAKE_SUCCESS){
             /**TODO:show message**/
             run_request_id *proptr = search(run_id);
             id_delete(run_id);
-            sprintf(file_name, "%s", run_id);
-            strcpy(type, proptr->coding_language);
+            swprintf(file_name, L"%s", run_id);
+            wcscpy(type, proptr->coding_language);
             errtyp = compile(file_name, type);
             if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
                 if(time() == 0){
@@ -237,8 +257,8 @@ void take_result( unsigned int run_id, int success )
         if(success == TAKE_SUCCESS){
             run_request_id *proptr = search(run_id);
             id_delete(run_id);
-            sprintf(file_name, "%s", run_id);
-            strcpy(type, proptr->coding_language);
+            swprintf(file_name, L"%s", run_id);
+            wcscpy(type, proptr->coding_language);
             errtyp = compile(file_name, type);
             }
     }
@@ -247,7 +267,7 @@ void take_result( unsigned int run_id, int success )
 
 void clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg )
 {
-
+    clar_insert(clar_id,private_byte,clarmsg);
 }
 
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language)
@@ -255,10 +275,10 @@ void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_lan
     run_request_id *currentPtr = pptr;
 
     run_request_id *temp_id = new run_request_id;
-    temp_id.run_id = run_id;
-    temp_id.problem_id = problem_id;
-    temp_id.coding_language = coding_language;
-	temp_id.next = NULL;
+    temp_id->run_id = run_id;
+    temp_id->problem_id = problem_id;
+    temp_id->coding_language = coding_language;
+	temp_id->next = NULL;
 
 	if( pptr == NULL )
 	{
@@ -278,7 +298,7 @@ run_request_id *search(unsigned int run_id)
     run_request_id *tptr = pptr;
 
     if(tptr->run_id == run_id){
-        return tptr->coding_language;
+        return tptr;
     }
 
     while( tptr->next != NULL ){
@@ -297,16 +317,16 @@ void id_delete(unsigned int run_id)
     run_request_id *nptr = pptr;
 
     if(dptr->run_id == run_id){
-        *pptr = pptr->next;
+        pptr = pptr->next;
         delete(dptr);
         return;
     }
 
     while( dptr->next != NULL ){
-        *cptr = dptr;
-        *dptr = dptr->next;
+        cptr = dptr;
+        dptr = dptr->next;
         if(dptr->run_id == run_id){
-            *nptr = dptr->next;
+            nptr = dptr->next;
             delete(dptr);
             cptr->next = nptr;
             break;
@@ -314,33 +334,43 @@ void id_delete(unsigned int run_id)
     }
 }
 
-int compile(char file_name[], char type[])
+int compile(wchar_t file_name[], wchar_t type[])
 {
     FILE *fptr1;
-    char call[100];
+    wchar_t call[100];
+    char call_mb[100];
+    size_t call_mbsize;
 
     fptr1=fopen("out.exe","r");
     if(fptr1 != NULL){
         fclose(fptr1);
-        DeleteFile("out.exe");
+        DeleteFile(L"out.exe");
     }
 
-    fptr1=fopen(file_name,"r");
+    fptr1=fopen_sp(file_name,L"r");
     if(fptr1!=NULL)
     {
-        if(!(strcmp(type, "c"))){
-            strcpy(call, "gcc -o out.exe ");
-            strcat(call, file_name);
-            strcat(call, " > output.txt 2>&1");
-            system(call);
+        if(!(wcscmp(type, L"c"))){
+            wcscpy(call, L"gcc -o out.exe ");
+            wcscat(call, file_name);
+            wcscat(call, L" > output.txt 2>&1");
+
+            call_mbsize = wcstombs( NULL, call, 0 ) + 1;
+            wcstombs( call_mb, call, call_mbsize );
+
+            system(call_mb);
             return(complie_result());
 
         }
-        else if(!(strcmp(type, "c++"))){
-            strcpy(call, "g++ -o out.exe ");
-            strcat(call, file_name);
-            strcat(call, " > output.txt 2>&1");
-            system(call);
+        else if(!(wcscmp(type, L"c++"))){
+            wcscpy(call, L"g++ -o out.exe ");
+            wcscat(call, file_name);
+            wcscat(call, L" > output.txt 2>&1");
+
+            call_mbsize = wcstombs( NULL, call, 0 ) + 1;
+            wcstombs( call_mb, call, call_mbsize );
+
+            system(call_mb);
             return(complie_result());
         }
         else{
@@ -405,7 +435,7 @@ int time(){
     memset(&si,0,sizeof(si));
     si.cb= sizeof(si);
 
-    CreateProcess( NULL, "executive.exe", NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+    CreateProcess( NULL, L"executive.exe", NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
     hProg = pi.hProcess;
 
     for(i = 0;i < 5;i++){
@@ -465,4 +495,68 @@ int judge(unsigned int problem_id){
     }
 
     return 0;
+}
+
+void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg)
+{
+    clar_request_id *currentPtr = clar_hptr;
+
+    clar_request_id *temp = new clar_request_id;
+    temp->clar_id = clar_id;
+    temp->private_byte = private_byte;
+    temp->clarmsg = clarmsg;
+	temp->next = NULL;
+
+	if( clar_hptr == NULL )
+	{
+		clar_hptr = temp;
+	}
+	else
+	{
+		while( currentPtr->next != NULL )
+			currentPtr = currentPtr->next;
+
+		currentPtr->next = temp;
+	}
+}
+
+clar_request_id *clar_search(unsigned int clar_id)
+{
+    clar_request_id *tptr = clar_hptr;
+
+    if(tptr->clar_id == clar_id){
+        return tptr;
+    }
+
+    while( tptr->next != NULL ){
+        if(tptr->clar_id == clar_id){
+            return tptr;
+            break;
+        }
+        tptr = tptr->next;
+    }
+}
+
+void clar_delete(unsigned int clar_id)
+{
+    clar_request_id *uptr = clar_hptr;
+    clar_request_id *dptr = clar_hptr;
+    clar_request_id *nptr = clar_hptr;
+
+    if(dptr->clar_id == clar_id){
+        clar_hptr = clar_hptr->next;
+        delete(dptr);
+        return;
+    }
+
+    while( dptr->next != NULL ){
+        uptr = dptr;
+        dptr = dptr->next;
+        if(dptr->clar_id == clar_id){
+            nptr = dptr->next;
+            delete(dptr);
+            uptr->next = nptr;
+            break;
+        }
+    }
 }
