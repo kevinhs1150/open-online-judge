@@ -6,6 +6,15 @@
 #include "gui.h"
 #include "sqlite3.h"
 
+/*
+extern "C"
+{
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <string.h>
+}
+*/
+
 /* Server GUI class. */
 class ServerFrame: public ServerGUI
 {
@@ -13,7 +22,6 @@ class ServerFrame: public ServerGUI
 		/* Sqlite variable */
 		sqlite3 *db;
 		char *errMsg = NULL;
-		char **result;
 		/* SQL DDL "CREATE TABLE" char string */
 		char *create_user = "CREATE TABLE user("
 			"account_id   INTEGER PRIMARY KEY,"
