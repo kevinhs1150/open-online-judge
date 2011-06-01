@@ -4,13 +4,18 @@
 #include <wx/wx.h>
 #include "TeamApp.h"
 #include "gui.h"
+extern "C"
+{
+    #include "teamproto.h"
+}
+
 
 class TeamFrame: public TeamGUI
 {
     public:
         TeamFrame(wxFrame *frame);
         ~TeamFrame();
-	
+
     private:
 
 };
