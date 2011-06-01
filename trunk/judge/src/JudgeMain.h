@@ -4,7 +4,6 @@
 #include <wx/wx.h>
 #include "JudgeApp.h"
 #include "gui.h"
-#include "judgeproto.h"
 
 #define STOP  0
 #define START 1

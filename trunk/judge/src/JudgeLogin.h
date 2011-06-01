@@ -1,5 +1,5 @@
-#ifndef _JUDGEMAIN_H_
-#define _JUDGEMAIN_H_
+#ifndef _JUDGELOGIN_H_
+#define _JUDGELOGIN_H_
 
 #include <wx/wx.h>
 #include "JudgeApp.h"
@@ -23,4 +23,4 @@ class JudgeLoginFrame: public LoginGUI
 };
 
 
-#endif // _JUDGEMAIN_H_
+#endif // _JUDGELOGIN_H_
