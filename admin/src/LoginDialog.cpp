@@ -1,5 +1,9 @@
 #include "LoginDialog.h"
 #include <wx/wx.h>
+extern "C"
+{
+#include "adminproto.h"
+}
 
 LoginDialog::LoginDialog(wxWindow *parent) : LoginGUI(parent){
 	
@@ -14,9 +18,11 @@ void LoginDialog::OnClose( wxCloseEvent& event ){
 }
 
 void LoginDialog::OnButtonClickLogin( wxCommandEvent& event ){
+	char ip[20];
+	sprintf(ip, "127.0.0.1");
 	wchar_t *id = m_textCtrlID->GetValue().wchar_str();
 	char *pw = m_textCtrlPassword->GetValue().char_str();
-	//adminproto_login( char *destip, wchar_t *account, char *password )
+	adminproto_login(ip, id, pw);
 }
 
 void LoginDialog::OnButtonClickExit( wxCommandEvent& event ){
