@@ -23,7 +23,7 @@ void cb_problem_update( char *srcip );
 void cb_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string );
 
 
-
+//unsigned int, short, check sprintf!!!
 ServerFrame::ServerFrame(wxFrame *frame)
     : ServerGUI(frame)
 {
@@ -91,43 +91,114 @@ void ServerFrame::OnButtonClickStop( wxCommandEvent& event )
 /* Server callback function definition. */
 void cb_login_request( char *srcip, short srctype, wchar_t *account, char *password )
 {
-	char sqlquery[100];
+	char sqlquery[] = "SELECT * FROM user;";
 	char account_char[20];
+	char srctype_char[5];
+	char **result;
+	int rows, cols, i, j;
+	int account_id;
+	bool enable = true;
 	
-	/* update only team (check it!) */
+	sprintf(srctype_char, "%h", &srctype);
 	wcstombs(account_char, account, 20);
-	sprintf(sqlquery, "UPDATE user SET logged_in = 'yes' WHERE account = '%s' and password = '%s' and srctype = '%d';", account_char, password, &account_type);
-	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	sqlite3_get_table(db , sqlquery, &result , &rows, &cols, &errMsg);
+	for(i=1;i<=rows;i++)
+	{
+		/* check account and password */
+		if( strcmp( result[i * cols + 1], account_char ) == 0 ){	
+			if( strcmp( result[i * cols + 2], password ) == 0 ){ 
+				
+				
+				strcpy( result[i * cols + 3],  srctype_char);	/* set source type */
+				strcpy( result[i * cols + 4],  srcip);	/* set source ipaddr */
+				strcpy( result[i * cols + 5], "yes" );	/* set logged in entry */
+				account_id = i;
+				enable = false;
+				break;
+			}
+		}
+	}
 	
-	//serverproto_login_reply( char *destip, short srctype, int confirmation, unsigned int account_id )
-	//serverproto_login_reply( srcip, srctype, LOGIN_VALID,  );
+	if(!enable)
+		serverproto_login_reply( srcip, srctype, LOGIN_VALID, account_id);
+	else
+		serverproto_login_reply( srcip, srctype, LOGIN_ACC_NOTEXIST, -1);
 }
 
 void cb_logout_request( char *srcip, short srctype, unsigned int account_id )
 {
-	/* update only team (check it!)*/
-	char sqlquery[100];
-	sprintf(sqlquery, "UPDATE user SET logged_in = 'no' WHERE account_id = '%d' and account_type = '%d';", &account_id, &srctype);
-	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	char sqlquery[] = "SELECT * FROM user;";
+	char **result;
+	int rows, cols;
+	char account_id_char[5];
+	bool enable = true;
+	
+	sprintf(account_id_char, "%u", &account_id);
+	sqlite3_get_table(db , sqlquery, &result , &rows, &cols, &errMsg);
+	
+	for(i=1;i<=rows;i++)
+	{
+		/* check account_id in each row */
+		if( strcmp( result[i * cols + 0],  account_id_char ) == 0 )
+		{
+			strcpy( result[i * cols + 5], "no" );
+			enable = false;
+			break
+		}
+	}
+	
+	if(!enable)
+		serverproto_logout_reply( srcip, srctype, LOGOUT_OK );
+	else
+		serverproto_logout_reply( srcip, srctype, LOGOUT_FAIL );
 }
 
 //the function needs a subdirectory "submit_temp/"
 void cb_submission_request( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )
 {
-	char sqlquery[100];
+	char sqlquery[100] = "SELECT * FROM problem;";
 	char coding_language_char[10];
 	char path_code_char[30];
+	char **result;
+	int rows, cols;
 	
-	//wcstombs(coding_language_char, coding_language, 10);
-	sprintf(path_code_char, "submit_temp/submit%d.%s", sqlite3_last_insert_rowid(db) + 1, coding_language_char);
-	//sprintf(sqlquery, "INSERT INTO submission(NULL, '%d', '%d', '%s', %s, NULL);", &account_id, &problem_id, coding_language_char, path_code_char);
-	//sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	sqlite3_get_table(db , sqlquery, &result , &rows, &cols, &errMsg);
+	
+	wcstombs(coding_language_char, coding_language, 10);
+	sprintf(path_code_char, "submit_temp/submit%d.%s", rows + 1, coding_language_char);
 	mbstowcs( *path_code, path_code_char, 30 );
 }
 
+//start here!!!
 void cb_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
 {
-	//add contents to db
+	char sqlquery[100];
+	char path_code_char[30];
+	char coding_language_char[10];
+	char **result;
+	int rows, cols;
+	
+	/* insert problem information into submission */
+	wcstombs(coding_language_char, coding_language, 10);
+	wcstombs(path_code_char, path_code, 30);
+	sprintf(sqlquery, "INSERT INTO submission(NULL, '%u', '%u', '%s', '%s', NULL);", &account_id, &problem_id, coding_language_char, path_code_char);
+	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	
+	sprintf(sqlquery, "SELECT * FROM user;");
+	sqlite3_get_table(db , sqlquery, &result , &rows, &cols, &errMsg);
+	
+	//for(i=1;i<=rows;i++)
+	//{
+	//	/* check account_id in each row */
+	//	if( result[i * cols + 3] - '0' == SRC_JUDGE )
+	//	{
+	//		strcpy( result[i * cols + 5], "no" );
+	//		enable = false;
+	//		break
+	//	}
+	//}
+	
+	//void serverproto_cbreg_run_result_notify( void (*cbfunc)( char *srcip, unsigned int run_id, wchar_t *result ) );
 }
 
 void cb_clar_request( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg )
@@ -135,7 +206,7 @@ void cb_clar_request( char *srcip, unsigned int account_id, int private_byte, wc
 	char sqlquery[100];
 	char clarmsg_char[100];
 	wcstombs(clarmsg_char, clarmsg, 100);
-	sprintf(sqlquery, "INSERT INTO clarification(NULL, '%s', '%d');", clarmsg_char, private_byte);
+	sprintf(sqlquery, "INSERT INTO clarification(NULL, '%s', '%d');", clarmsg_char, &private_byte);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 }
 
@@ -156,7 +227,7 @@ void cb_account_add( char *srcip, unsigned int type, wchar_t *account, char *pas
 	char sqlquery[100];
 	char account_char[20];
 	wcstombs(account_char, account, 20);
-	sprintf(sqlquery, "INSERT INTO user(NULL, '%s', '%s', '%d', '%s', 'no');", account_char, password, type, srcip);
+	sprintf(sqlquery, "INSERT INTO user(NULL, '%s', '%s', '%d', '%s', 'no');", account_char, password, &type, srcip);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 }
 
