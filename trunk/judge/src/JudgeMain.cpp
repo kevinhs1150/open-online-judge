@@ -20,10 +20,16 @@ typedef struct clar{
     struct clar *next;
 }clar_request_id;
 
+typedef struct problem_list{
+	unsigned int problem_id;
+	struct problem_list *next;
+} problem_all;
+
 JudgeLoginFrame *loginframe;
 JudgeFrame *mainFrame = NULL;
 run_request_id *pptr = NULL;
 clar_request_id *clar_hptr = NULL;
+problem_all *problem_hptr = NULL;
 
 void login_confirm( int confirm_code, unsigned int account_id );
 void logout_confirm( int confirm_code );
@@ -37,6 +43,8 @@ void problem_update_dlfin(unsigned int problem_id, wchar_t *path_description, wc
 void take_result( unsigned int run_id, int success );
 void clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg );
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language);
+void problem_insert(unsigned int problem_id);
+int problem_search(unsigned int problem_id)
 run_request_id *search(unsigned int run_id);
 void id_delete(unsigned int run_id);
 int compile(wchar_t [], wchar_t []);
@@ -72,16 +80,40 @@ JudgeFrame::JudgeFrame(wxFrame *frame)
     mainFrame = this;
 }
 
-
 JudgeFrame::~JudgeFrame()
 {
 }
 
+void JudgeFrame::OnButtonClickLogout( wxCommandEvent& event )
+{
+	judgeproto_logout(IP,account_id);
+}
+
+void JudgeFrame::account_id_set(unsigned int account_id)
+{
+	wxString id;
+	
+	this->account_id = account_id;
+	
+	id << (this->account_id);
+	m_staticTextName->SetLabel(id);
+}
+
 void JudgeFrame::timer(unsigned int hours, unsigned int minutes, unsigned int seconds)
 {
+	wxString time;
+	
     timer_hours = hours;
     timer_minutes = minutes;
     timer_seconds = seconds;
+	
+	time << hours << wxT(":") << minutes << wxT(":") << seconds;
+	m_staticTextTime->SetLabel( time );
+}
+
+void JudgeFrame::set_problem_choice()
+{
+	
 }
 
 void JudgeFrame::start()
@@ -116,6 +148,7 @@ void OnButtonClickLogout( wxCommandEvent& event )
 void login_confirm( int confirm_code, unsigned int account_id )
 {
     if( confirm_code == LOGIN_VALID )
+		loginframe->account_id_set(account_id);
         loginframe->EndModal(0);
     else{
         wxMessageBox( wxT("Login Error.\nPromble: account NOTEXIST or password WRONG."), wxT("Login Error"),wxOK|wxICON_EXCLAMATION);
@@ -291,6 +324,49 @@ void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_lan
 
 		currentPtr->next = temp_id;
 	}
+	
+	if(problem_search(problem_id) == 0){
+		problem_insert(problem_id);
+		mainFrame->set_problem_choice();
+	}
+}
+
+void problem_insert(unsigned int problem_id)
+{
+    problem_all *currentPtr = problem_hptr;
+
+    problem_all *temp_id = new problem_all;
+    temp_id->problem_id = problem_id;
+	temp_id->next = NULL;
+
+	if( problem_hptr == NULL )
+	{
+		problem_hptr = temp_id;
+	}
+	else
+	{
+		while( currentPtr->next != NULL )
+			currentPtr = currentPtr->next;
+
+		currentPtr->next = temp_id;
+	}
+}
+
+int problem_search(unsigned int problem_id)
+{
+	problem_all *problem_all_hptr = problem_hptr;
+	
+	if(problem_all_hptr->problem_id == problem_id){
+		return 1;
+	}
+	
+	while(problem_all_hptr->next != NULL){
+		if(problem_all_hptr->problem_id == problem_id){
+			return 1;
+		}
+		problem_all_hptr = problem_all_hptr->next; 
+	}
+	return 0;
 }
 
 run_request_id *search(unsigned int run_id)
