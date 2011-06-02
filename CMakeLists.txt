@@ -22,3 +22,6 @@ ADD_SUBDIRECTORY(judge)
 ADD_SUBDIRECTORY(admin)
 ADD_SUBDIRECTORY(server)
 ADD_SUBDIRECTORY(liboojproto)
+
+CONFIGURE_FILE(libpthread/pthreadGC2.dll ${CMAKE_BINARY_DIR}/bin/pthreadGC2.dll COPYONLY)
+CONFIGURE_FILE(libpthread/libpthreadGC2.a ${CMAKE_BINARY_DIR}/lib/pthreadGC2.a COPYONLY)

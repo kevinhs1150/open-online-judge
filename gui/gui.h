@@ -300,6 +300,7 @@ class JudgeGUI : public wxFrame
 		wxStaticText* m_staticTextName;
 		wxButton* m_buttonLogout;
 		wxChoice* m_choiceFilter;
+		wxCheckBox* m_checkBoxAutoJudge;
 		
 		wxStaticText* m_staticTextNewUnjudgeCount;
 		wxListCtrl* m_listCtrlRuns;
