@@ -15,7 +15,7 @@
 
   create table submission(run_id int, account_id int, problem_id int, lang varchar(10), path_code varchar(50), judge_id int, primary key(run_id), foreign key(account_id) references user, foreign key(problem_id) references problem, foreign key(judge_id) references judge_type);
  
-  * clarification(clar_id, msg)
+  * clarification(clar_id, msg, private_byte)
   
   create table clarification(clar_id int, msg varchar(100), private_byte int, primary key(clar_id));
   
