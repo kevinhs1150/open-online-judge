@@ -4,6 +4,8 @@ extern "C"
 #include "adminproto.h"
 }
 
+char server_ip[20];
+
 /* callback functions */
 void cb_account_info( unsigned int account_id, unsigned int type, wchar_t *account )
 {
@@ -55,6 +57,8 @@ AdminFrame::AdminFrame(wxFrame *frame)
     : AdminGUI(frame)
 {
 	char localaddr[20];
+	int ip1, ip2, ip3, ip4;
+	FILE *ipFile;
 	sprintf(localaddr, "0.0.0.0");
 	
 	adminproto_cbreg_login_confirm( cb_login_confirm );
@@ -68,12 +72,23 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	adminproto_cbreg_problem_info( cb_problem_info );
 	adminproto_cbreg_problem_info_dlfin( cb_problem_info_dlfin );
 	adminproto_cbreg_sb_update( cb_sb_update );
-
-	if(adminproto_listen(localaddr) < 0){
+	
+	ipFile = fopen("ip.txt", "r");
+	if(ipFile == NULL){
+		wxMessageBox(_("ip.txt not found!"));
+		isLogin = false;
+	}
+	else if(fscanf(ipFile, "%d.%d.%d.%d", &ip1, &ip2, &ip3, &ip4) != 4){
+		wxMessageBox(_("Invalid IP Address!"));
+		isLogin = false;
+	}
+	else if(adminproto_listen(localaddr) < 0){
 		wxMessageBox(_("Listen Error!"));
 		isLogin = false;
 	}
 	else{
+		sprintf(server_ip, "%d.%d.%d.%d", ip1, ip2, ip3, ip4);
+	
 		LoginDialog* loginDialog = new LoginDialog(NULL);
 		if(loginDialog->ShowModal() == 0)
 			isLogin = false;
