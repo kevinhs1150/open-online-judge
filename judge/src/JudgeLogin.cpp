@@ -9,20 +9,25 @@ JudgeLoginFrame::~JudgeLoginFrame()
 {
 }
 
-void OnTextEnterPassword( wxCommandEvent& event )
+void JudgeLoginFrame::OnClose( wxCloseEvent& event )
+{
+	Destroy();
+}
+
+void JudgeLoginFrame::OnTextEnterPassword( wxCommandEvent& event )
 {
     login();
 }
-void OnButtonClickLogin( wxCommandEvent& event )
+void JudgeLoginFrame::OnButtonClickLogin( wxCommandEvent& event )
 {
     login();
 }
-void OnButtonClickExit( wxCommandEvent& event )
+void JudgeLoginFrame::OnButtonClickExit( wxCommandEvent& event )
 {
     EndModal(-1);
 }
 
-void login()
+void JudgeLoginFrame::login()
 {
     wchar_t ID[20];
     char password[50];
@@ -47,7 +52,7 @@ void login()
     }
 }
 
-void cleanPassword()
+void JudgeLoginFrame::cleanPassword()
 {
     m_textCtrlPassword->Clear();
 }

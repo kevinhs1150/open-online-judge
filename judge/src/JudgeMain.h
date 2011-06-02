@@ -22,13 +22,17 @@ class JudgeFrame: public JudgeGUI
     public:
         JudgeFrame(wxFrame *frame);
         ~JudgeFrame();
+		void account_id_set(unsigned int account_id);
         void timer(unsigned int hours, unsigned int minutes, unsigned int seconds);
+		void set_problem_choice();
         void start();
         void stop();
         void IP_set();
         char *IP_get();
 
     private:
+		void OnButtonClickLogout( wxCommandEvent& event );
+		unsigned int account_id;
         unsigned int timer_hours;
         unsigned int timer_minutes;
         unsigned int timer_seconds;

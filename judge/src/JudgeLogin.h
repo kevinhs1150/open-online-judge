@@ -15,6 +15,7 @@ class JudgeLoginFrame: public LoginGUI
         void cleanPassword();
 
     private:
+		void OnClose( wxCloseEvent& event );
         void OnTextEnterPassword( wxCommandEvent& event );
 		void OnButtonClickLogin( wxCommandEvent& event );
 		void OnButtonClickExit( wxCommandEvent& event );
