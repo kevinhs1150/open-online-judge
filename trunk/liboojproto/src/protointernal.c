@@ -11,6 +11,9 @@ void (*cb_contest_stop)( void ) = NULL;
 void (*cb_clar_request)( unsigned int clar_id, int private_byte, wchar_t *clarmsg ) = NULL;
 void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ) = NULL;
 
+/* callback common to all clients */
+void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string ) = NULL;
+
 /* utility function implementation */
 #if _WIN32
 int win32_sock_init( void )
@@ -428,6 +431,23 @@ void proto_clar_request( char *msgptr )
 	free( private_byte_str );
 	free( clarmsg_mb );
 	free( clarmsg );
+}
+
+void proto_clar_reply( char *msgptr )
+{
+	char *clar_id_str = proto_str_split( msgptr, &msgptr );
+	char *clarmsg_mb = proto_str_split( msgptr, &msgptr );
+	char *result_string_mb = proto_str_split( msgptr, NULL );
+
+	unsigned int clar_id = atoi( clar_id_str );
+	wchar_t *clarmsg = proto_str_postrecv( clarmsg_mb );
+	wchar_t *result_string = proto_str_postrecv( result_string_mb );
+
+	(*cb_clar_reply)( clar_id, clarmsg, result_string );
+
+	free( clar_id_str );
+	free( result_string_mb );
+	free( result_string );
 }
 
 void proto_sb_update( char *msgptr )

@@ -51,6 +51,11 @@ void judgeproto_cbreg_take_result( void (*cbfunc)( unsigned int run_id, int succ
  * Client should notify the judge.  Judge should then reply the clarification. */
 void judgeproto_cbreg_clar_request( void (*cbfunc)( unsigned int clar_id, int private_byte, wchar_t *clarmsg ) );
 
+/* Callback for clarification reply. (from server)
+ * Pass the clarification id and result string to team client.
+ * Team client should notify the user about the result. */
+void judgeproto_cbreg_clar_reply( void (*cbfunc)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string ) );
+
 
 /* listen thread
  * This function should be called in initial routine.  It listens for data from server. */

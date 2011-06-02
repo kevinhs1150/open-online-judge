@@ -20,6 +20,7 @@ extern void (*cb_timer_set)( unsigned int hours, unsigned int minutes, unsigned 
 extern void (*cb_contest_start)( void );
 extern void (*cb_contest_stop)( void );
 extern void (*cb_clar_request)( unsigned int clar_id, int private_byte, wchar_t *clarmsg );
+extern void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
 
 /* thread function */
 void *judgeproto_reqhand_thread( void *args );
@@ -150,6 +151,10 @@ void *judgeproto_reqhand_thread( void *args )
 		else if( RQID == OPID_CLAR_REQUEST )
 		{
 			proto_clar_request( msgptr );
+		}
+		else if( RQID == OPID_CLAR_REPLY )
+		{
+			proto_clar_reply( msgptr );
 		}
 		else
 		{
@@ -284,13 +289,14 @@ void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int, wchar_t**, w
 void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int, wchar_t*, wchar_t*, wchar_t* ) )  { cb_problem_update_dlfin = cbfunc; }
 void judgeproto_cbreg_take_result( void (*cbfunc)( unsigned int, int ) ) { cb_take_result = cbfunc; }
 void judgeproto_cbreg_clar_request( void (*cbfunc)( unsigned int, int, wchar_t* ) ) { cb_clar_request = cbfunc; }
+void judgeproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t*, wchar_t* ) );
 
 static int judgeproto_cbcheck( void )
 {
 	if( cb_login_confirm == NULL || cb_logout_confirm == NULL ||
 		cb_timer_set == NULL || cb_contest_start == NULL || cb_contest_stop == NULL ||
-		cb_run_request == NULL || cb_run_request_dlfin == NULL ||
-		cb_problem_update == NULL || cb_problem_update_dlfin == NULL || cb_clar_request == NULL )
+		cb_run_request == NULL || cb_run_request_dlfin == NULL || cb_problem_update == NULL ||
+		cb_problem_update_dlfin == NULL || cb_clar_request == NULL || cb_clar_reply == NULL )
 		return 0;
 	else
 		return 1;

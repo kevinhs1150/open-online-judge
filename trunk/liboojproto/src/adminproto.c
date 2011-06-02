@@ -18,6 +18,7 @@ extern void (*cb_timer_set)( unsigned int hours, unsigned int minutes, unsigned 
 extern void (*cb_contest_start)( void );
 extern void (*cb_contest_stop)( void );
 extern void (*cb_clar_request)( unsigned int clar_id, int private_byte, wchar_t *clarmsg );
+extern void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
 extern void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
 
 /* thread function */
@@ -91,6 +92,10 @@ void *adminproto_reqhand_thread( void *args )
 		if( RQID == OPID_CLAR_REQUEST )
 		{
 			proto_clar_request( msgptr );
+		}
+		else if( RQID == OPID_CLAR_REPLY )
+		{
+			proto_clar_reply( msgptr );
 		}
 		else if( RQID == OPID_ACC_INFO )
 		{
@@ -511,6 +516,7 @@ void adminproto_cbreg_timer_set( void (*cbfunc)( unsigned int, unsigned int, uns
 void adminproto_cbreg_contest_start( void (*cbfunc)( void ) ) { cb_contest_start = cbfunc; }
 void adminproto_cbreg_contest_stop( void (*cbfunc)( void ) )  { cb_contest_stop = cbfunc; }
 void adminproto_cbreg_clar_request( void (*cbfunc)( unsigned int, int, wchar_t* ) )           { cb_clar_request = cbfunc; }
+void adminproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t*, wchar_t* ) );
 void adminproto_cbreg_account_info( void (*cbfunc)( unsigned int, unsigned int, wchar_t* ) )  { cb_account_info = cbfunc; }
 void adminproto_cbreg_problem_info( void (*cbfunc)( unsigned int, wchar_t**, wchar_t**, wchar_t** ) ) { cb_problem_info = cbfunc; }
 void adminproto_cbreg_problem_info_dlfin( void (*cbfunc)( unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_info_dlfin = cbfunc; }
@@ -520,8 +526,8 @@ static int adminproto_cbcheck( void )
 {
 	if( cb_login_confirm == NULL || cb_logout_confirm == NULL ||
 		cb_timer_set == NULL || cb_contest_start == NULL || cb_contest_stop == NULL ||
-		cb_clar_request == NULL || cb_account_info == NULL || cb_problem_info == NULL ||
-		cb_problem_info_dlfin == NULL )
+		cb_clar_request == NULL || cb_clar_reply == NULL || cb_account_info == NULL ||
+		cb_problem_info == NULL || cb_problem_info_dlfin == NULL )
 		return 0;
 	else
 		return 1;

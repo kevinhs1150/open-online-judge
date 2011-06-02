@@ -140,10 +140,15 @@ int serverproto_contest_stop( char *destip, short desttype );
 
 /* run result reply (to team)
  * Initial state (waiting for run) should also be notofied with this function. */
-int serverproto_run_reply( char *destip, unsigned int run_id, wchar_t *result );
+int serverproto_run_reply( char *destip, unsigned int run_id, unsigned int problem_id, wchar_t *result );
 
-/* clarification reply (to team) */
-int serverproto_clar_reply( char *destip, unsigned int clar_id, wchar_t *result );
+/* clarification reply (to all clients) */
+int serverproto_clar_reply( char *destip, unsigned int clar_id, wchar_t *clarmsg, wchar_t *result );
+
+/* problem modification notify (to team) */
+int serverproto_problem_change_add( char *destip, unsigned int problem_id );
+int serverproto_problem_change_del( char *destip, unsigned int problem_id );
+int serverproto_problem_change_mod( char *destip, unsigned int problem_id );
 
 /* scoreboard update (to team and admin) */
 int serverproto_sb_update( char *destip, unsigned int upd_acc_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );

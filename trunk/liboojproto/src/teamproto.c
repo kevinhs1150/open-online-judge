@@ -7,10 +7,12 @@
 static int teamproto_cbcheck( void );
 
 /* callback functions */
-void (*cb_run_reply)( unsigned int run_id, wchar_t *result_string )   = NULL;
-void (*cb_clar_reply)( unsigned int clar_id, wchar_t *result_string ) = NULL;
-void (*cb_pu_request)( wchar_t **path_description )                   = NULL;
-void (*cb_pu_request_dlfin)( wchar_t *path_description )              = NULL;
+void (*cb_run_reply)( unsigned int run_id, unsigned int problem_id, wchar_t *result_string )   = NULL;
+void (*cb_pu_request)( wchar_t **path_description )      = NULL;
+void (*cb_pu_request_dlfin)( wchar_t *path_description ) = NULL;
+void (*cb_pch_add)( unsigned int problem_id ) = NULL;
+void (*cb_pch_del)( unsigned int problem_id ) = NULL;
+void (*cb_pch_mod)( unsigned int problem_id ) = NULL;
 
 /* callback functions extern-ed from protointernal.c */
 extern void (*cb_login_confirm)( int confirm_code, unsigned int account_id );
@@ -18,6 +20,7 @@ extern void (*cb_logout_confirm)( int confirm_code );
 extern void (*cb_timer_set)( unsigned int hours, unsigned int minutes, unsigned int seconds );
 extern void (*cb_contest_start)( void );
 extern void (*cb_contest_stop)( void );
+extern void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
 extern void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
 
 /* thread function */
@@ -91,30 +94,23 @@ void *teamproto_reqhand_thread( void *args )
 		if( RQID == OPID_RUN_REPLY )
 		{
 			char *run_id_str = proto_str_split( msgptr, &msgptr );
+			char *problem_id_str = proto_str_split( msgptr, &msgptr );
 			char *result_string_mb = proto_str_split( msgptr, NULL );
 
 			unsigned int run_id = atoi( run_id_str );
+			unsigned int problem_id = atoi( problem_id_str );
 			wchar_t *result_string = proto_str_postrecv( result_string_mb );
 
-			(*cb_run_reply)( run_id, result_string );
+			(*cb_run_reply)( run_id, problem_id, result_string );
 
 			free( run_id_str );
+			free( problem_id_str );
 			free( result_string_mb );
 			free( result_string );
 		}
 		else if( RQID == OPID_CLAR_REPLY )
 		{
-			char *clar_id_str = proto_str_split( msgptr, &msgptr );
-			char *result_string_mb = proto_str_split( msgptr, &msgptr );
-
-			unsigned int clar_id = atoi( clar_id_str );
-			wchar_t *result_string = proto_str_postrecv( result_string_mb );
-
-			(*cb_clar_reply)( clar_id, result_string );
-
-			free( clar_id_str );
-			free( result_string_mb );
-			free( result_string );
+			proto_clar_reply( msgptr );
 		}
 		else if( RQID == OPID_SB_UPDATE )
 		{
@@ -132,6 +128,25 @@ void *teamproto_reqhand_thread( void *args )
 			(*cb_pu_request_dlfin)( path_description );
 
 			free( path_description );
+		}
+		else if( RQID == OPID_P_CHANGE )
+		{
+			char *pch_opid_str = proto_str_split( msgptr, &msgptr );
+			unsigned int pch_opid = atoi( pch_opid_str );
+
+			/* extract problem id */
+			char *problem_id_str = proto_str_split( msgptr ,NULL );
+			unsigned int problem_id = atoi( problem_id_str );
+
+			if( pch_opid == PCH_OPID_ADD )
+				(*cb_pch_add)( problem_id );
+			else if( pch_opid == PCH_OPID_DEL )
+				(*cb_pch_del)( problem_id );
+			else if( pch_opid == PCH_OPID_MOD )
+				(*cb_pch_mod)( problem_id );
+
+			free( pch_opid_str );
+			free( problem_id_str );
 		}
 		else
 		{
@@ -262,18 +277,22 @@ void teamproto_cbreg_logout_confirm( void( *cbfunc )( int ) ) { cb_logout_confir
 void teamproto_cbreg_timer_set( void (*cbfunc)( unsigned int, unsigned int, unsigned int ) ) { cb_timer_set = cbfunc; }
 void teamproto_cbreg_contest_start( void (*cbfunc)( void ) )  { cb_contest_start = cbfunc; }
 void teamproto_cbreg_contest_stop( void (*cbfunc)( void ) )   { cb_contest_stop = cbfunc; }
-void teamproto_cbreg_run_reply( void (*cbfunc)( unsigned int, wchar_t* ) )  { cb_run_reply = cbfunc; }
-void teamproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t* ) ) { cb_clar_reply = cbfunc; }
+void teamproto_cbreg_run_reply( void (*cbfunc)( unsigned int, unsigned int, wchar_t* ) )  { cb_run_reply = cbfunc; }
+void teamproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t*, wchar_t* ) ) { cb_clar_reply = cbfunc; }
 void teamproto_cbreg_sb_update( void (*cbfunc)( unsigned int, wchar_t*, unsigned int, unsigned int ) ) { cb_sb_update = cbfunc; }
 void teamproto_cbreg_pu_request( void (*cbfunc)( wchar_t** ) )     { cb_pu_request = cbfunc; }
 void teamproto_cbreg_pu_request_dlfin( void (*cbfunc)( wchar_t*) ) { cb_pu_request_dlfin = cbfunc; }
+void teamproto_cbreg_problem_add( void (*cbfunc)( unsigned int ) ) { cb_pch_add = cbfunc; }
+void teamproto_cbreg_problem_del( void (*cbfunc)( unsigned int ) ) { cb_pch_del = cbfunc; }
+void teamproto_cbreg_problem_mod( void (*cbfunc)( unsigned int ) ) { cb_pch_mod = cbfunc; }
 
 static int teamproto_cbcheck( void )
 {
 	if( cb_login_confirm == NULL || cb_logout_confirm == NULL ||
 		cb_timer_set == NULL || cb_contest_start == NULL || cb_contest_stop == NULL ||
 		cb_run_reply == NULL || cb_clar_reply == NULL || cb_sb_update == NULL ||
-		cb_pu_request == NULL || cb_pu_request_dlfin == NULL )
+		cb_pu_request == NULL || cb_pu_request_dlfin == NULL ||
+		cb_pch_add == NULL || cb_pch_del == NULL || cb_pch_mod == NULL )
 		return 0;
 	else
 		return 1;

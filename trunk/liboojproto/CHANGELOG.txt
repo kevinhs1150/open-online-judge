@@ -70,5 +70,21 @@ released on 2011.05.28   by Infinity
  definition glitches.
 
 
-protocol 0 revision 4 (follow specification 0.3)
+protocol 0 revision 4 (follow specification 0.4)
+released on 2011.06.02   by Infinity
+ + team: Added three callbacks for team client to be able to receive problem
+ set modification from server.
+ + server: Added three functions for server to be able to notify team about
+ problem set modification.
+ + admin&judge: Added one callback for these clients to receive clarification
+ reply.  Team client is not affected.
+
+ * team: Changed run_reply and clar_reply callbacks to send essential
+ information.
+ * server: Changed run_reply and clar_reply functions to send essential
+ information.
+ * internal: Generalized clarification functions for all clients.
+
+
+protocol 0 revision 5
 ongoing

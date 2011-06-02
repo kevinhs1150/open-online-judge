@@ -634,16 +634,18 @@ int serverproto_contest_stop( char *destip, short desttype )
 	return 0;
 }
 
-int serverproto_run_reply( char *destip, unsigned int run_id, wchar_t *result )
+int serverproto_run_reply( char *destip, unsigned int run_id, unsigned int problem_id, wchar_t *result )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *run_id_str = uint2str( run_id );
+	char *problem_id_str = uint2str( problem_id );
 	char *result_mb = proto_str_presend( result );
 
 	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_RUN_REPLY );
 	msgptr = proto_str_comb( msgptr, run_id_str );
+	msgptr = proto_str_comb( msgptr, problem_id_str );
 	msgptr = proto_str_comb( msgptr, result_mb );
 
 	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_TEAM ) ) < 0 )
@@ -658,21 +660,24 @@ int serverproto_run_reply( char *destip, unsigned int run_id, wchar_t *result )
 
 	shutdown_wr_sp( sockfd );
 	free( run_id_str );
+	free( problem_id_str );
 	free( result_mb );
 
 	return 0;
 }
 
-int serverproto_clar_reply( char *destip, unsigned int clar_id, wchar_t *result )
+int serverproto_clar_reply( char *destip, unsigned int clar_id, wchar_t *clarmsg, wchar_t *result )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *clar_id_str = uint2str( clar_id );
+	char *clarmsg_mb = proto_str_presend( clarmsg );
 	char *result_mb = proto_str_presend( result );
 
 	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_CLAR_REPLY );
 	msgptr = proto_str_comb( msgptr, clar_id_str );
+	msgptr = proto_str_comb( msgptr, clarmsg_mb );
 	msgptr = proto_str_comb( msgptr, result_mb );
 
 	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_TEAM ) ) < 0 )
@@ -687,7 +692,95 @@ int serverproto_clar_reply( char *destip, unsigned int clar_id, wchar_t *result 
 
 	shutdown_wr_sp( sockfd );
 	free( clar_id_str );
+	free( clarmsg_mb );
 	free( result_mb );
+
+	return 0;
+}
+
+int serverproto_problem_change_add( char *destip, unsigned int problem_id )
+{
+	int sockfd;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL;
+	char *pch_opid_str = uint2str( PCH_OPID_ADD );
+	char *problem_id_str = uint2str( problem_id );
+
+	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_P_CHANGE );
+	msgptr = proto_str_comb( msgptr, pch_opid_str );
+	msgptr = proto_str_comb( msgptr, problem_id_str );
+
+	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_TEAM ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[serverproto_problem_change_add()] tcp_connect() call failed.\n");
+#endif
+		return -1;
+	}
+
+	send_sp( sockfd, sendbuf, BUFLEN );
+
+	shutdown_wr_sp( sockfd );
+	free( pch_opid_str );
+	free( problem_id_str );
+
+	return 0;
+}
+
+int serverproto_problem_change_del( char *destip, unsigned int problem_id )
+{
+	int sockfd;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL;
+	char *pch_opid_str = uint2str( PCH_OPID_DEL );
+	char *problem_id_str = uint2str( problem_id );
+
+	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_P_CHANGE );
+	msgptr = proto_str_comb( msgptr, pch_opid_str );
+	msgptr = proto_str_comb( msgptr, problem_id_str );
+
+	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_TEAM ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[serverproto_problem_change_del()] tcp_connect() call failed.\n");
+#endif
+		return -1;
+	}
+
+	send_sp( sockfd, sendbuf, BUFLEN );
+
+	shutdown_wr_sp( sockfd );
+	free( pch_opid_str );
+	free( problem_id_str );
+
+	return 0;
+}
+
+int serverproto_problem_change_mod( char *destip, unsigned int problem_id )
+{
+	int sockfd;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL;
+	char *pch_opid_str = uint2str( PCH_OPID_MOD );
+	char *problem_id_str = uint2str( problem_id );
+
+	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_P_CHANGE );
+	msgptr = proto_str_comb( msgptr, pch_opid_str );
+	msgptr = proto_str_comb( msgptr, problem_id_str );
+
+	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_TEAM ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[serverproto_problem_change_mod()] tcp_connect() call failed.\n");
+#endif
+		return -1;
+	}
+
+	send_sp( sockfd, sendbuf, BUFLEN );
+
+	shutdown_wr_sp( sockfd );
+	free( pch_opid_str );
+	free( problem_id_str );
 
 	return 0;
 }

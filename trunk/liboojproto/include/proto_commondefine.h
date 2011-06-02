@@ -48,6 +48,10 @@
 #define OPID_CLAR_REPLY		11	/* clarification reply */
 #define OPID_SB_UPDATE		12	/* scoreboard update */
 #define OPID_PUPLOAD		13	/* problem upload */
+#define OPID_P_CHANGE		21  /* problem change */
+	#define PCH_OPID_ADD		0  /* problem added */
+	#define PCH_OPID_DEL		1  /* problem deleted */
+	#define PCH_OPID_MOD		2  /* problem modified */
 
 /* judge -> server */
 #define OPID_RUN_RESULT		10	/* run result */
@@ -55,6 +59,7 @@
 #define OPID_TAKE_RUN		13	/* take run */
 #define OPID_CLAR_RESULT	12	/* clarification result */
 /* server -> judge */
+#define OPID_CLAR_REPLY		11	/* clarification reply */
 #define OPID_RUN_REQUEST	14	/* run request */
 #define OPID_CLAR_REQUEST	17	/* clarification request */
 #define OPID_PUPDATE		15	/* problem update */
@@ -73,6 +78,7 @@
 	#define P_OPID_UPDATE		3	/* update problem info */
 #define OPID_CLAR_RESULT	12	/* clarification result */
 /* server -> admin */
+#define OPID_CLAR_REPLY		11	/* clarification reply */
 #define OPID_CLAR_REQUEST	17	/* clarification request */
 #define OPID_ACC_INFO		18	/* account information */
 #define OPID_P_INFO			19	/* problem information */
