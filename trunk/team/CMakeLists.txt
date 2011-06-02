@@ -1,7 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(Team)
 INCLUDE_DIRECTORIES("../gui")
+INCLUDE_DIRECTORIES("../liboojproto/include")
 
 SET(srcs src/TeamApp.cpp src/TeamMain.cpp)
 ADD_EXECUTABLE(Team WIN32 ${srcs})
-TARGET_LINK_LIBRARIES(Team ${wxWidgets_LIBRARIES} gui)
+TARGET_LINK_LIBRARIES(Team ${wxWidgets_LIBRARIES} gui oojproto ${CMAKE_BINARY_DIR}/lib/pthreadGC2.a)
