@@ -53,8 +53,17 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	char localaddr[20];
 	sprintf(localaddr, "0.0.0.0");
 	
+	adminproto_cbreg_login_confirm( cb_login_confirm );
+	adminproto_cbreg_logout_confirm( cb_logout_confirm );
+	adminproto_cbreg_timer_set( cb_timer_set );
+	adminproto_cbreg_contest_start( cb_contest_start );
+	adminproto_cbreg_contest_stop( cb_contest_stop );
+	adminproto_cbreg_clar_request( cb_clar_request );
 	adminproto_cbreg_account_info( cb_account_info );
-	
+	adminproto_cbreg_problem_info( cb_problem_info );
+	adminproto_cbreg_problem_info_dlfin( cb_problem_info_dlfin );
+	adminproto_cbreg_sb_update( cb_sb_update );
+
 	if(adminproto_listen(localaddr) < 0){
 		wxMessageBox(_("Listen Error!"));
 		isLogin = false;

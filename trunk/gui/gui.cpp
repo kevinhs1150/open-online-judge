@@ -947,6 +947,9 @@ JudgeGUI::JudgeGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_choiceFilter->SetSelection( 0 );
 	bSizerFilter->Add( m_choiceFilter, 0, wxALL, 5 );
 	
+	m_checkBoxAutoJudge = new wxCheckBox( this, wxID_ANY, wxT("AutoJudge"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerFilter->Add( m_checkBoxAutoJudge, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
 	
 	bSizerFilter->Add( 0, 0, 1, wxEXPAND, 5 );
 	
