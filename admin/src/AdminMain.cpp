@@ -43,6 +43,10 @@ void cb_clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg )
 
 }
 
+void cb_clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string ){
+
+}
+
 void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ){
 
 }
@@ -59,6 +63,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	adminproto_cbreg_contest_start( cb_contest_start );
 	adminproto_cbreg_contest_stop( cb_contest_stop );
 	adminproto_cbreg_clar_request( cb_clar_request );
+	adminproto_cbreg_clar_reply( cb_clar_reply );
 	adminproto_cbreg_account_info( cb_account_info );
 	adminproto_cbreg_problem_info( cb_problem_info );
 	adminproto_cbreg_problem_info_dlfin( cb_problem_info_dlfin );
