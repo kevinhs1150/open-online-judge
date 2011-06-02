@@ -152,6 +152,36 @@ class AdminGUI : public wxFrame
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+/// Class NewAccount
+///////////////////////////////////////////////////////////////////////////////
+class NewAccount : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxRadioButton* m_radioBtnAdmin;
+		wxRadioButton* m_radioBtnJudge;
+		wxRadioButton* m_radioBtnTeam;
+		wxStaticText* m_staticTextID;
+		wxTextCtrl* m_textCtrlID;
+		wxStaticText* m_staticTextPassword;
+		wxTextCtrl* m_textCtrlPassword;
+		wxButton* m_buttonOK;
+		wxButton* m_buttonCancel;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnButtonClickOK( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickCancel( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		NewAccount( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+		~NewAccount();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
 /// Class TeamGUI
 ///////////////////////////////////////////////////////////////////////////////
 class TeamGUI : public wxFrame 
