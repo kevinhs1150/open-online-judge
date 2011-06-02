@@ -495,6 +495,86 @@ AdminGUI::~AdminGUI()
 {
 }
 
+NewAccount::NewAccount( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizerMain;
+	bSizerMain = new wxBoxSizer( wxVERTICAL );
+	
+	wxStaticBoxSizer* sbSizerAccType;
+	sbSizerAccType = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Account Type") ), wxHORIZONTAL );
+	
+	m_radioBtnAdmin = new wxRadioButton( this, wxID_ANY, wxT("Admin"), wxDefaultPosition, wxDefaultSize, 0 );
+	sbSizerAccType->Add( m_radioBtnAdmin, 0, wxALL, 5 );
+	
+	m_radioBtnJudge = new wxRadioButton( this, wxID_ANY, wxT("Judge"), wxDefaultPosition, wxDefaultSize, 0 );
+	sbSizerAccType->Add( m_radioBtnJudge, 0, wxALL, 5 );
+	
+	m_radioBtnTeam = new wxRadioButton( this, wxID_ANY, wxT("Team"), wxDefaultPosition, wxDefaultSize, 0 );
+	sbSizerAccType->Add( m_radioBtnTeam, 0, wxALL, 5 );
+	
+	bSizerMain->Add( sbSizerAccType, 0, wxEXPAND, 5 );
+	
+	wxStaticBoxSizer* sbSizerLoginInfo;
+	sbSizerLoginInfo = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Login Info") ), wxVERTICAL );
+	
+	wxBoxSizer* bSizerID;
+	bSizerID = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextID = new wxStaticText( this, wxID_ANY, wxT("ID:"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
+	m_staticTextID->Wrap( -1 );
+	bSizerID->Add( m_staticTextID, 2, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_textCtrlID = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerID->Add( m_textCtrlID, 3, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	sbSizerLoginInfo->Add( bSizerID, 0, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerPassword;
+	bSizerPassword = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextPassword = new wxStaticText( this, wxID_ANY, wxT("Password:"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
+	m_staticTextPassword->Wrap( -1 );
+	bSizerPassword->Add( m_staticTextPassword, 2, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_textCtrlPassword = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD );
+	bSizerPassword->Add( m_textCtrlPassword, 3, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	sbSizerLoginInfo->Add( bSizerPassword, 0, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerButton;
+	bSizerButton = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_buttonOK = new wxButton( this, wxID_ANY, wxT("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButton->Add( m_buttonOK, 1, wxALL, 5 );
+	
+	m_buttonCancel = new wxButton( this, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButton->Add( m_buttonCancel, 1, wxALL, 5 );
+	
+	sbSizerLoginInfo->Add( bSizerButton, 1, wxEXPAND, 5 );
+	
+	bSizerMain->Add( sbSizerLoginInfo, 0, wxEXPAND, 5 );
+	
+	this->SetSizer( bSizerMain );
+	this->Layout();
+	bSizerMain->Fit( this );
+	
+	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_buttonOK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccount::OnButtonClickOK ), NULL, this );
+	m_buttonCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccount::OnButtonClickCancel ), NULL, this );
+}
+
+NewAccount::~NewAccount()
+{
+	// Disconnect Events
+	m_buttonOK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccount::OnButtonClickOK ), NULL, this );
+	m_buttonCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccount::OnButtonClickCancel ), NULL, this );
+	
+}
+
 TeamGUI::TeamGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );

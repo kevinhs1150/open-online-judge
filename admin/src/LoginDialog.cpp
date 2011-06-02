@@ -8,11 +8,9 @@ extern "C"
 extern char server_ip[20];
 
 LoginDialog::LoginDialog(wxWindow *parent) : LoginGUI(parent){
-	
 }
 
 LoginDialog::~LoginDialog(){
-
 }
 
 void LoginDialog::OnClose( wxCloseEvent& event ){
