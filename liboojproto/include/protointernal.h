@@ -94,6 +94,9 @@ int proto_commonreq( int RQSR, int RQID, char *msgptr );
 /* internal common clarification request function -- common to admin and judge clients */
 void proto_clar_request( char *msgptr );
 
+/* internal common clarification reply function -- common to all clients */
+void proto_clar_reply( char *msgptr );
+
 /* internal common scoreboard update request function -- common to team and admin */
 void proto_sb_update( char *msgptr );
 

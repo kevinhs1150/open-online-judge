@@ -34,6 +34,11 @@ void adminproto_cbreg_contest_stop( void (*cbfunc)( void ) );
  * Client should notify the administrator.  Administrator should then reply the clarification. */
 void adminproto_cbreg_clar_request( void (*clar_request)( unsigned int clar_id, int private_byte, wchar_t *clarmsg ) );
 
+/* Callback for clarification reply. (from server)
+ * Pass the clarification id and result string to team client.
+ * Team client should notify the user about the result. */
+void adminproto_cbreg_clar_reply( void (*cbfunc)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string ) );
+
 /* Callback for account information update. (from server)
  * Pass "account id", "account type" and "account name(possibly updated one)" to administrator client.
  * Administrator client should update its own list of accounts. */

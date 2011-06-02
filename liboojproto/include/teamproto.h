@@ -32,12 +32,12 @@ void teamproto_cbreg_contest_stop( void (*cbfunc)( void ) );
 /* Callback for run result reply. (from server)
  * Pass the run id and result string to team client.
  * Team client should notify the user about the result. */
-void teamproto_cbreg_run_reply( void (*cbfunc)( unsigned int run_id, wchar_t *result_string ) );
+void teamproto_cbreg_run_reply( void (*cbfunc)( unsigned int run_id, unsigned int problem_id, wchar_t *result_string ) );
 
 /* Callback for clarification reply. (from server)
  * Pass the clarification id and result string to team client.
  * Team client should notify the user about the result. */
-void teamproto_cbreg_clar_reply( void (*cbfunc)( unsigned int clar_id, wchar_t *result_string ) );
+void teamproto_cbreg_clar_reply( void (*cbfunc)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string ) );
 
 /* Callback for scoreboard update. (from server)
  * Pass the "account id whose account is going to be updated", the new account name, the new accept count and the new time.
@@ -48,6 +48,12 @@ void teamproto_cbreg_sb_update( void (*cbfunc)( unsigned int updated_account_id,
  * Team client should fill the string with the path where problem description will be stored. */
 void teamproto_cbreg_pu_request( void (*cbfunc)( wchar_t **path_description ) );
 void teamproto_cbreg_pu_request_dlfin( void (*cbfunc)( wchar_t *path_description ) );
+
+/* Callback for problem change notification. (from server, due to administrator changed some problem)
+ * */
+void teamproto_cbreg_problem_add( void (*cbfunc)( unsigned int problem_id ) );
+void teamproto_cbreg_problem_del( void (*cbfunc)( unsigned int problem_id ) );
+void teamproto_cbreg_problem_mod( void (*cbfunc)( unsigned int problem_id ) );
 
 /* listen thread
  * This function should be called in initial routine.  It listens for data from server. */
