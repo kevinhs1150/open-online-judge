@@ -5,6 +5,8 @@ extern "C"
 }
 
 char server_ip[20];
+unsigned int login_id;
+LoginDialog* loginDialog;
 
 /* callback functions */
 void cb_account_info( unsigned int account_id, unsigned int type, wchar_t *account )
@@ -22,7 +24,17 @@ void cb_problem_info_dlfin( unsigned int problem_id, wchar_t *path_description, 
 
 /* callback functions extern-ed from protointernal.c */
 void cb_login_confirm( int confirm_code, unsigned int account_id ){
-
+	if(confirm_code == LOGIN_VALID){
+		login_id = account_id;
+		loginDialog->LoginSuccess();
+	}
+	else if(confirm_code == LOGIN_ACC_NOTEXIST){
+		wxMessageBox(_("Account not exist!"));
+	}
+	else if(confirm_code == LOGIN_PASS_WRONG){
+		wxMessageBox(_("Wrong password!"));
+	}
+	return;
 }
 
 void cb_logout_confirm( int confirm_code ){
@@ -59,7 +71,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	char localaddr[20];
 	int ip1, ip2, ip3, ip4;
 	FILE *ipFile;
-	sprintf(localaddr, "0.0.0.0");
+	loginDialog = new LoginDialog(NULL);
 	
 	adminproto_cbreg_login_confirm( cb_login_confirm );
 	adminproto_cbreg_logout_confirm( cb_logout_confirm );
@@ -73,6 +85,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	adminproto_cbreg_problem_info_dlfin( cb_problem_info_dlfin );
 	adminproto_cbreg_sb_update( cb_sb_update );
 	
+	sprintf(localaddr, "0.0.0.0");
 	ipFile = fopen("ip.txt", "r");
 	if(ipFile == NULL){
 		wxMessageBox(_("ip.txt not found!"));
@@ -88,17 +101,22 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	}
 	else{
 		sprintf(server_ip, "%d.%d.%d.%d", ip1, ip2, ip3, ip4);
-	
-		LoginDialog* loginDialog = new LoginDialog(NULL);
 		if(loginDialog->ShowModal() == 0)
 			isLogin = false;
 		else
 			isLogin = true;
 		loginDialog->Destroy();
 	}
-
 }
 
 AdminFrame::~AdminFrame()
 {
+}
+
+void AdminFrame::OnClickButtonAddProblem( wxCommandEvent& event ){
+	m_textCtrlProblemName->Clear();
+}
+
+void AdminFrame::OnClickButtonDelProblem( wxCommandEvent& event ){
+	event.Skip();
 }

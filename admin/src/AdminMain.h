@@ -14,6 +14,8 @@ class AdminFrame: public AdminGUI
 		bool isLogin;
 	
     private:
+		void OnClickButtonAddProblem( wxCommandEvent& event );
+		void OnClickButtonDelProblem( wxCommandEvent& event );
 
 };
 
