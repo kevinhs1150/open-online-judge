@@ -26,7 +26,7 @@ class ServerFrame: public ServerGUI
 		char *create_user = "CREATE TABLE user("
 			"account_id   INTEGER PRIMARY KEY,"
 			"account      VARCHAR(20),"
-			"password     VARCHAR(10),"
+			"password     VARCHAR(25),"
 			"account_type INTEGER,"
 			"ipaddress    VARCHAR(20),"
 			"logged_in    VARCHAR(5));"
@@ -50,8 +50,10 @@ class ServerFrame: public ServerGUI
 
 		char *create_clarification = "CREATE TABLE clarification("
 			"clar_id       INTEGER PRIMARY KEY,"
-			"msg         VARCHAR(100),"
-			"private_byte INTEGER);";
+			"account_id    INTEGER,"
+			"msg           VARCHAR(100),"
+			"private_byte  INTEGER),"
+			"FOREIGN KEY(account_id) REFERENCES user(account_id);";
 
 		char *create_scoreboard = "CREATE TABLE scoreboard("
 			"account_id		INTEGER PRIMARY KEY,"

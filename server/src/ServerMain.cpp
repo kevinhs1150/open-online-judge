@@ -96,16 +96,25 @@ void cb_login_request( char *srcip, short srctype, wchar_t *account, char *passw
 	char **result;
 	int rows, cols;
 	unsigned int account_id;
-	bool is_find = false;
+	bool is_find_acc = false, is_find_pass = false;
 	
 	wcstombs(account_char, account, 20);
 	
-	/* find account_id by checking account and password */
+	/* check account */
+	sprintf(sqlquery, "SELECT account_id FROM user WHERE account = '%s';", account_char);
+	sqlite3_get_table(db , sqlquery, &result , &rows, &cols, &errMsg);
+	if(rows >= 1)
+	{
+		is_find_acc = true;
+	}
+	sqlite3_free_table(result);
+	
+	/* check both account and password */
 	sprintf(sqlquery, "SELECT account_id FROM user WHERE account = '%s' and password = '%s';", account_char, password);
 	sqlite3_get_table(db , sqlquery, &result , &rows, &cols, &errMsg);
 	if(rows >= 1)
 	{
-		is_find = true;
+		is_find_pass = true;
 		sscanf(result[1 * rows + 0], "%u", &account_id);
 		
 		/* Update logged_in entity */
@@ -115,10 +124,12 @@ void cb_login_request( char *srcip, short srctype, wchar_t *account, char *passw
 	sqlite3_free_table(result);
 	
 	/* login reply */
-	if(is_find)
-		serverproto_login_reply( srcip, srctype, LOGIN_VALID, account_id);
-	else
+	if(!is_find_acc)
 		serverproto_login_reply( srcip, srctype, LOGIN_ACC_NOTEXIST, -1);
+	else if(!is_find_pass)
+		serverproto_login_reply( srcip, srctype, LOGIN_PASS_WRONG, -1);
+	else	
+		serverproto_login_reply( srcip, srctype, LOGIN_VALID, account_id);
 }
 
 void cb_logout_request( char *srcip, short srctype, unsigned int account_id )
@@ -128,7 +139,7 @@ void cb_logout_request( char *srcip, short srctype, unsigned int account_id )
 	int rows, cols;
 	bool is_find = false;
 	
-	/* update logged_in attribute */
+	/* update logged_in entity */
 	sprintf(sqlquery, "SELECT account_id FROM user WHERE account_id = '%u';", account_id);
 	sqlite3_get_table(db , sqlquery, &result , &rows, &cols, &errMsg);
 	if(row >= 1)
@@ -170,14 +181,14 @@ void cb_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned
 	int rows, cols;
 	unsigned int run_id;
 	
-	/* insert problem information into submission */
+	/* insert problem information into submission table */
 	wcstombs(coding_language_char, coding_language, 10);
 	wcstombs(path_code_char, path_code, 30);
-	sprintf(sqlquery, "INSERT INTO submission(NULL, '%u', '%u', '%s', '%s', NULL);", account_id, problem_id, coding_language_char, path_code_char);
+	sprintf(sqlquery, "INSERT INTO submission VALUES(NULL, '%u', '%u', '%s', '%s', NULL);", account_id, problem_id, coding_language_char, path_code_char);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 	run_id = sqlite3_last_insert_rowid(db);  /* get run_id from submission table */
 	
-	/* send run request to each judge */
+	/* send run_request to each judge */
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%d';", SRC_JUDGE);
 	sqlite3_get_table(db , sqlquery, &result , &rows, &cols, &errMsg);
 	
@@ -188,16 +199,27 @@ void cb_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned
 	sqlite3_free_table(result);
 }
 
-//start here!!!
 void cb_clar_request( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg )
 {
 	char sqlquery[100];
 	char clarmsg_char[100];
+	unsigned int clar_id;
 	
 	/* insert clarification info */
 	wcstombs(clarmsg_char, clarmsg, 100);
-	sprintf(sqlquery, "INSERT INTO clarification(NULL, '%s', '%d');", clarmsg_char, private_byte);
+	sprintf(sqlquery, "INSERT INTO clarification VALUES(NULL, '%u', '%s', '%d');", account_id, clarmsg_char, private_byte);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	
+	/* send clar_request to each judge and admin */
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%d' or account_type = '%d';", SRC_JUDGE, SRC_ADMIN);
+	sqlite3_get_table(db , sqlquery, &result , &rows, &cols, &errMsg);
+	clar_id = sqlite3_last_insert_rowid(db);
+	
+	for(i=1;i<=rows;i++)
+	{
+		serverproto_clar_request(result[i * cols + 0], clar_id, private_byte, clarmsg );
+	}
+	sqlite3_free_table(result);
 }
 
 void cb_pd_request( char *srcip, unsigned int account_id, unsigned int problem_id )
@@ -217,7 +239,7 @@ void cb_account_add( char *srcip, unsigned int type, wchar_t *account, char *pas
 	//char sqlquery[100];
 	//char account_char[20];
 	//wcstombs(account_char, account, 20);
-	//sprintf(sqlquery, "INSERT INTO user(NULL, '%s', '%s', '%d', '%s', 'no');", account_char, password, type, srcip);
+	//sprintf(sqlquery, "INSERT INTO user VALUES(NULL, '%s', '%s', '%d', '%s', 'no');", account_char, password, type, srcip);
 	//sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 }
 
