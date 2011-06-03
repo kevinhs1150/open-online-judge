@@ -29,9 +29,9 @@
 #include <wx/spinctrl.h>
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
+#include <wx/choice.h>
 #include <wx/notebook.h>
 #include <wx/frame.h>
-#include <wx/choice.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -83,6 +83,7 @@ class AdminGUI : public wxFrame
 		wxStaticText* m_staticTextTime;
 		
 		wxStaticText* m_staticTextName;
+		wxButton* m_buttonChangePassword;
 		wxButton* m_buttonLogout;
 		wxNotebook* m_notebook;
 		wxPanel* m_panelAccounts;
@@ -123,10 +124,10 @@ class AdminGUI : public wxFrame
 		wxListCtrl* m_listCtrlProblems;
 		wxButton* m_buttonProblemAdd;
 		wxButton* m_buttonProblemDel;
-		wxStaticText* m_staticText39;
+		wxStaticText* m_staticTextProblemName;
 		wxTextCtrl* m_textCtrlProblemName;
-		wxCheckBox* m_checkBox1;
-		wxFilePickerCtrl* m_filePicker1;
+		wxCheckBox* m_checkBoxProblemFile;
+		wxFilePickerCtrl* m_filePickerProblemFile;
 		wxStaticText* m_staticText47;
 		wxSpinCtrl* m_spinCtrl13;
 		wxStaticText* m_staticText48;
@@ -142,7 +143,22 @@ class AdminGUI : public wxFrame
 		
 		
 		wxButton* m_button27;
-		wxPanel* m_panel4;
+		wxPanel* m_panelClar;
+		wxStaticText* m_staticText62;
+		wxChoice* m_choice6;
+		wxListCtrl* m_listCtrl10;
+		wxStaticText* m_staticTextClarID;
+		wxStaticText* m_staticTextClarIDVal;
+		wxStaticText* m_staticTextClarProblem;
+		wxStaticText* m_staticTextClarProblemVal;
+		wxTextCtrl* m_textCtrl17;
+		wxTextCtrl* m_textCtrl18;
+		wxButton* m_button42;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnClickButtonAddProblem( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnClickButtonDelProblem( wxCommandEvent& event ) { event.Skip(); }
+		
 	
 	public:
 		
@@ -152,9 +168,35 @@ class AdminGUI : public wxFrame
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class NewAccount
+/// Class ChangePassGUI
 ///////////////////////////////////////////////////////////////////////////////
-class NewAccount : public wxDialog 
+class ChangePassGUI : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticTextOldPass;
+		wxTextCtrl* m_textCtrlOldPass;
+		wxStaticText* m_staticTextNewPass;
+		wxTextCtrl* m_textCtrlNewPass;
+		wxStaticText* m_staticTextConfirmPass;
+		wxTextCtrl* m_textCtrlConfirmPass;
+		
+		wxButton* m_buttonOK;
+		wxButton* m_buttonCancel;
+		
+	
+	public:
+		
+		ChangePassGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+		~ChangePassGUI();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class NewAccountGUI
+///////////////////////////////////////////////////////////////////////////////
+class NewAccountGUI : public wxDialog 
 {
 	private:
 	
@@ -176,8 +218,8 @@ class NewAccount : public wxDialog
 	
 	public:
 		
-		NewAccount( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
-		~NewAccount();
+		NewAccountGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+		~NewAccountGUI();
 	
 };
 
@@ -192,6 +234,7 @@ class TeamGUI : public wxFrame
 		wxStaticText* m_staticTextTime;
 		
 		wxStaticText* m_staticTextTeamName;
+		wxButton* m_buttonChangePassword;
 		wxButton* m_buttonLogout;
 		wxChoice* m_choiceProblem;
 		wxButton* m_buttonDownload;
@@ -265,7 +308,7 @@ class ClarDialogGUI : public wxDialog
 	protected:
 		wxStaticText* m_staticTextTitle;
 		wxStaticText* m_staticTextProblem;
-		wxChoice* m_choice3;
+		wxChoice* m_choiceProblem;
 		wxStaticText* m_staticTextQuestion;
 		wxTextCtrl* m_textCtrlFileQuestion;
 		
@@ -328,6 +371,7 @@ class JudgeGUI : public wxFrame
 		wxStaticText* m_staticTextTime;
 		
 		wxStaticText* m_staticTextName;
+		wxButton* m_buttonChangePassword;
 		wxButton* m_buttonLogout;
 		wxChoice* m_choiceFilter;
 		wxCheckBox* m_checkBoxAutoJudge;
@@ -378,9 +422,9 @@ class JudgementConfirmGUI : public wxDialog
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class JudgeSubmission
+/// Class JudgeSubmissionGUI
 ///////////////////////////////////////////////////////////////////////////////
-class JudgeSubmission : public wxDialog 
+class JudgeSubmissionGUI : public wxDialog 
 {
 	private:
 	
@@ -419,15 +463,15 @@ class JudgeSubmission : public wxDialog
 	
 	public:
 		
-		JudgeSubmission( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Judge"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE );
-		~JudgeSubmission();
+		JudgeSubmissionGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Judge"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE );
+		~JudgeSubmissionGUI();
 	
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class JudgeCompare
+/// Class JudgeCompareGUI
 ///////////////////////////////////////////////////////////////////////////////
-class JudgeCompare : public wxDialog 
+class JudgeCompareGUI : public wxDialog 
 {
 	private:
 	
@@ -438,8 +482,8 @@ class JudgeCompare : public wxDialog
 	
 	public:
 		
-		JudgeCompare( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Compare Outputs"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
-		~JudgeCompare();
+		JudgeCompareGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Compare Outputs"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+		~JudgeCompareGUI();
 	
 };
 

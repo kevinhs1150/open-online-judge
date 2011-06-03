@@ -32,3 +32,8 @@ void LoginDialog::OnButtonClickExit( wxCommandEvent& event ){
 	EndModal(0);
 	return;
 }
+
+void LoginDialog::LoginSuccess(){
+	EndModal(1);
+	return;
+}

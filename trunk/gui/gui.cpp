@@ -136,6 +136,9 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_staticTextName->Wrap( -1 );
 	bSizerTitle->Add( m_staticTextName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
+	m_buttonChangePassword = new wxButton( this, wxID_ANY, wxT("Change Password"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerTitle->Add( m_buttonChangePassword, 0, wxALL, 5 );
+	
 	m_buttonLogout = new wxButton( this, wxID_ANY, wxT("Logout"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizerTitle->Add( m_buttonLogout, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
@@ -200,7 +203,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelAccounts->SetSizer( bSizerAccountPage );
 	m_panelAccounts->Layout();
 	bSizerAccountPage->Fit( m_panelAccounts );
-	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), true );
+	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), false );
 	m_panelContestInfo = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerContestInfoPage;
 	bSizerContestInfoPage = new wxBoxSizer( wxVERTICAL );
@@ -355,31 +358,31 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	bSizerProblemsPage->Add( bSizerProblemList, 1, wxEXPAND, 5 );
 	
-	wxBoxSizer* bSizer51;
-	bSizer51 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizerProblemInfo;
+	bSizerProblemInfo = new wxBoxSizer( wxVERTICAL );
 	
-	wxBoxSizer* bSizer54;
-	bSizer54 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizerProblemName;
+	bSizerProblemName = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_staticText39 = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Problem Name:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText39->Wrap( -1 );
-	bSizer54->Add( m_staticText39, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_staticTextProblemName = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Problem Name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextProblemName->Wrap( -1 );
+	bSizerProblemName->Add( m_staticTextProblemName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_textCtrlProblemName = new wxTextCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer54->Add( m_textCtrlProblemName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	bSizerProblemName->Add( m_textCtrlProblemName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	bSizer51->Add( bSizer54, 0, wxEXPAND, 5 );
+	bSizerProblemInfo->Add( bSizerProblemName, 0, wxEXPAND, 5 );
 	
-	wxBoxSizer* bSizer55;
-	bSizer55 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizerProblemFile;
+	bSizerProblemFile = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_checkBox1 = new wxCheckBox( m_panelProblems, wxID_ANY, wxT("Problem File:"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer55->Add( m_checkBox1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_checkBoxProblemFile = new wxCheckBox( m_panelProblems, wxID_ANY, wxT("Problem File:"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerProblemFile->Add( m_checkBoxProblemFile, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_filePicker1 = new wxFilePickerCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
-	bSizer55->Add( m_filePicker1, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_filePickerProblemFile = new wxFilePickerCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	bSizerProblemFile->Add( m_filePickerProblemFile, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	bSizer51->Add( bSizer55, 0, wxEXPAND, 5 );
+	bSizerProblemInfo->Add( bSizerProblemFile, 0, wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer64;
 	bSizer64 = new wxBoxSizer( wxHORIZONTAL );
@@ -395,7 +398,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_staticText48->Wrap( -1 );
 	bSizer64->Add( m_staticText48, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	bSizer51->Add( bSizer64, 0, wxEXPAND, 5 );
+	bSizerProblemInfo->Add( bSizer64, 0, wxEXPAND, 5 );
 	
 	wxStaticBoxSizer* sbSizer12;
 	sbSizer12 = new wxStaticBoxSizer( new wxStaticBox( m_panelProblems, wxID_ANY, wxT("Sample Data") ), wxVERTICAL );
@@ -427,7 +430,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	sbSizer12->Add( bSizerTestingInput1, 0, wxEXPAND, 5 );
 	
-	bSizer51->Add( sbSizer12, 0, wxEXPAND, 5 );
+	bSizerProblemInfo->Add( sbSizer12, 0, wxEXPAND, 5 );
 	
 	wxStaticBoxSizer* sbSizer121;
 	sbSizer121 = new wxStaticBoxSizer( new wxStaticBox( m_panelProblems, wxID_ANY, wxT("Official Data") ), wxVERTICAL );
@@ -456,10 +459,10 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	sbSizer121->Add( bSizerTestingInput11, 0, wxEXPAND, 5 );
 	
-	bSizer51->Add( sbSizer121, 0, wxEXPAND, 5 );
+	bSizerProblemInfo->Add( sbSizer121, 0, wxEXPAND, 5 );
 	
 	
-	bSizer51->Add( 0, 0, 1, wxEXPAND, 5 );
+	bSizerProblemInfo->Add( 0, 0, 1, wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer65;
 	bSizer65 = new wxBoxSizer( wxHORIZONTAL );
@@ -470,16 +473,99 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_button27 = new wxButton( m_panelProblems, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer65->Add( m_button27, 0, wxALL, 5 );
 	
-	bSizer51->Add( bSizer65, 0, wxEXPAND, 5 );
+	bSizerProblemInfo->Add( bSizer65, 0, wxEXPAND, 5 );
 	
-	bSizerProblemsPage->Add( bSizer51, 2, wxEXPAND, 5 );
+	bSizerProblemsPage->Add( bSizerProblemInfo, 2, wxEXPAND, 5 );
 	
 	m_panelProblems->SetSizer( bSizerProblemsPage );
 	m_panelProblems->Layout();
 	bSizerProblemsPage->Fit( m_panelProblems );
 	m_notebook->AddPage( m_panelProblems, wxT("Problems"), false );
-	m_panel4 = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	m_notebook->AddPage( m_panel4, wxT("a page"), false );
+	m_panelClar = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizerClarPage;
+	bSizerClarPage = new wxBoxSizer( wxHORIZONTAL );
+	
+	wxBoxSizer* bSizerClarList;
+	bSizerClarList = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizerClarListTop;
+	bSizerClarListTop = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticText62 = new wxStaticText( m_panelClar, wxID_ANY, wxT("Clarifications:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText62->Wrap( -1 );
+	bSizerClarListTop->Add( m_staticText62, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	wxArrayString m_choice6Choices;
+	m_choice6 = new wxChoice( m_panelClar, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choice6Choices, 0 );
+	m_choice6->SetSelection( 0 );
+	bSizerClarListTop->Add( m_choice6, 0, wxALL, 5 );
+	
+	bSizerClarList->Add( bSizerClarListTop, 0, wxEXPAND, 5 );
+	
+	m_listCtrl10 = new wxListCtrl( m_panelClar, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_ICON|wxLC_LIST );
+	bSizerClarList->Add( m_listCtrl10, 1, wxALL|wxEXPAND, 5 );
+	
+	bSizerClarPage->Add( bSizerClarList, 1, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerClarInfo;
+	bSizerClarInfo = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizerClarID;
+	bSizerClarID = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextClarID = new wxStaticText( m_panelClar, wxID_ANY, wxT("ID:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextClarID->Wrap( -1 );
+	bSizerClarID->Add( m_staticTextClarID, 0, wxALL, 5 );
+	
+	m_staticTextClarIDVal = new wxStaticText( m_panelClar, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextClarIDVal->Wrap( -1 );
+	bSizerClarID->Add( m_staticTextClarIDVal, 0, wxALL, 5 );
+	
+	bSizerClarInfo->Add( bSizerClarID, 0, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerClarProblem;
+	bSizerClarProblem = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextClarProblem = new wxStaticText( m_panelClar, wxID_ANY, wxT("Problem:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextClarProblem->Wrap( -1 );
+	bSizerClarProblem->Add( m_staticTextClarProblem, 0, wxALL, 5 );
+	
+	m_staticTextClarProblemVal = new wxStaticText( m_panelClar, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextClarProblemVal->Wrap( -1 );
+	bSizerClarProblem->Add( m_staticTextClarProblemVal, 0, wxALL, 5 );
+	
+	bSizerClarInfo->Add( bSizerClarProblem, 0, wxEXPAND, 5 );
+	
+	wxStaticBoxSizer* sbSizer18;
+	sbSizer18 = new wxStaticBoxSizer( new wxStaticBox( m_panelClar, wxID_ANY, wxT("label") ), wxVERTICAL );
+	
+	m_textCtrl17 = new wxTextCtrl( m_panelClar, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+	sbSizer18->Add( m_textCtrl17, 1, wxALL|wxEXPAND, 5 );
+	
+	bSizerClarInfo->Add( sbSizer18, 1, wxEXPAND, 5 );
+	
+	wxStaticBoxSizer* sbSizer19;
+	sbSizer19 = new wxStaticBoxSizer( new wxStaticBox( m_panelClar, wxID_ANY, wxT("label") ), wxVERTICAL );
+	
+	m_textCtrl18 = new wxTextCtrl( m_panelClar, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE );
+	sbSizer19->Add( m_textCtrl18, 1, wxALL|wxEXPAND, 5 );
+	
+	bSizerClarInfo->Add( sbSizer19, 1, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer90;
+	bSizer90 = new wxBoxSizer( wxVERTICAL );
+	
+	m_button42 = new wxButton( m_panelClar, wxID_ANY, wxT("Reply"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer90->Add( m_button42, 0, wxALIGN_RIGHT|wxALL, 5 );
+	
+	bSizerClarInfo->Add( bSizer90, 0, wxEXPAND, 5 );
+	
+	bSizerClarPage->Add( bSizerClarInfo, 2, wxEXPAND, 5 );
+	
+	m_panelClar->SetSizer( bSizerClarPage );
+	m_panelClar->Layout();
+	bSizerClarPage->Fit( m_panelClar );
+	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), true );
 	
 	bSizerNotebook->Add( m_notebook, 1, wxEXPAND|wxALL, 5 );
 	
@@ -489,13 +575,92 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	this->Layout();
 	
 	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_buttonProblemAdd->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnClickButtonAddProblem ), NULL, this );
+	m_buttonProblemDel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnClickButtonDelProblem ), NULL, this );
 }
 
 AdminGUI::~AdminGUI()
 {
+	// Disconnect Events
+	m_buttonProblemAdd->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnClickButtonAddProblem ), NULL, this );
+	m_buttonProblemDel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnClickButtonDelProblem ), NULL, this );
+	
 }
 
-NewAccount::NewAccount( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+ChangePassGUI::ChangePassGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizerMain;
+	bSizerMain = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizerOld;
+	bSizerOld = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextOldPass = new wxStaticText( this, wxID_ANY, wxT("Old Password:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextOldPass->Wrap( -1 );
+	bSizerOld->Add( m_staticTextOldPass, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_textCtrlOldPass = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 140,-1 ), wxTE_PASSWORD );
+	bSizerOld->Add( m_textCtrlOldPass, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	bSizerMain->Add( bSizerOld, 1, wxALIGN_RIGHT, 5 );
+	
+	wxBoxSizer* bSizerNew;
+	bSizerNew = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextNewPass = new wxStaticText( this, wxID_ANY, wxT("New Password:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextNewPass->Wrap( -1 );
+	bSizerNew->Add( m_staticTextNewPass, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_textCtrlNewPass = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 140,-1 ), wxTE_PASSWORD );
+	bSizerNew->Add( m_textCtrlNewPass, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	bSizerMain->Add( bSizerNew, 1, wxALIGN_RIGHT, 5 );
+	
+	wxBoxSizer* bSizerRep;
+	bSizerRep = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextConfirmPass = new wxStaticText( this, wxID_ANY, wxT("Confirm Password:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextConfirmPass->Wrap( -1 );
+	bSizerRep->Add( m_staticTextConfirmPass, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_textCtrlConfirmPass = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 140,-1 ), wxTE_PASSWORD );
+	bSizerRep->Add( m_textCtrlConfirmPass, 0, wxALL, 5 );
+	
+	bSizerMain->Add( bSizerRep, 1, wxALIGN_RIGHT, 5 );
+	
+	wxBoxSizer* bSizerButton;
+	bSizerButton = new wxBoxSizer( wxHORIZONTAL );
+	
+	
+	bSizerButton->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_buttonOK = new wxButton( this, wxID_ANY, wxT("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButton->Add( m_buttonOK, 0, wxALL, 5 );
+	
+	m_buttonCancel = new wxButton( this, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButton->Add( m_buttonCancel, 0, wxALL, 5 );
+	
+	
+	bSizerButton->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	bSizerMain->Add( bSizerButton, 1, wxEXPAND, 5 );
+	
+	this->SetSizer( bSizerMain );
+	this->Layout();
+	bSizerMain->Fit( this );
+	
+	this->Centre( wxBOTH );
+}
+
+ChangePassGUI::~ChangePassGUI()
+{
+}
+
+NewAccountGUI::NewAccountGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 	
@@ -563,15 +728,15 @@ NewAccount::NewAccount( wxWindow* parent, wxWindowID id, const wxString& title, 
 	this->Centre( wxBOTH );
 	
 	// Connect Events
-	m_buttonOK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccount::OnButtonClickOK ), NULL, this );
-	m_buttonCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccount::OnButtonClickCancel ), NULL, this );
+	m_buttonOK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccountGUI::OnButtonClickOK ), NULL, this );
+	m_buttonCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccountGUI::OnButtonClickCancel ), NULL, this );
 }
 
-NewAccount::~NewAccount()
+NewAccountGUI::~NewAccountGUI()
 {
 	// Disconnect Events
-	m_buttonOK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccount::OnButtonClickOK ), NULL, this );
-	m_buttonCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccount::OnButtonClickCancel ), NULL, this );
+	m_buttonOK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccountGUI::OnButtonClickOK ), NULL, this );
+	m_buttonCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccountGUI::OnButtonClickCancel ), NULL, this );
 	
 }
 
@@ -595,6 +760,9 @@ TeamGUI::TeamGUI( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	m_staticTextTeamName = new wxStaticText( this, wxID_ANY, wxT("Team Name"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextTeamName->Wrap( -1 );
 	bSizerTitle->Add( m_staticTextTeamName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_buttonChangePassword = new wxButton( this, wxID_ANY, wxT("Change Password"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerTitle->Add( m_buttonChangePassword, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_buttonLogout = new wxButton( this, wxID_ANY, wxT("Logout"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizerTitle->Add( m_buttonLogout, 0, wxALL, 5 );
@@ -837,14 +1005,14 @@ ClarDialogGUI::ClarDialogGUI( wxWindow* parent, wxWindowID id, const wxString& t
 	
 	m_staticTextProblem = new wxStaticText( this, wxID_ANY, wxT("Problem:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextProblem->Wrap( -1 );
-	m_staticTextProblem->SetFont( wxFont( 16, 74, 90, 90, false, wxT("Arial") ) );
+	m_staticTextProblem->SetFont( wxFont( 14, 74, 90, 90, false, wxT("Arial") ) );
 	
 	bSizerProblem->Add( m_staticTextProblem, 0, wxALL, 5 );
 	
-	wxArrayString m_choice3Choices;
-	m_choice3 = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choice3Choices, 0 );
-	m_choice3->SetSelection( 0 );
-	bSizerProblem->Add( m_choice3, 1, wxALL, 5 );
+	wxArrayString m_choiceProblemChoices;
+	m_choiceProblem = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceProblemChoices, 0 );
+	m_choiceProblem->SetSelection( 0 );
+	bSizerProblem->Add( m_choiceProblem, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	bSizerMain->Add( bSizerProblem, 0, wxEXPAND, 5 );
 	
@@ -853,7 +1021,7 @@ ClarDialogGUI::ClarDialogGUI( wxWindow* parent, wxWindowID id, const wxString& t
 	
 	m_staticTextQuestion = new wxStaticText( this, wxID_ANY, wxT("Question:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextQuestion->Wrap( -1 );
-	m_staticTextQuestion->SetFont( wxFont( 16, 74, 90, 90, false, wxEmptyString ) );
+	m_staticTextQuestion->SetFont( wxFont( 14, 74, 90, 90, false, wxT("Arial") ) );
 	
 	bSizerQuestion->Add( m_staticTextQuestion, 0, wxALL, 5 );
 	
@@ -1008,6 +1176,9 @@ JudgeGUI::JudgeGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_staticTextName->Wrap( -1 );
 	bSizerTitle->Add( m_staticTextName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
+	m_buttonChangePassword = new wxButton( this, wxID_ANY, wxT("Change Password"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerTitle->Add( m_buttonChangePassword, 0, wxALL, 5 );
+	
 	m_buttonLogout = new wxButton( this, wxID_ANY, wxT("Logout"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizerTitle->Add( m_buttonLogout, 0, wxALL, 5 );
 	
@@ -1145,7 +1316,7 @@ JudgementConfirmGUI::~JudgementConfirmGUI()
 	
 }
 
-JudgeSubmission::JudgeSubmission( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+JudgeSubmissionGUI::JudgeSubmissionGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 	
@@ -1317,11 +1488,11 @@ JudgeSubmission::JudgeSubmission( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Centre( wxBOTH );
 }
 
-JudgeSubmission::~JudgeSubmission()
+JudgeSubmissionGUI::~JudgeSubmissionGUI()
 {
 }
 
-JudgeCompare::JudgeCompare( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+JudgeCompareGUI::JudgeCompareGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 	
@@ -1359,7 +1530,7 @@ JudgeCompare::JudgeCompare( wxWindow* parent, wxWindowID id, const wxString& tit
 	this->Centre( wxBOTH );
 }
 
-JudgeCompare::~JudgeCompare()
+JudgeCompareGUI::~JudgeCompareGUI()
 {
 }
 

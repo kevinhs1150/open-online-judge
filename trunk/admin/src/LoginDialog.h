@@ -12,6 +12,8 @@ class LoginDialog: public LoginGUI{
 	public:
 		LoginDialog(wxWindow *parent);
 		~LoginDialog();
+		
+		void LoginSuccess();
 };
 
 #endif
