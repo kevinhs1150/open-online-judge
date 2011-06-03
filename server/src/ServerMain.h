@@ -52,8 +52,9 @@ class ServerFrame: public ServerGUI
 			"clar_id       INTEGER PRIMARY KEY,"
 			"account_id    INTEGER,"
 			"msg           VARCHAR(100),"
-			"private_byte  INTEGER),"
-			"FOREIGN KEY(account_id) REFERENCES user(account_id);";
+			"result        VAECHAR(100),"
+			"private_byte  INTEGER,"
+			"FOREIGN KEY(account_id) REFERENCES user(account_id));";
 
 		char *create_scoreboard = "CREATE TABLE scoreboard("
 			"account_id		INTEGER PRIMARY KEY,"
