@@ -203,17 +203,19 @@ void cb_clar_request( char *srcip, unsigned int account_id, int private_byte, wc
 {
 	char sqlquery[100];
 	char clarmsg_char[100];
+	char **result;
 	unsigned int clar_id;
+	
 	
 	/* insert clarification info */
 	wcstombs(clarmsg_char, clarmsg, 100);
-	sprintf(sqlquery, "INSERT INTO clarification VALUES(NULL, '%u', '%s', '%d');", account_id, clarmsg_char, private_byte);
+	sprintf(sqlquery, "INSERT INTO clarification VALUES(NULL, '%u', '%s', NULL, '%d');", account_id, clarmsg_char, private_byte);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	clar_id = sqlite3_last_insert_rowid(db);
 	
 	/* send clar_request to each judge and admin */
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%d' or account_type = '%d';", SRC_JUDGE, SRC_ADMIN);
 	sqlite3_get_table(db , sqlquery, &result , &rows, &cols, &errMsg);
-	clar_id = sqlite3_last_insert_rowid(db);
 	
 	for(i=1;i<=rows;i++)
 	{
@@ -291,4 +293,38 @@ void cb_problem_update( char *srcip )
 
 void cb_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string )
 {
+	char sqlquery[100];
+	char result_string_char[100];
+	char **table;
+	int rows, cols, i;
+	unsigned int account_id;
+	wchar_t msg_wchar[100];
+	
+	/* update clarification table */
+	wcstombs(result_string_char, result_string, 100);
+	sprintf(sqlquery, "UPDATE clarification SET result = '%s' WHERE clar_id = '%u';", result_string_char, clar_id);
+	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	
+	/* send clar_reply to team */
+	sprintf(sqlquery, "SELECT account_id, msg FROM clarification WHERE clar_id = '%u';", clar_id);
+	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
+	sccanf(result[1 * cols + 1], "%u", &account_id);
+	mbstowcs(msg_wchar, result[1 * cols + 1], 100);
+	sqlite3_free_table(table);
+	
+	if(private_byte == 1)
+	{
+		sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_id = '%u';", account_id);
+		sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
+		serverproto_clar_reply( table[1 * cols + 0], clar_id, msg_wchar, result_string );
+		sqlite3_free_table(table);
+	}
+	else
+	{
+		sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%d';", SRC_TEAM);
+		sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
+		for(i=1;i<=rows;i++)
+			serverproto_clar_reply( table[i * cols + 0], clar_id, msg_wchar, result_string );
+		sqlite3_free_table(table);
+	}
 }
