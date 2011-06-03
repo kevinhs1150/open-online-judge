@@ -5,7 +5,7 @@
 
   * user(account_id, account, password, account_type, ipaddress, logged_in)
 
-  create table user(account_id int, account varchar(20), password varchar(10), account_type int, ipaddress, varchar(20), logged_in varchar(5), primary key(account_id));
+  create table user(account_id int, account varchar(20), password varchar(25), account_type int, ipaddress, varchar(20), logged_in varchar(5), primary key(account_id));
  
   * problem(problem_id, path_description, correct_input_filename, correct_output_filename)
  
@@ -15,9 +15,9 @@
 
   create table submission(run_id int, account_id int, problem_id int, lang varchar(10), path_code varchar(50), judge_id int, primary key(run_id), foreign key(account_id) references user, foreign key(problem_id) references problem, foreign key(judge_id) references judge_type);
  
-  * clarification(clar_id, msg, private_byte)
+  * clarification(clar_id, account_id, msg, private_byte)
   
-  create table clarification(clar_id int, msg varchar(100), private_byte int, primary key(clar_id));
+  create table clarification(clar_id int, account_id int, msg varchar(100), private_byte int, primary key(clar_id), foreign key(account_id) references user);
   
   * scoreboard(account_id, time, score)
   
