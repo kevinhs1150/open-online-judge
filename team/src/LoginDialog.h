@@ -2,6 +2,10 @@
 #define _LOGINDIALOG_H_
 
 #include "gui.h"
+extern "C"
+{
+    #include "teamproto.h"
+}
 
 class LoginDialog: public LoginGUI{
 	private:
