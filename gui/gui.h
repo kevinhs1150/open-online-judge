@@ -185,6 +185,11 @@ class ChangePassGUI : public wxDialog
 		wxButton* m_buttonOK;
 		wxButton* m_buttonCancel;
 		
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnButtonClickOK( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickCancel( wxCommandEvent& event ) { event.Skip(); }
+		
 	
 	public:
 		

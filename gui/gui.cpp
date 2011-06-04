@@ -654,10 +654,18 @@ ChangePassGUI::ChangePassGUI( wxWindow* parent, wxWindowID id, const wxString& t
 	bSizerMain->Fit( this );
 	
 	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_buttonOK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ChangePassGUI::OnButtonClickOK ), NULL, this );
+	m_buttonCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ChangePassGUI::OnButtonClickCancel ), NULL, this );
 }
 
 ChangePassGUI::~ChangePassGUI()
 {
+	// Disconnect Events
+	m_buttonOK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ChangePassGUI::OnButtonClickOK ), NULL, this );
+	m_buttonCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ChangePassGUI::OnButtonClickCancel ), NULL, this );
+	
 }
 
 NewAccountGUI::NewAccountGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
