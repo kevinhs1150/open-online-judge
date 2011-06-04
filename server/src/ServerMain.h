@@ -6,14 +6,14 @@
 #include "gui.h"
 #include "sqlite3.h"
 
-/*
+
 extern "C"
 {
-	#include <stdio.h>
+	#include "serverproto.h"
 	#include <stdlib.h>
 	#include <string.h>
 }
-*/
+
 
 /* Server GUI class. */
 class ServerFrame: public ServerGUI
@@ -34,8 +34,8 @@ class ServerFrame: public ServerGUI
 		char *create_problem = "CREATE TABLE problem("
 			"problem_id					INTEGER PRIMARY KEY,"
 			"path_description			VARCHAR(50),"
-			"correct_input_filename     VARCHAR(10),"
-			"correct_output_filename    VARCHAR(10));"
+			"correct_input_filename     VARCHAR(50),"
+			"correct_output_filename    VARCHAR(50));"
 
 		char *create_submission = "CREATE TABLE submission("
 			"run_id      INTEGER PRIMARY KEY,"
@@ -43,10 +43,9 @@ class ServerFrame: public ServerGUI
 			"problem_id  INTEGER,"
 			"lang        VARCHAR(10),"
 			"path_code	 VARCHAR(50),"
-			"judge_id	 INTEGER,"
+			"judge_result VARCHAR(25),"
 			"FOREIGN KEY(account_id) REFERENCES user(account_id),"
-			"FOREIGN KEY(problem_id) REFERENCES problem(problem_id),"
-			"FOREIGN KEY(judge_id) REFERENCES judge_type(judge_id));";
+			"FOREIGN KEY(problem_id) REFERENCES problem(problem_id));";
 
 		char *create_clarification = "CREATE TABLE clarification("
 			"clar_id       INTEGER PRIMARY KEY,"
@@ -61,10 +60,6 @@ class ServerFrame: public ServerGUI
 			"time			INTEGER,"
 			"score			INTEGER,"
 			"FOREIGN KEY(account_id) REFERENCES user(account_id));";
-
-		char *create_judge_type = "CREATE TABLE judge_type("
-			"judge_id		INTEGER PRIMARY KEY,"
-			"sentence		VARCHAR(20));";
     public:
         ServerFrame(wxFrame *frame);
         ~ServerFrame();
