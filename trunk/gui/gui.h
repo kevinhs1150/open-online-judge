@@ -465,6 +465,16 @@ class JudgeSubmissionGUI : public wxDialog
 		wxButton* m_buttonCancel;
 		
 		wxStaticLine* m_staticline3;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnButtonClickShowInput( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickShowSource( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickRun( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickStop( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickShowOutput( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickJudge( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickCancel( wxCommandEvent& event ) { event.Skip(); }
+		
 	
 	public:
 		
@@ -484,6 +494,10 @@ class JudgeCompareGUI : public wxDialog
 		wxTextCtrl* m_textCtrlOfficialOutput;
 		wxTextCtrl* m_textCtrlUserOutput;
 		wxButton* m_buttonClose;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnButtonClickClose( wxCommandEvent& event ) { event.Skip(); }
+		
 	
 	public:
 		

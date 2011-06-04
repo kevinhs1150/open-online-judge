@@ -1494,10 +1494,28 @@ JudgeSubmissionGUI::JudgeSubmissionGUI( wxWindow* parent, wxWindowID id, const w
 	bSizerMain->Fit( this );
 	
 	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_buttonShowInputData->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickShowInput ), NULL, this );
+	m_buttonShowSource->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickShowSource ), NULL, this );
+	m_buttonRun->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickRun ), NULL, this );
+	m_buttonStop->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickStop ), NULL, this );
+	m_button35->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickShowOutput ), NULL, this );
+	m_buttonJudge->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickJudge ), NULL, this );
+	m_buttonCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickCancel ), NULL, this );
 }
 
 JudgeSubmissionGUI::~JudgeSubmissionGUI()
 {
+	// Disconnect Events
+	m_buttonShowInputData->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickShowInput ), NULL, this );
+	m_buttonShowSource->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickShowSource ), NULL, this );
+	m_buttonRun->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickRun ), NULL, this );
+	m_buttonStop->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickStop ), NULL, this );
+	m_button35->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickShowOutput ), NULL, this );
+	m_buttonJudge->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickJudge ), NULL, this );
+	m_buttonCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickCancel ), NULL, this );
+	
 }
 
 JudgeCompareGUI::JudgeCompareGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
@@ -1536,10 +1554,16 @@ JudgeCompareGUI::JudgeCompareGUI( wxWindow* parent, wxWindowID id, const wxStrin
 	bSizerMain->Fit( this );
 	
 	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_buttonClose->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeCompareGUI::OnButtonClickClose ), NULL, this );
 }
 
 JudgeCompareGUI::~JudgeCompareGUI()
 {
+	// Disconnect Events
+	m_buttonClose->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeCompareGUI::OnButtonClickClose ), NULL, this );
+	
 }
 
 ServerGUI::ServerGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
