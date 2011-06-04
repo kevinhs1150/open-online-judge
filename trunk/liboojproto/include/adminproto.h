@@ -48,8 +48,8 @@ void adminproto_cbreg_account_update( void (*account_info)( unsigned int account
  * Pass "problem id" to administrator client.
  * The three string should be filled respectively with path where "problem description", "input data" and "correct answer" will be stored.
  * Administrator client should store the files and update its own list of problems. */
-void adminproto_cbreg_problem_info( void (*problem_info)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
-void adminproto_cbreg_problem_info_dlfin( void (*problem_info_dlfin)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
+void adminproto_cbreg_problem_update( void (*problem_update)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
+void adminproto_cbreg_problem_update_dlfin( void (*problem_update_dlfin)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
 
 /* Callback for scoreboard update. (from server)
  * Pass the "account id whose record is going to be updated", the new account name, the new accept count and the new time. 
