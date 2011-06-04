@@ -9,15 +9,15 @@ unsigned int login_id;
 LoginDialog* loginDialog;
 
 /* callback functions */
-void cb_account_info( unsigned int account_id, unsigned int type, wchar_t *account )
+void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *account )
 {
 }
 
-void cb_problem_info( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
+void cb_problem_update( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
 {
 }
 
-void cb_problem_info_dlfin( unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
+void cb_problem_update_dlfin( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
 }
 
@@ -53,7 +53,7 @@ void cb_contest_stop( void ){
 
 }
 
-void cb_clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg ){
+void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg ){
 
 }
 
@@ -80,9 +80,9 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	adminproto_cbreg_contest_stop( cb_contest_stop );
 	adminproto_cbreg_clar_request( cb_clar_request );
 	adminproto_cbreg_clar_reply( cb_clar_reply );
-	adminproto_cbreg_account_info( cb_account_info );
-	adminproto_cbreg_problem_info( cb_problem_info );
-	adminproto_cbreg_problem_info_dlfin( cb_problem_info_dlfin );
+	adminproto_cbreg_account_update( cb_account_update );
+	adminproto_cbreg_problem_update( cb_problem_update );
+	adminproto_cbreg_problem_update_dlfin( cb_problem_update_dlfin );
 	adminproto_cbreg_sb_update( cb_sb_update );
 	
 	sprintf(localaddr, "0.0.0.0");
