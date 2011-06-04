@@ -13,6 +13,7 @@ class JudgeCompareFrame: public JudgeCompareGUI
         ~JudgeCompareFrame();
 
     private:
+		void OnButtonClickClose( wxCommandEvent& event );
 };
 
 #endif // _JUDGECOMPARE_H_

@@ -12,3 +12,7 @@ JudgeCompareFrame::JudgeCompareFrame(wxFrame *frame)
 JudgeCompareFrame::~JudgeCompareFrame()
 {
 }
+
+void JudgeCompareFrame::OnButtonClickClose( wxCommandEvent& event );
+{
+}
