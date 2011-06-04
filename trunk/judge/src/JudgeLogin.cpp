@@ -1,4 +1,8 @@
 #include "JudgeMain.h"
+extern "C"
+{
+    #include "judgeproto.h"
+}
 
 JudgeLoginFrame::JudgeLoginFrame(wxFrame *frame)
     : LoginGUI(frame)
@@ -11,7 +15,7 @@ JudgeLoginFrame::~JudgeLoginFrame()
 
 void JudgeLoginFrame::OnClose( wxCloseEvent& event )
 {
-	Destroy();
+	EndModal(-1);
 }
 
 void JudgeLoginFrame::OnTextEnterPassword( wxCommandEvent& event )
