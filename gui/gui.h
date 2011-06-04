@@ -87,12 +87,8 @@ class AdminGUI : public wxFrame
 		wxButton* m_buttonLogout;
 		wxNotebook* m_notebook;
 		wxPanel* m_panelAccounts;
-		wxListCtrl* m_listCtrlAdmin;
-		wxListCtrl* m_listCtrlJudge;
-		wxListCtrl* m_listCtrlTeam;
 		wxButton* m_buttonAccountNew;
-		wxButton* m_buttonAccountRefresh;
-		wxButton* m_buttonAccountApply;
+		wxButton* m_buttonAccountDelete;
 		wxPanel* m_panelContestInfo;
 		wxStaticText* m_staticTextContestTitle;
 		wxTextCtrl* m_textCtrlContestTitle;
@@ -156,11 +152,18 @@ class AdminGUI : public wxFrame
 		wxButton* m_button42;
 		
 		// Virtual event handlers, overide them in your derived class
-		virtual void OnClickButtonAddProblem( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnClickButtonDelProblem( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickChangePassword( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickLogout( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickNewAccount( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickDeleteAccount( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickAddProblem( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickDelProblem( wxCommandEvent& event ) { event.Skip(); }
 		
 	
 	public:
+		wxListCtrl* m_listCtrlAdmin;
+		wxListCtrl* m_listCtrlJudge;
+		wxListCtrl* m_listCtrlTeam;
 		
 		AdminGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 753,553 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		~AdminGUI();
@@ -254,6 +257,7 @@ class TeamGUI : public wxFrame
 		wxListCtrl* m_listCtrlScore;
 		
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnButtonClickChangePassword( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickLogout( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickDownload( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickBrowse( wxCommandEvent& event ) { event.Skip(); }
@@ -386,6 +390,7 @@ class JudgeGUI : public wxFrame
 		wxListCtrl* m_listCtrlClars;
 		
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnButtonClickChangePassword( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickLogout( wxCommandEvent& event ) { event.Skip(); }
 		
 	

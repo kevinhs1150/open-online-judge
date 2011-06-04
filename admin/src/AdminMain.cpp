@@ -4,13 +4,27 @@ extern "C"
 #include "adminproto.h"
 }
 
+AdminFrame* AdminFrameGlobal;
+
 char server_ip[20];
 unsigned int login_id;
 LoginDialog* loginDialog;
 
 /* callback functions */
-void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *account )
-{
+void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *account ){
+	wxString name(account);
+	if(type == SRC_ADMIN){
+		AdminFrameGlobal->m_listCtrlAdmin->InsertItem(account_id, name);
+	}
+	else if(type == SRC_JUDGE){
+		AdminFrameGlobal->m_listCtrlJudge->InsertItem(account_id, name);
+	}
+	else if(type == SRC_TEAM){
+		AdminFrameGlobal->m_listCtrlTeam->InsertItem(account_id, name);
+	}
+	else{
+		// no definition, it must a mistake!
+	}
 }
 
 void cb_problem_update( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
@@ -71,6 +85,9 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	char localaddr[20];
 	int ip1, ip2, ip3, ip4;
 	FILE *ipFile;
+	
+	AdminFrameGlobal = this;
+	
 	loginDialog = new LoginDialog(NULL);
 	
 	adminproto_cbreg_login_confirm( cb_login_confirm );
@@ -105,18 +122,40 @@ AdminFrame::AdminFrame(wxFrame *frame)
 			isLogin = false;
 		else
 			isLogin = true;
-		loginDialog->Destroy();
 	}
+	loginDialog->Destroy();
 }
 
 AdminFrame::~AdminFrame()
 {
 }
 
-void AdminFrame::OnClickButtonAddProblem( wxCommandEvent& event ){
+/*
+void AdminFrame::OnClose( wxCloseEvent& event ){
+	//Destroy();
+}
+*/
+
+void AdminFrame::OnButtonClickChangePassword( wxCommandEvent& event ){
+
+}
+
+void AdminFrame::OnButtonClickLogout( wxCommandEvent& event ){
+
+}
+
+void AdminFrame::OnButtonClickNewAccount( wxCommandEvent& event ){
+
+}
+
+void AdminFrame::OnButtonClickDeleteAccount( wxCommandEvent& event ){
+
+}
+
+void AdminFrame::OnButtonClickAddProblem( wxCommandEvent& event ){
 	m_textCtrlProblemName->Clear();
 }
 
-void AdminFrame::OnClickButtonDelProblem( wxCommandEvent& event ){
+void AdminFrame::OnButtonClickDelProblem( wxCommandEvent& event ){
 	event.Skip();
 }

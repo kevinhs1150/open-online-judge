@@ -189,14 +189,11 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxBoxSizer* bSizerAccountButton;
 	bSizerAccountButton = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_buttonAccountNew = new wxButton( m_panelAccounts, wxID_ANY, wxT("New Account"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizerAccountButton->Add( m_buttonAccountNew, 2, wxALL, 5 );
+	m_buttonAccountNew = new wxButton( m_panelAccounts, wxID_ANY, wxT("New"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerAccountButton->Add( m_buttonAccountNew, 1, wxALL, 5 );
 	
-	m_buttonAccountRefresh = new wxButton( m_panelAccounts, wxID_ANY, wxT("Refresh"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizerAccountButton->Add( m_buttonAccountRefresh, 1, wxALL, 5 );
-	
-	m_buttonAccountApply = new wxButton( m_panelAccounts, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizerAccountButton->Add( m_buttonAccountApply, 1, wxALL, 5 );
+	m_buttonAccountDelete = new wxButton( m_panelAccounts, wxID_ANY, wxT("Del"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerAccountButton->Add( m_buttonAccountDelete, 1, wxALL, 5 );
 	
 	bSizerAccountPage->Add( bSizerAccountButton, 0, wxEXPAND, 5 );
 	
@@ -480,7 +477,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelProblems->SetSizer( bSizerProblemsPage );
 	m_panelProblems->Layout();
 	bSizerProblemsPage->Fit( m_panelProblems );
-	m_notebook->AddPage( m_panelProblems, wxT("Problems"), false );
+	m_notebook->AddPage( m_panelProblems, wxT("Problems"), true );
 	m_panelClar = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerClarPage;
 	bSizerClarPage = new wxBoxSizer( wxHORIZONTAL );
@@ -565,7 +562,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelClar->SetSizer( bSizerClarPage );
 	m_panelClar->Layout();
 	bSizerClarPage->Fit( m_panelClar );
-	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), true );
+	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), false );
 	
 	bSizerNotebook->Add( m_notebook, 1, wxEXPAND|wxALL, 5 );
 	
@@ -577,15 +574,23 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	this->Centre( wxBOTH );
 	
 	// Connect Events
-	m_buttonProblemAdd->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnClickButtonAddProblem ), NULL, this );
-	m_buttonProblemDel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnClickButtonDelProblem ), NULL, this );
+	m_buttonChangePassword->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickChangePassword ), NULL, this );
+	m_buttonLogout->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickLogout ), NULL, this );
+	m_buttonAccountNew->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickNewAccount ), NULL, this );
+	m_buttonAccountDelete->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDeleteAccount ), NULL, this );
+	m_buttonProblemAdd->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickAddProblem ), NULL, this );
+	m_buttonProblemDel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDelProblem ), NULL, this );
 }
 
 AdminGUI::~AdminGUI()
 {
 	// Disconnect Events
-	m_buttonProblemAdd->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnClickButtonAddProblem ), NULL, this );
-	m_buttonProblemDel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnClickButtonDelProblem ), NULL, this );
+	m_buttonChangePassword->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickChangePassword ), NULL, this );
+	m_buttonLogout->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickLogout ), NULL, this );
+	m_buttonAccountNew->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickNewAccount ), NULL, this );
+	m_buttonAccountDelete->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDeleteAccount ), NULL, this );
+	m_buttonProblemAdd->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickAddProblem ), NULL, this );
+	m_buttonProblemDel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDelProblem ), NULL, this );
 	
 }
 
@@ -865,6 +870,7 @@ TeamGUI::TeamGUI( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	this->Centre( wxBOTH );
 	
 	// Connect Events
+	m_buttonChangePassword->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickLogout ), NULL, this );
 	m_buttonDownload->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickDownload ), NULL, this );
 	m_buttonBrowse->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickBrowse ), NULL, this );
@@ -876,6 +882,7 @@ TeamGUI::TeamGUI( wxWindow* parent, wxWindowID id, const wxString& title, const 
 TeamGUI::~TeamGUI()
 {
 	// Disconnect Events
+	m_buttonChangePassword->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickLogout ), NULL, this );
 	m_buttonDownload->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickDownload ), NULL, this );
 	m_buttonBrowse->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickBrowse ), NULL, this );
@@ -1242,12 +1249,14 @@ JudgeGUI::JudgeGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	this->Centre( wxBOTH );
 	
 	// Connect Events
+	m_buttonChangePassword->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeGUI::OnButtonClickLogout ), NULL, this );
 }
 
 JudgeGUI::~JudgeGUI()
 {
 	// Disconnect Events
+	m_buttonChangePassword->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeGUI::OnButtonClickLogout ), NULL, this );
 	
 }
