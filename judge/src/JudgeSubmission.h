@@ -13,6 +13,13 @@ class JudgeSubmissionFrame: public JudgeSubmissionGUI
         ~JudgeSubmissionFrame();
 
     private:
+		void OnButtonClickShowInput( wxCommandEvent& event );
+		void OnButtonClickShowSource( wxCommandEvent& event );
+		void OnButtonClickRun( wxCommandEvent& event );
+		void OnButtonClickStop( wxCommandEvent& event );
+		void OnButtonClickShowOutput( wxCommandEvent& event );
+		void OnButtonClickJudge( wxCommandEvent& event );
+		void OnButtonClickCancel( wxCommandEvent& event );
 };
 
 #endif // _JUDGESUBMISSION_H_
