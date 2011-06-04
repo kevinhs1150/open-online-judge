@@ -32,7 +32,7 @@ void adminproto_cbreg_contest_stop( void (*cbfunc)( void ) );
 /* Callback for clarification request. (from server)
  * Pass "clarification id", "whether this is a private message" and "clarification message" to administrator client.
  * Client should notify the administrator.  Administrator should then reply the clarification. */
-void adminproto_cbreg_clar_request( void (*clar_request)( unsigned int clar_id, int private_byte, wchar_t *clarmsg ) );
+void adminproto_cbreg_clar_request( void (*clar_request)( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg ) );
 
 /* Callback for clarification reply. (from server)
  * Pass the clarification id and result string to team client.
@@ -42,14 +42,14 @@ void adminproto_cbreg_clar_reply( void (*cbfunc)( unsigned int clar_id, wchar_t 
 /* Callback for account information update. (from server)
  * Pass "account id", "account type" and "account name(possibly updated one)" to administrator client.
  * Administrator client should update its own list of accounts. */
-void adminproto_cbreg_account_info( void (*account_info)( unsigned int account_id, unsigned int type, wchar_t *account ) );
+void adminproto_cbreg_account_update( void (*account_info)( unsigned int account_id, unsigned int type, wchar_t *account ) );
 
 /* Callback for problem information update. (from server)
  * Pass "problem id" to administrator client.
  * The three string should be filled respectively with path where "problem description", "input data" and "correct answer" will be stored.
  * Administrator client should store the files and update its own list of problems. */
-void adminproto_cbreg_problem_info( void (*problem_info)( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
-void adminproto_cbreg_problem_info_dlfin( void (*problem_info_dlfin)( unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
+void adminproto_cbreg_problem_info( void (*problem_info)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
+void adminproto_cbreg_problem_info_dlfin( void (*problem_info_dlfin)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
 
 /* Callback for scoreboard update. (from server)
  * Pass the "account id whose record is going to be updated", the new account name, the new accept count and the new time. 
@@ -79,9 +79,9 @@ int adminproto_account_mod( char *destip, unsigned int account_id, wchar_t *new_
 int adminproto_account_update( char *destip );
 
 /* problem management */
-int adminproto_problem_add( char *destip, unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+int adminproto_problem_add( char *destip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
 int adminproto_problem_del( char *destip, unsigned int problem_id );
-int adminproto_problem_mod( char *destip, unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+int adminproto_problem_mod( char *destip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
 int adminproto_problem_update( char *destip );
 
 /* clarification reply */

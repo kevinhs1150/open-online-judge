@@ -85,6 +85,19 @@ released on 2011.06.02   by Infinity
  information.
  * internal: Generalized clarification functions for all clients.
 
+2011.06.04 quick fix
+ + server: Totally forgot about the problem_update function = =|||....  Added
+ back now.
+
+ * server&admin&judge: For all clarification requesting functions, they will 
+ now be notified the requester account.
+ * server&admin&judge: For all problem information and management related
+ functions, time limit can be specified now.
+ * server&admin: problem_info function renamed into problem_update for code
+ reuse.
+ * server&admin: account_info function renamed into account_update for naming
+ scheme consistency.
+ * internal: Generalized problem_update functions for admin and judge.
 
 protocol 0 revision 5
 ongoing

@@ -80,8 +80,8 @@
 /* server -> admin */
 #define OPID_CLAR_REPLY		11	/* clarification reply */
 #define OPID_CLAR_REQUEST	17	/* clarification request */
-#define OPID_ACC_INFO		18	/* account information */
-#define OPID_P_INFO			19	/* problem information */
+#define OPID_ACCUPDATE		18	/* account information */
+#define OPID_PUPDATE		15	/* problem update */
 #define OPID_SB_UPDATE		12	/* scoreboard update */
 
 

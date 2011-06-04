@@ -910,7 +910,7 @@ int serverproto_take_result( char *destip, unsigned int run_id, int success )
 	return 0;
 }
 
-int serverproto_account_info( char *destip, unsigned int account_id, unsigned int type, wchar_t *account )
+int serverproto_account_update( char *destip, unsigned int account_id, unsigned int type, wchar_t *account )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -919,7 +919,7 @@ int serverproto_account_info( char *destip, unsigned int account_id, unsigned in
 	char *type_str = uint2str( type );
 	char *account_mb = proto_str_presend( account );
 
-	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_ACC_INFO );
+	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_ACCUPDATE );
 	msgptr = proto_str_comb( msgptr, account_id_str );
 	msgptr = proto_str_comb( msgptr, type_str );
 	msgptr = proto_str_comb( msgptr, account_mb );
@@ -927,7 +927,7 @@ int serverproto_account_info( char *destip, unsigned int account_id, unsigned in
 	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_ADMIN ) ) < 0 )
 	{
 #if PROTO_DBG > 0
-		printf("[serverproto_login_reply()] tcp_connect() call failed.\n");
+		printf("[serverproto_account_update()] tcp_connect() call failed.\n");
 #endif
 		return -1;
 	}
@@ -942,20 +942,22 @@ int serverproto_account_info( char *destip, unsigned int account_id, unsigned in
 	return 0;
 }
 
-int serverproto_problem_info( char *destip, unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
+int serverproto_problem_update( char *destip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *problem_id_str = uint2str( problem_id );
+	char *time_limit_str = uint2str( time_limit );
 
-	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_P_INFO );
+	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_PUPDATE );
 	msgptr = proto_str_comb( msgptr, problem_id_str );
+	msgptr = proto_str_comb( msgptr, time_limit_str );
 
 	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_ADMIN ) ) < 0 )
 	{
 #if PROTO_DBG > 0
-		printf("[serverproto_login_reply()] tcp_connect() call failed.\n");
+		printf("[serverproto_problem_update()] tcp_connect() call failed.\n");
 #endif
 		return -1;
 	}
@@ -969,6 +971,7 @@ int serverproto_problem_info( char *destip, unsigned int problem_id, wchar_t *pa
 
 	shutdown_wr_sp( sockfd );
 	free( problem_id_str );
+	free( time_limit_str );
 
 	return 0;
 }

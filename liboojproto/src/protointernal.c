@@ -8,8 +8,10 @@ void (*cb_contest_start)( void ) = NULL;
 void (*cb_contest_stop)( void ) = NULL;
 
 /* callback common to admin and judge */
-void (*cb_clar_request)( unsigned int clar_id, int private_byte, wchar_t *clarmsg ) = NULL;
+void (*cb_clar_request)( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg ) = NULL;
 void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ) = NULL;
+void (*cb_problem_update)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) = NULL;
+void (*cb_problem_update_dlfin)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
 
 /* callback common to all clients */
 void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string ) = NULL;
@@ -418,16 +420,23 @@ int proto_commonreq( int RQSR, int RQID, char *msgptr )
 void proto_clar_request( char *msgptr )
 {
 	char *clar_id_str = proto_str_split( msgptr, &msgptr );
+	char *account_id_str = proto_str_split( msgptr, &msgptr );
+	char *account_mb = proto_str_split( msgptr, &msgptr );
 	char *private_byte_str = proto_str_split( msgptr, &msgptr );
 	char *clarmsg_mb = proto_str_split( msgptr, NULL );
 
 	unsigned int clar_id = atoi( clar_id_str );
+	unsigned int account_id = atoi( account_id_str );
+	wchar_t *account = proto_str_postrecv( account_mb );
 	int private_byte = atoi( private_byte_str );
 	wchar_t *clarmsg = proto_str_postrecv( clarmsg_mb );
 
-	(*cb_clar_request)( clar_id, private_byte, clarmsg );
+	(*cb_clar_request)( clar_id, account_id, account, private_byte, clarmsg );
 
 	free( clar_id_str );
+	free( account_id_str );
+	free( account_mb );
+	free( account );
 	free( private_byte_str );
 	free( clarmsg_mb );
 	free( clarmsg );
@@ -469,6 +478,31 @@ void proto_sb_update( char *msgptr )
 	free( new_accept_count_str );
 	free( new_time_str );
 	free( new_account );
+}
+
+void proto_problem_update( int sockfd, char *msgptr )
+{
+	char *problem_id_str = proto_str_split( msgptr, &msgptr );
+	char *time_limit_str = proto_str_split( msgptr, &msgptr );
+	wchar_t *path_description = NULL, *path_input = NULL, *path_answer = NULL;
+
+	unsigned int problem_id = atoi( problem_id_str );
+	unsigned int time_limit = atoi( time_limit_str );
+
+	(*cb_problem_update)( problem_id, time_limit, &path_description, &path_input, &path_answer );
+
+	/* download file */
+	filerecv( sockfd, path_description );
+	filerecv( sockfd, path_input );
+	filerecv( sockfd, path_answer );
+
+	(*cb_problem_update_dlfin)( problem_id, time_limit, path_description, path_input, path_answer );
+
+	free( problem_id_str );
+	free( time_limit_str );
+	free( path_description );
+	free( path_input );
+	free( path_answer );
 }
 
 /* common function implementation */
