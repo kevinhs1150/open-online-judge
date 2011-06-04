@@ -163,10 +163,10 @@ int serverproto_run_request( char *destip, unsigned int run_id, unsigned int pro
 int serverproto_take_result( char *destip, unsigned int run_id, int success );
 
 /* account information update (to admin) */
-int serverproto_account_info( char *destip, unsigned int account_id, unsigned int type, wchar_t *account );
+int serverproto_account_update( char *destip, unsigned int account_id, unsigned int type, wchar_t *account );
 
-/* problem update (to judge & admin) */
-int serverproto_problem_info( char *destip, unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+/* problem information update (to admin and judge) */
+int serverproto_problem_update( char *destip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
 
 /* contest site situation -- not implemented yet */
 

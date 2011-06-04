@@ -9,8 +9,6 @@ static int judgeproto_cbcheck( void );
 /* callback functions */
 void (*cb_run_request)( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )         = NULL;
 void (*cb_run_request_dlfin)( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )    = NULL;
-void (*cb_problem_update)( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )    = NULL;
-void (*cb_problem_update_dlfin)( unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
 void (*cb_take_result)( unsigned int run_id, int success );
 
 /* callback functions extern-ed from protointernal.c */
@@ -19,8 +17,10 @@ extern void (*cb_logout_confirm)( int confirm_code );
 extern void (*cb_timer_set)( unsigned int hours, unsigned int minutes, unsigned int seconds );
 extern void (*cb_contest_start)( void );
 extern void (*cb_contest_stop)( void );
-extern void (*cb_clar_request)( unsigned int clar_id, int private_byte, wchar_t *clarmsg );
+extern void (*cb_clar_request)( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg );
 extern void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
+extern void (*cb_problem_update)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
+extern void (*cb_problem_update_dlfin)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
 
 /* thread function */
 void *judgeproto_reqhand_thread( void *args );
@@ -116,24 +116,7 @@ void *judgeproto_reqhand_thread( void *args )
 		}
 		else if( RQID == OPID_PUPDATE )
 		{
-			char *problem_id_str = proto_str_split( msgptr, &msgptr );
-			wchar_t *path_description = NULL, *path_input = NULL, *path_answer = NULL;
-
-			unsigned int problem_id = atoi( problem_id_str );
-
-			(*cb_problem_update)( problem_id, &path_description, &path_input, &path_answer );
-
-			/* download file */
-			filerecv( sockfd, path_description );
-			filerecv( sockfd, path_input );
-			filerecv( sockfd, path_answer );
-
-			(*cb_problem_update_dlfin)( problem_id, path_description, path_input, path_answer );
-
-			free( problem_id_str );
-			free( path_description );
-			free( path_input );
-			free( path_answer );
+			proto_problem_update( sockfd, msgptr );
 		}
 		else if( RQID == OPID_TAKE_RESULT )
 		{
@@ -285,10 +268,10 @@ void judgeproto_cbreg_contest_start( void (*cbfunc)( void ) ) { cb_contest_start
 void judgeproto_cbreg_contest_stop( void (*cbfunc)( void ) )  { cb_contest_stop = cbfunc; }
 void judgeproto_cbreg_run_request( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t** ) )      { cb_run_request = cbfunc; }
 void judgeproto_cbreg_run_request_dlfin( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t* ) ) { cb_run_request_dlfin = cbfunc; }
-void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int, wchar_t**, wchar_t**, wchar_t** ) )     { cb_problem_update = cbfunc; }
-void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int, wchar_t*, wchar_t*, wchar_t* ) )  { cb_problem_update_dlfin = cbfunc; }
+void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int, unsigned int, wchar_t**, wchar_t**, wchar_t** ) ) { cb_problem_update = cbfunc; }
+void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) {cb_problem_update_dlfin = cbfunc;}
 void judgeproto_cbreg_take_result( void (*cbfunc)( unsigned int, int ) ) { cb_take_result = cbfunc; }
-void judgeproto_cbreg_clar_request( void (*cbfunc)( unsigned int, int, wchar_t* ) ) { cb_clar_request = cbfunc; }
+void judgeproto_cbreg_clar_request( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, int, wchar_t* ) ) { cb_clar_request = cbfunc; }
 void judgeproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t*, wchar_t* ) );
 
 static int judgeproto_cbcheck( void )

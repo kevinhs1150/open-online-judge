@@ -39,8 +39,8 @@ void judgeproto_cbreg_run_request_dlfin( void (*cbfunc)( unsigned int run_id, un
 /* Callback for problem update. (from server)
  * Pass the problem id to judge client.
  * The rest three strings should be filled with path to store "problem description", "input data" and "correct answer" respectively. */
-void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
-void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
+void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
+void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
 
 /* Callback for take result. (from server)
  * Pass the run id and success indicator to judge client. */
@@ -49,7 +49,7 @@ void judgeproto_cbreg_take_result( void (*cbfunc)( unsigned int run_id, int succ
 /* Callback for clarification request. (from server)
  * Pass "clarification id", "whether this is a private message" and "clarification message" to administrator client.
  * Client should notify the judge.  Judge should then reply the clarification. */
-void judgeproto_cbreg_clar_request( void (*cbfunc)( unsigned int clar_id, int private_byte, wchar_t *clarmsg ) );
+void judgeproto_cbreg_clar_request( void (*cbfunc)( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg ) );
 
 /* Callback for clarification reply. (from server)
  * Pass the clarification id and result string to team client.
