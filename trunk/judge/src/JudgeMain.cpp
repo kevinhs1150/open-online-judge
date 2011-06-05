@@ -195,7 +195,7 @@ void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_
     }
 
     /**TODO: new memory for *path_code**/
-    *path_code = new wchar_t [ strlen(filename)+1 ];
+    *path_code = (wchar_t *) molloc( (strlen(filename)) +1) * sizeof(wchar_t);
     wsprintf(*path_code, L"%s", filename );
 }
 
@@ -215,9 +215,9 @@ void problem_update( unsigned int problem_id, wchar_t **path_description, wchar_
     sprintf(path, "problem/%u", problem_id);
 
     /**TODO: new memory for *path_code**/
-    *path_description = new wchar_t [ strlen(path)+1 ];
-    *path_input = new wchar_t [ strlen(path)+1 ];
-    *path_answer = new wchar_t [ strlen(path)+1 ];
+    *path_description = (wchar_t *) molloc( (strlen(path))+1 ) * sizeof(wchar_t);
+    *path_input = (wchar_t *)molloc( strlen(path)+1 ) * sizeof(wchar_t);
+    *path_answer = (wchar_t *)molloc( strlen(path)+1 ) * sizeof(wchar_t);
 
     wsprintf(*path_description, L"%s.pdf", path );
     wsprintf(*path_input, L"%s_input.txt", path );
@@ -240,7 +240,7 @@ void take_result( unsigned int run_id, int success )
             /**TODO:show message**/
             run_request_id *proptr = search(run_id);
             id_delete(run_id);
-            swprintf(file_name, L"%s", run_id);
+            swprintf(file_name, L"%u", run_id);
             wcscpy(type, proptr->coding_language);
             errtyp = compile(file_name, type);
             if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
