@@ -20,6 +20,15 @@ JudgeSubmissionFrame::~JudgeSubmissionFrame()
 {
 }
 
+void JudgeSubmissionFrame::IP_set()
+{
+    FILE *fptr1;
+
+    fptr1=fopen("config.txt","r");
+    fscanf (fptr1, "%s", IP);
+    fclose(fptr1);
+}
+
 void JudgeSubmissionFrame::setRunProblemID(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language)
 {
 	wxString submissionNO;
@@ -107,9 +116,38 @@ void JudgeSubmissionFrame::OnButtonClickShowOutput( wxCommandEvent& event )
 
 void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 {
+	int column = m_choiceJudgement->GetSelection(); /**取得choice的選擇**/
+	wchar_t result_string[20];
+	
+	if(column == 1){
+		this->result = YES;
+	}
+	else if(column == 2){
+		this->result = COMPLIE_ERROR;
+	}
+	else if(cloumn == 3){
+		this->result = WRONG_ANSWER;
+	}
+	else if(column == 4){
+		this->result = TIME_LIMIT_EXCEED;
+	}
+	
 	Confirmframe = new JudgementConfirmFrame(0L);
 	Confirmframe->setJudgementVal(this->result);
 	if(Confirmframe->ShowModal() == 0){
+		if(this->reult == YES){
+			swprintf(result_string,L"yes");
+		}
+		else if(this->result == COMPLIE_ERROR){
+			swprintf(result_string,L"complie error");
+		}
+		else if(this->result == WRONG_ANSWER){
+			swprintf(result_string,L"wrong answer");
+		}
+		else{
+			swprintf(result_string,L"time-limit exceed");
+		}
+		judgeproto_judge_result(this->IP,this->run_id,result_string);
         EndModal(0);
     }
 }
@@ -130,8 +168,6 @@ void JudgeSubmissionFrame::setResultChoice()
 	choice.Printf(wxT("output wrong"));
 	m_choiceJudgement->Append(choice);
 	choice.Printf(wxT("time-limit exceed"));
-	m_choiceJudgement->Append(choice);
-	choice.Printf(wxT("other error"));
 	m_choiceJudgement->Append(choice);
 }
 
