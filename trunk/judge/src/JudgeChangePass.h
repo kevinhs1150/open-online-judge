@@ -11,8 +11,15 @@ class JudgeChangePassFrame: public ChangePassGUI
     public:
         JudgeChangePassFrame(wxFrame *frame);
         ~JudgeChangePassFrame();
+		
+		void set_account_id(unsigned int account_id);
+		void IP_set();
+		void textCtrlClear();
 
     private:
+		unsigned int account_id;
+		char *IP;
+		
 		void OnButtonClickOK( wxCommandEvent& event );
 		void OnButtonClickCancel( wxCommandEvent& event );
 };

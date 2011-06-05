@@ -119,16 +119,16 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 	int column = m_choiceJudgement->GetSelection(); /**取得choice的選擇**/
 	wchar_t result_string[20];
 	
-	if(column == 1){
+	if(column == 0){
 		this->result = YES;
 	}
-	else if(column == 2){
+	else if(column == 1){
 		this->result = COMPLIE_ERROR;
 	}
-	else if(cloumn == 3){
+	else if(cloumn == 2){
 		this->result = WRONG_ANSWER;
 	}
-	else if(column == 4){
+	else if(column == 3){
 		this->result = TIME_LIMIT_EXCEED;
 	}
 	
@@ -147,8 +147,12 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 		else{
 			swprintf(result_string,L"time-limit exceed");
 		}
-		judgeproto_judge_result(this->IP,this->run_id,result_string);
-        EndModal(0);
+		if(judgeproto_judge_result(this->IP,this->run_id,result_string) != 0){
+			wxMessageBox("Judgement Submission Error.\nPromble: Socket error.","Judgement Submission Error",wxOK|wxICON_EXCLAMATION);
+		}
+		else{
+			EndModal(0);
+		}
     }
 }
 

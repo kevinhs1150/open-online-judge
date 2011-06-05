@@ -17,6 +17,7 @@ typedef struct clar{
     unsigned int clar_id;
     int private_byte;
     wchar_t *clarmsg;
+	wchar_t *result_string;
     struct clar *next;
 }clar_request_id;
 
@@ -40,11 +41,15 @@ void contest_start( void );
 void contest_stop( void );
 void problem_update( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
 void problem_update_dlfin(unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+void problem_remove( unsigned int problem_id );
 void take_result( unsigned int run_id, int success );
 void clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg );
+void clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language);
 void problem_insert(unsigned int problem_id);
-int problem_search(unsigned int problem_id)
+int problem_search(unsigned int problem_id);
+void problem_search_delete(unsigned int problem_id);
+void run_search_delete(unsigned int problem_id);
 run_request_id *search(unsigned int run_id);
 void id_delete(unsigned int run_id);
 int compile(wchar_t [], wchar_t []);
@@ -55,6 +60,7 @@ void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg);
 clar_request_id *clar_search(unsigned int clar_id);
 void clar_delete(unsigned int clar_id);
 
+//class public function
 JudgeFrame::JudgeFrame(wxFrame *frame)
     : JudgeGUI(frame)
 {
@@ -67,8 +73,10 @@ JudgeFrame::JudgeFrame(wxFrame *frame)
     judgeproto_cbreg_run_request_dlfin(run_request_dlfin);
     judgeproto_cbreg_problem_update(problem_update);
     judgeproto_cbreg_problem_update_dlfin(problem_update_dlfin);
+	judgeproto_cbreg_problem_remove(problem_remove);
     judgeproto_cbreg_take_result(take_result);
     judgeproto_cbreg_clar_request(clar_request);
+	judgeproto_cbreg_clar_reply(clar_reply);
     judgeproto_listen("0.0.0.0");
 
     loginframe = new JudgeLoginFrame(0L);
@@ -84,18 +92,13 @@ JudgeFrame::~JudgeFrame()
 {
 }
 
-void JudgeFrame::OnButtonClickLogout( wxCommandEvent& event )
-{
-	judgeproto_logout(IP,account_id);
-}
-
 void JudgeFrame::account_id_set(unsigned int account_id)
 {
 	wxString id;
 	
 	this->account_id = account_id;
 	
-	id << (this->account_id);
+	id.Printf("%u",this->account_id);
 	m_staticTextName->SetLabel(id);
 }
 
@@ -111,9 +114,12 @@ void JudgeFrame::timer(unsigned int hours, unsigned int minutes, unsigned int se
 	m_staticTextTime->SetLabel( time );
 }
 
-void JudgeFrame::set_problem_choice()
+void JudgeFrame::setPtoblemFilterChoice(unsigned int problem_id)
 {
+	wxString choice;
 	
+	choice.Printf(wxT("%u"), problem_id);
+	m_choiceFilter->Append(choice);
 }
 
 void JudgeFrame::start()
@@ -140,11 +146,24 @@ char *JudgeFrame::IP_get()
     return IP;
 }
 
-void OnButtonClickLogout( wxCommandEvent& event )
+//class private function
+void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 {
-    judgeproto_cbreg_logout_confirm( logout_confirm );
+	changePassFrame = new JudgeChangePassFrame(0L);
+	changePassFrame->set_account_id(this->account_id);
 }
 
+void JudgeFrame::OnButtonClickLogout( wxCommandEvent& event )
+{
+    if((judgeproto_cbreg_logout_confirm( logout_confirm )) != 0){
+		wxMessageBox("Logont Error.\nPromble: Socket error.","Logout Error",wxOK|wxICON_EXCLAMATION);
+	}
+	else{
+		this->Destroy();
+	}
+}
+
+//call back function use
 void login_confirm( int confirm_code, unsigned int account_id )
 {
     if( confirm_code == LOGIN_VALID )
@@ -229,6 +248,21 @@ void problem_update_dlfin(unsigned int problem_id, wchar_t *path_description, wc
     /**TODO:problem view**/
 }
 
+void problem_remove( unsigned int problem_id )
+{
+	char file[20];
+	
+	sprintf(file,"problem/%u.pdf",problem_id);
+	DeleteFile(file);
+	sprintf(file,"problem/%u_input.txt",problem_id);
+	DeleteFile(file);
+	sprintf(file,"problem/%u_answer.txt",problem_id);
+	DeleteFile(file);
+	
+	run_search_delete(problem_id);
+	problem_search_delete(problem_id);
+}
+
 void take_result( unsigned int run_id, int success )
 {
     wchar_t file_name[50];
@@ -303,6 +337,13 @@ void clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg )
     clar_insert(clar_id,private_byte,clarmsg);
 }
 
+void clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string )
+{
+	clar_request_id *result_insertPtr = clar_search(clar_id);
+	result_insertPtr->result_string = result_string;
+}
+
+//run_request_id & problem_all linked list modify
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language)
 {
     run_request_id *currentPtr = pptr;
@@ -350,6 +391,7 @@ void problem_insert(unsigned int problem_id)
 
 		currentPtr->next = temp_id;
 	}
+	mainFrame->setPtoblemFilterChoice(unsigned int problem_id);
 }
 
 int problem_search(unsigned int problem_id)
@@ -367,6 +409,52 @@ int problem_search(unsigned int problem_id)
 		problem_all_hptr = problem_all_hptr->next; 
 	}
 	return 0;
+}
+
+void problem_search_delete(unsigned int problem_id)
+{
+	problem_all *cptr = problem_hptr;
+    problem_all *dptr = problem_hptr;
+    problem_all *nptr = problem_hptr;
+
+    if(dptr->problem_id == problem_id){
+        problem_hptr = problem_hptr->next;
+        delete(dptr);
+        return;
+    }
+
+    while( dptr->next != NULL ){
+        cptr = dptr;
+        dptr = dptr->next;
+        if(dptr->problem_id == problem_id){
+            nptr = dptr->next;
+            delete(dptr);
+            cptr->next = nptr;
+            break;
+        }
+    }
+}
+void run_search_delete(unsigned int problem_id)
+{
+	run_request_id *cptr = pptr;
+    run_request_id *dptr = pptr;
+    run_request_id *nptr = pptr;
+
+    if(dptr->problem_id == problem_id){
+        pptr = pptr->next;
+        delete(dptr);
+    }
+
+    while( dptr->next != NULL ){
+        cptr = dptr;
+        dptr = dptr->next;
+        if(dptr->problem_id == problem_id){
+            nptr = dptr->next;
+            delete(dptr);
+            cptr->next = nptr;
+			dptr = cptr;
+        }
+    }
 }
 
 run_request_id *search(unsigned int run_id)
@@ -410,6 +498,73 @@ void id_delete(unsigned int run_id)
     }
 }
 
+//clar_request_id linked list modify
+void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg)
+{
+    clar_request_id *currentPtr = clar_hptr;
+
+    clar_request_id *temp = new clar_request_id;
+    temp->clar_id = clar_id;
+    temp->private_byte = private_byte;
+    temp->clarmsg = clarmsg;
+	temp->result_string = NULL;
+	temp->next = NULL;
+
+	if( clar_hptr == NULL )
+	{
+		clar_hptr = temp;
+	}
+	else
+	{
+		while( currentPtr->next != NULL )
+			currentPtr = currentPtr->next;
+
+		currentPtr->next = temp;
+	}
+}
+
+clar_request_id *clar_search(unsigned int clar_id)
+{
+    clar_request_id *tptr = clar_hptr;
+
+    if(tptr->clar_id == clar_id){
+        return tptr;
+    }
+
+    while( tptr->next != NULL ){
+        if(tptr->clar_id == clar_id){
+            return tptr;
+            break;
+        }
+        tptr = tptr->next;
+    }
+}
+
+void clar_delete(unsigned int clar_id)
+{
+    clar_request_id *uptr = clar_hptr;
+    clar_request_id *dptr = clar_hptr;
+    clar_request_id *nptr = clar_hptr;
+
+    if(dptr->clar_id == clar_id){
+        clar_hptr = clar_hptr->next;
+        delete(dptr);
+        return;
+    }
+
+    while( dptr->next != NULL ){
+        uptr = dptr;
+        dptr = dptr->next;
+        if(dptr->clar_id == clar_id){
+            nptr = dptr->next;
+            delete(dptr);
+            uptr->next = nptr;
+            break;
+        }
+    }
+}
+
+//do judge
 int compile(wchar_t file_name[], wchar_t type[])
 {
     FILE *fptr1;
@@ -573,66 +728,4 @@ int judge(unsigned int problem_id){
     return 0;
 }
 
-void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg)
-{
-    clar_request_id *currentPtr = clar_hptr;
 
-    clar_request_id *temp = new clar_request_id;
-    temp->clar_id = clar_id;
-    temp->private_byte = private_byte;
-    temp->clarmsg = clarmsg;
-	temp->next = NULL;
-
-	if( clar_hptr == NULL )
-	{
-		clar_hptr = temp;
-	}
-	else
-	{
-		while( currentPtr->next != NULL )
-			currentPtr = currentPtr->next;
-
-		currentPtr->next = temp;
-	}
-}
-
-clar_request_id *clar_search(unsigned int clar_id)
-{
-    clar_request_id *tptr = clar_hptr;
-
-    if(tptr->clar_id == clar_id){
-        return tptr;
-    }
-
-    while( tptr->next != NULL ){
-        if(tptr->clar_id == clar_id){
-            return tptr;
-            break;
-        }
-        tptr = tptr->next;
-    }
-}
-
-void clar_delete(unsigned int clar_id)
-{
-    clar_request_id *uptr = clar_hptr;
-    clar_request_id *dptr = clar_hptr;
-    clar_request_id *nptr = clar_hptr;
-
-    if(dptr->clar_id == clar_id){
-        clar_hptr = clar_hptr->next;
-        delete(dptr);
-        return;
-    }
-
-    while( dptr->next != NULL ){
-        uptr = dptr;
-        dptr = dptr->next;
-        if(dptr->clar_id == clar_id){
-            nptr = dptr->next;
-            delete(dptr);
-            uptr->next = nptr;
-            break;
-        }
-    }
-}
