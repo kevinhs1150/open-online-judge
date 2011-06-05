@@ -6,11 +6,18 @@
 #include "gui.h"
 #include "judgeproto.h"
 
+#define YES 0
+#define COMPLIE_ERROR -1
+#define WRONG_ANSWER -2
+#define TIME_LIMIT_EXCEED -3
+
 class JudgementConfirmFrame: public JudgementConfirmGUI
 {
     public:
         JudgementConfirmFrame(wxFrame *frame);
         ~JudgementConfirmFrame();
+		
+		void setJudgementVal(int result);
 
     private:
 		void OnButtonClickYes( wxCommandEvent& event );
