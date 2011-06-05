@@ -81,7 +81,7 @@ int judgeproto_login( char *destip, wchar_t *account, char *password );
 int judgeproto_logout( char *destip, unsigned int account_id );
 
 /* password change */
-int judgeproto_password_change( char *destip, unsigned int account_id, char *new_password );
+int judgeproto_password_change( char *destip, unsigned int account_id, char *old_password, char *new_password );
 
 /* run result */
 int judgeproto_judge_result( char *destip, unsigned int run_id, wchar_t *result_string );

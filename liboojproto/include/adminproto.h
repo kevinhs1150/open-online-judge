@@ -84,7 +84,7 @@ int adminproto_login( char *destip, wchar_t *account, char *password );
 int adminproto_logout( char *destip, unsigned int account_id );
 
 /* password change */
-int adminproto_password_change( char *destip, unsigned int account_id, char *new_password );
+int adminproto_password_change( char *destip, unsigned int account_id, char *old_password, char *new_password );
 
 /* account management */
 int adminproto_account_add( char *destip, unsigned int type, wchar_t *account, char *password );

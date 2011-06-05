@@ -205,9 +205,9 @@ int judgeproto_logout( char *destip, unsigned int account_id )
 	return proto_logout( destip, OPSR_JUDGE, account_id );
 }
 
-int judgeproto_password_change( char *destip, unsigned int account_id, char *new_password )
+int judgeproto_password_change( char *destip, unsigned int account_id, char *old_password, char *new_password )
 {
-	return proto_password_change( destip, OPSR_JUDGE, account_id, new_password );
+	return proto_password_change( destip, OPSR_JUDGE, account_id, old_password, new_password );
 }
 
 /* run result */
