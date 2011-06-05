@@ -473,7 +473,7 @@ int complie_result(){
         {
             while((ch = getc(fptr2))!= EOF){
                 result = SUCCESS_WITH_WARNING;
-                printf("%c",ch);
+                //printf("%c",ch);
             }
             fclose(fptr2);
         }
@@ -488,7 +488,7 @@ int complie_result(){
         if(fptr2 != NULL)
         {
             while((ch = getc(fptr2))!= EOF){
-                printf("%c",ch);
+                //printf("%c",ch);
             }
             fclose(fptr2);
         }

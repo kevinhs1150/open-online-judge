@@ -12,11 +12,9 @@ class JudgeCompareFrame: public JudgeCompareGUI
         JudgeCompareFrame(wxFrame *frame);
         ~JudgeCompareFrame();
 		
-		void setRunProblemID(unsigned int run_id, unsigned int problem_id);
+		void setProblemID(unsigned int problem_id);
 
     private:
-		unsigned int run_id;
-		unsigned int problem_id;
 		void OnButtonClickClose( wxCommandEvent& event );
 };
 
