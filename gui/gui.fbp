@@ -765,11 +765,11 @@
                                 <property name="font"></property>
                                 <property name="hidden"></property>
                                 <property name="id">wxID_ANY</property>
-                                <property name="label">Time</property>
+                                <property name="label">00:00:00</property>
                                 <property name="maximum_size"></property>
                                 <property name="minimum_size"></property>
                                 <property name="name">m_staticTextTime</property>
-                                <property name="permission">protected</property>
+                                <property name="permission">public</property>
                                 <property name="pos"></property>
                                 <property name="size"></property>
                                 <property name="style"></property>

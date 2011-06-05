@@ -26,6 +26,10 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 	else{
 		// no definition, it must a mistake!
 	}
+	return;
+}
+
+void cb_account_remove( unsigned int account_id ){
 }
 
 void cb_problem_update( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
@@ -56,8 +60,13 @@ void cb_logout_confirm( int confirm_code ){
 
 }
 
-void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int seconds ){
+void cb_password_change_confirm( int confirm_code ){
 
+}
+
+void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int seconds ){
+	AdminFrameGlobal->m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), hours, minutes, seconds));
+	return;
 }
 
 void cb_contest_start( void ){
@@ -80,6 +89,10 @@ void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsign
 
 }
 
+void cb_problem_remove( unsigned int problem_id ){
+
+}
+
 AdminFrame::AdminFrame(wxFrame *frame)
     : AdminGUI(frame)
 {
@@ -88,21 +101,24 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	FILE *ipFile;
 	
 	isProblemInfoEnable = false;
-	
 	AdminFrameGlobal = this;
+	InitAccountList();
 	
 	loginDialog = new LoginDialog(NULL);
 	
 	adminproto_cbreg_login_confirm( cb_login_confirm );
 	adminproto_cbreg_logout_confirm( cb_logout_confirm );
+	adminproto_cbreg_password_change_confirm( cb_password_change_confirm );
 	adminproto_cbreg_timer_set( cb_timer_set );
 	adminproto_cbreg_contest_start( cb_contest_start );
 	adminproto_cbreg_contest_stop( cb_contest_stop );
 	adminproto_cbreg_clar_request( cb_clar_request );
 	adminproto_cbreg_clar_reply( cb_clar_reply );
 	adminproto_cbreg_account_update( cb_account_update );
+	adminproto_cbreg_account_remove( cb_account_remove );
 	adminproto_cbreg_problem_update( cb_problem_update );
 	adminproto_cbreg_problem_update_dlfin( cb_problem_update_dlfin );
+	adminproto_cbreg_problem_remove( cb_problem_remove );
 	adminproto_cbreg_sb_update( cb_sb_update );
 	
 	sprintf(localaddr, "0.0.0.0");
@@ -139,6 +155,34 @@ void AdminFrame::OnClose( wxCloseEvent& event ){
 }
 */
 
+void AdminFrame::InitAccountList(){
+	wxListItem itemCol;
+	
+	m_listCtrlAdmin->DeleteAllItems();
+	while(m_listCtrlAdmin->GetColumnCount())
+		m_listCtrlAdmin->DeleteColumn(0);
+	
+	m_listCtrlJudge->DeleteAllItems();
+	while(m_listCtrlJudge->GetColumnCount())
+		m_listCtrlJudge->DeleteColumn(0);
+	
+	m_listCtrlTeam->DeleteAllItems();
+	while(m_listCtrlTeam->GetColumnCount())
+		m_listCtrlTeam->DeleteColumn(0);
+	
+	itemCol.SetText(_("ID"));
+	m_listCtrlAdmin->InsertColumn(0, itemCol);
+	m_listCtrlJudge->InsertColumn(0, itemCol);
+	m_listCtrlTeam->InsertColumn(0, itemCol);
+	
+	itemCol.SetText(_("Name"));
+	m_listCtrlAdmin->InsertColumn(1, itemCol);
+	m_listCtrlJudge->InsertColumn(1, itemCol);
+	m_listCtrlTeam->InsertColumn(1, itemCol);
+	
+	return;
+}
+
 void AdminFrame::ProblemInfoEnable(bool enable){
 	if(isProblemInfoEnable == enable)
 		return;
@@ -161,29 +205,86 @@ void AdminFrame::ProblemInfoEnable(bool enable){
 }
 
 void AdminFrame::OnButtonClickChangePassword( wxCommandEvent& event ){
-
+	m_listCtrlAdmin->SetItemState(0, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
 void AdminFrame::OnButtonClickLogout( wxCommandEvent& event ){
-	m_listCtrlAdmin->InsertItem(1, _("Data"));
+	long tmp;
+	tmp = m_listCtrlAdmin->InsertItem(0, _("Test A"));
+	m_listCtrlAdmin->SetItem(tmp, 1, _("Test B"));
+	
+	tmp = m_listCtrlAdmin->InsertItem(0, _("Test C"));
+	m_listCtrlAdmin->SetItem(tmp, 1, _("Test D"));
+	
 }
 
 void AdminFrame::OnListItemActivatedAdmin( wxListEvent& event ){
-	AccountDialog *accountDialog = new AccountDialog(this, event.GetText(), SRC_ADMIN, event.GetIndex());
+	wxListItem item;
+	item.SetId(event.GetIndex());
+	item.SetColumn(1);
+	item.SetMask(wxLIST_MASK_TEXT);
+	m_listCtrlAdmin->GetItem(item);
+	AccountDialog *accountDialog = new AccountDialog(this, item.GetText(), SRC_ADMIN, event.GetIndex());
 	accountDialog->ShowModal();
 	accountDialog->Destroy();
+	
+	return;
+}
+
+void AdminFrame::OnListItemSelectedAdmin( wxListEvent& event ){
+	int i;
+	for(i = 0 ; i < m_listCtrlJudge->GetItemCount() ; i++)
+		m_listCtrlJudge->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	for(i = 0 ; i < m_listCtrlTeam->GetItemCount() ; i++)
+		m_listCtrlTeam->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	
+	return;
 }
 
 void AdminFrame::OnListItemActivatedJudge( wxListEvent& event ){
-	AccountDialog *accountDialog = new AccountDialog(this, event.GetText(), SRC_JUDGE, event.GetIndex());
+	wxListItem item;
+	item.SetId(event.GetIndex());
+	item.SetColumn(1);
+	item.SetMask(wxLIST_MASK_TEXT);
+	m_listCtrlJudge->GetItem(item);
+	AccountDialog *accountDialog = new AccountDialog(this, item.GetText(), SRC_JUDGE, event.GetIndex());
 	accountDialog->ShowModal();
 	accountDialog->Destroy();
+	
+	return;
+}
+
+void AdminFrame::OnListItemSelectedJudge( wxListEvent& event ){
+	int i;
+	for(i = 0 ; i < m_listCtrlAdmin->GetItemCount() ; i++)
+		m_listCtrlAdmin->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	for(i = 0 ; i < m_listCtrlTeam->GetItemCount() ; i++)
+		m_listCtrlTeam->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	
+	return;
 }
 
 void AdminFrame::OnListItemActivatedTeam( wxListEvent& event ){
-	AccountDialog *accountDialog = new AccountDialog(this, event.GetText(), SRC_TEAM, event.GetIndex());
+	wxListItem item;
+	item.SetId(event.GetIndex());
+	item.SetColumn(1);
+	item.SetMask(wxLIST_MASK_TEXT);
+	m_listCtrlTeam->GetItem(item);
+	AccountDialog *accountDialog = new AccountDialog(this, item.GetText(), SRC_TEAM, event.GetIndex());
 	accountDialog->ShowModal();
 	accountDialog->Destroy();
+	
+	return;
+}
+
+void AdminFrame::OnListItemSelectedTeam( wxListEvent& event ){
+	int i;
+	for(i = 0 ; i < m_listCtrlAdmin->GetItemCount() ; i++)
+		m_listCtrlAdmin->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	for(i = 0 ; i < m_listCtrlJudge->GetItemCount() ; i++)
+		m_listCtrlJudge->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	
+	return;
 }
 
 void AdminFrame::OnButtonClickNewAccount( wxCommandEvent& event ){
@@ -195,7 +296,7 @@ void AdminFrame::OnButtonClickNewAccount( wxCommandEvent& event ){
 }
 
 void AdminFrame::OnButtonClickDeleteAccount( wxCommandEvent& event ){
-
+	
 }
 
 void AdminFrame::OnButtonClickStart( wxCommandEvent& event ){

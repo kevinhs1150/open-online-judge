@@ -17,13 +17,17 @@ class AdminFrame: public AdminGUI
 		bool isProblemInfoEnable;
 	
 		//void OnClose( wxCloseEvent& event );
+		void InitAccountList();
 		void ProblemInfoEnable(bool enable);
 		
 		void OnButtonClickChangePassword( wxCommandEvent& event );
 		void OnButtonClickLogout( wxCommandEvent& event );
 		void OnListItemActivatedAdmin( wxListEvent& event );
+		void OnListItemSelectedAdmin( wxListEvent& event );
 		void OnListItemActivatedJudge( wxListEvent& event );
+		void OnListItemSelectedJudge( wxListEvent& event );
 		void OnListItemActivatedTeam( wxListEvent& event );
+		void OnListItemSelectedTeam( wxListEvent& event );
 		void OnButtonClickNewAccount( wxCommandEvent& event );
 		void OnButtonClickDeleteAccount( wxCommandEvent& event );
 		void OnButtonClickStart( wxCommandEvent& event );

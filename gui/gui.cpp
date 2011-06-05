@@ -125,7 +125,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxBoxSizer* bSizerTitle;
 	bSizerTitle = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_staticTextTime = new wxStaticText( this, wxID_ANY, wxT("Time"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextTime = new wxStaticText( this, wxID_ANY, wxT("00:00:00"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextTime->Wrap( -1 );
 	bSizerTitle->Add( m_staticTextTime, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
