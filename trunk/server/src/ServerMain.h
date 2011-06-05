@@ -4,16 +4,14 @@
 #include <wx/wx.h>
 #include "ServerApp.h"
 #include "gui.h"
-#include "sqlite3.h"
-
 
 extern "C"
 {
 	#include "serverproto.h"
+	#include "sqlite3.h"
 	#include <stdlib.h>
 	#include <string.h>
 }
-
 
 /* Server GUI class. */
 class ServerFrame: public ServerGUI
@@ -21,21 +19,21 @@ class ServerFrame: public ServerGUI
 	private:
 		/* Sqlite variable */
 		sqlite3 *db;
-		char *errMsg = NULL;
-		/* SQL DDL "CREATE TABLE" char string */
+		/* "CREATE TABLE" SQL */
 		char *create_user = "CREATE TABLE user("
 			"account_id   INTEGER PRIMARY KEY,"
-			"account      VARCHAR(20),"
+			"account      VARCHAR(25),"
 			"password     VARCHAR(25),"
 			"account_type INTEGER,"
 			"ipaddress    VARCHAR(20),"
-			"logged_in    VARCHAR(5));"
+			"logged_in    VARCHAR(5));";
 			
 		char *create_problem = "CREATE TABLE problem("
 			"problem_id					INTEGER PRIMARY KEY,"
 			"path_description			VARCHAR(50),"
 			"correct_input_filename     VARCHAR(50),"
-			"correct_output_filename    VARCHAR(50));"
+			"correct_output_filename    VARCHAR(50),"
+			"time_limit					INTEGER);";
 
 		char *create_submission = "CREATE TABLE submission("
 			"run_id      INTEGER PRIMARY KEY,"
@@ -56,7 +54,8 @@ class ServerFrame: public ServerGUI
 			"FOREIGN KEY(account_id) REFERENCES user(account_id));";
 
 		char *create_scoreboard = "CREATE TABLE scoreboard("
-			"account_id		INTEGER PRIMARY KEY,"
+			"score_id		INTEGER PRIMARY KEY,"
+			"account_id		INTEGER,"
 			"time			INTEGER,"
 			"score			INTEGER,"
 			"FOREIGN KEY(account_id) REFERENCES user(account_id));";

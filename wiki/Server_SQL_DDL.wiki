@@ -7,7 +7,7 @@
 
   create table user(account_id int, account varchar(20), password varchar(25), account_type int, ipaddress, varchar(20), logged_in varchar(5), primary key(account_id));
  
-  * problem(problem_id, path_description, correct_input_filename, correct_output_filename)
+  * problem(problem_id, path_description, correct_input_filename, correct_output_filename, time_limit)
  
   create table problem(problem_id int, path_description VARCHAR(50), correct_input_filename varchar(50), correct_output_filename varchar(50), primary key(problem_id));
  
