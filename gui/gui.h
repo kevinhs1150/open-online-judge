@@ -158,6 +158,9 @@ class AdminGUI : public wxFrame
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnButtonClickChangePassword( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickLogout( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnListItemActivatedAdmin( wxListEvent& event ) { event.Skip(); }
+		virtual void OnListItemActivatedJudge( wxListEvent& event ) { event.Skip(); }
+		virtual void OnListItemActivatedTeam( wxListEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickNewAccount( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickDeleteAccount( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickStart( wxCommandEvent& event ) { event.Skip(); }
@@ -211,9 +214,9 @@ class ChangePassGUI : public wxDialog
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class NewAccountGUI
+/// Class AccountGUI
 ///////////////////////////////////////////////////////////////////////////////
-class NewAccountGUI : public wxDialog 
+class AccountGUI : public wxDialog 
 {
 	private:
 	
@@ -235,8 +238,8 @@ class NewAccountGUI : public wxDialog
 	
 	public:
 		
-		NewAccountGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
-		~NewAccountGUI();
+		AccountGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+		~AccountGUI();
 	
 };
 
