@@ -3,6 +3,7 @@
 /* variables used globally over liboojproto */
 void (*cb_login_confirm)( int confirm_code, unsigned int account_id ) = NULL;
 void (*cb_logout_confirm)( int confirm_code ) = NULL;
+void (*cb_passwd_change_confirm)( int confirm_code ) = NULL;
 void (*cb_timer_set)( unsigned int hours, unsigned int minutes, unsigned int seconds ) = NULL;
 void (*cb_contest_start)( void ) = NULL;
 void (*cb_contest_stop)( void ) = NULL;
@@ -12,6 +13,7 @@ void (*cb_clar_request)( unsigned int clar_id, unsigned int account_id, wchar_t 
 void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ) = NULL;
 void (*cb_problem_update)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) = NULL;
 void (*cb_problem_update_dlfin)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
+void (*cb_problem_remove)( unsigned int problem_id ) = NULL;
 
 /* callback common to all clients */
 void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string ) = NULL;
@@ -380,6 +382,16 @@ int proto_commonreq( int RQSR, int RQID, char *msgptr )
 
 			free( confirm_code_str );
 		}
+		else if( RQID == OPID_PASSWD_REPLY )
+		{
+			char *confirm_code_str = proto_str_split( msgptr, NULL );
+
+			int confirm_code = atoi( confirm_code_str );
+
+			(*cb_passwd_change_confirm)( confirm_code );
+
+			free( confirm_code_str );
+		}
 
 		return 1;
 	}
@@ -410,7 +422,7 @@ int proto_commonreq( int RQSR, int RQID, char *msgptr )
 		{
 			(*cb_contest_stop)();
 		}
-		
+
 		return 1;
 	}
 
@@ -483,7 +495,7 @@ void proto_sb_update( char *msgptr )
 void proto_problem_update( int sockfd, char *msgptr )
 {
 	char *problem_id_str = proto_str_split( msgptr, &msgptr );
-	char *time_limit_str = proto_str_split( msgptr, &msgptr );
+	char *time_limit_str = proto_str_split( msgptr, NULL );
 	wchar_t *path_description = NULL, *path_input = NULL, *path_answer = NULL;
 
 	unsigned int problem_id = atoi( problem_id_str );
@@ -503,6 +515,17 @@ void proto_problem_update( int sockfd, char *msgptr )
 	free( path_description );
 	free( path_input );
 	free( path_answer );
+}
+
+void proto_problem_remove( char *msgptr )
+{
+	char *problem_id_str = proto_str_split( msgptr ,NULL );
+
+	unsigned int problem_id = atoi( problem_id_str );
+
+	(*cb_problem_remove)( problem_id );
+
+	free( problem_id_str );
 }
 
 /* common function implementation */
@@ -529,7 +552,6 @@ int proto_login( char *destip, short src, wchar_t *account, char *password )
 
 	shutdown_wr_sp( sockfd );
 	free( account_mb );
-
 	return 0;
 }
 
@@ -547,6 +569,32 @@ int proto_logout( char *destip, short src, unsigned int account_id )
 	{
 #if PROTO_DBG > 0
 		printf("[proto_logout()] tcp_connect() call failed.\n");
+#endif
+		return -1;
+	}
+
+	send( sockfd, sendbuf, BUFLEN, 0 );
+
+	shutdown_wr_sp( sockfd );
+	free( account_id_str );
+	return 0;
+}
+
+int proto_password_change( char *destip, short src, unsigned int account_id, char *new_password )
+{
+	int sockfd;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL;
+	char *account_id_str = uint2str( account_id );
+
+	msgptr = proto_srid_comb( sendbuf, src, OPID_PASSWD_CHANGE );
+	msgptr = proto_str_comb( msgptr, account_id_str );
+	msgptr = proto_str_comb( msgptr, new_password );
+
+	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_SERVER ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[proto_password_change()] tcp_connect() call failed.\n");
 #endif
 		return -1;
 	}
@@ -586,7 +634,93 @@ int proto_clar_result( char *destip, short srctype, unsigned int clar_id, int pr
 	free( clar_id_str );
 	free( private_byte_str );
 	free( result_string_mb );
-
 	return 0;
 }
 
+int proto_sb_sync( char *destip, short srctype )
+{
+	int sockfd;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL;
+
+	msgptr = proto_srid_comb( sendbuf, srctype, OPID_SB_SYNC );
+
+	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_SERVER ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[proto_sb_sync()] tcp_connect() call failed.\n");
+#endif
+		return -1;
+	}
+
+	send_sp( sockfd, sendbuf, BUFLEN );
+
+	shutdown_wr_sp( sockfd );
+	return 0;
+}
+
+int proto_timer_sync( char *destip, short srctype )
+{
+	int sockfd;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL;
+
+	msgptr = proto_srid_comb( sendbuf, srctype, OPID_TIMER_SYNC );
+
+	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_SERVER ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[proto_timer_sync()] tcp_connect() call failed.\n");
+#endif
+		return -1;
+	}
+
+	send_sp( sockfd, sendbuf, BUFLEN );
+
+	shutdown_wr_sp( sockfd );
+	return 0;
+}
+
+int proto_contest_state_sync( char *destip, short srctype )
+{
+	int sockfd;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL;
+
+	msgptr = proto_srid_comb( sendbuf, srctype, OPID_CONTEST_STATE_SYNC );
+
+	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_SERVER ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[proto_contest_sync()] tcp_connect() call failed.\n");
+#endif
+		return -1;
+	}
+
+	send_sp( sockfd, sendbuf, BUFLEN );
+
+	shutdown_wr_sp( sockfd );
+	return 0;
+}
+
+int proto_clar_sync( char *destip, short srctype )
+{
+	int sockfd;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL;
+
+	msgptr = proto_srid_comb( sendbuf, srctype, OPID_CLAR_SYNC );
+
+	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_SERVER ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[proto_clar_sync()] tcp_connect() call failed.\n");
+#endif
+		return -1;
+	}
+
+	send_sp( sockfd, sendbuf, BUFLEN );
+
+	shutdown_wr_sp( sockfd );
+	return 0;
+}

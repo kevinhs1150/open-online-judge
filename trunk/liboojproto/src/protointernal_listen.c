@@ -71,7 +71,7 @@ int proto_listen( char *localaddr, unsigned short bind_port, void *(*cbthread)( 
 
 int proto_active( void )
 {
-	return !proto_stop;	
+	return !proto_stop;
 }
 
 int proto_stop_listen( void )

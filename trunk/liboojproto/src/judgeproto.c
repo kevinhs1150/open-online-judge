@@ -14,6 +14,7 @@ void (*cb_take_result)( unsigned int run_id, int success );
 /* callback functions extern-ed from protointernal.c */
 extern void (*cb_login_confirm)( int confirm_code, unsigned int account_id );
 extern void (*cb_logout_confirm)( int confirm_code );
+extern void (*cb_password_change_confirm)( int confirm_code );
 extern void (*cb_timer_set)( unsigned int hours, unsigned int minutes, unsigned int seconds );
 extern void (*cb_contest_start)( void );
 extern void (*cb_contest_stop)( void );
@@ -21,6 +22,23 @@ extern void (*cb_clar_request)( unsigned int clar_id, unsigned int account_id, w
 extern void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
 extern void (*cb_problem_update)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
 extern void (*cb_problem_update_dlfin)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+extern void (*cb_problem_remove)( unsigned int problem_id );
+
+/* callback registration functions */
+void judgeproto_cbreg_login_confirm( void (*cbfunc)( int, unsigned int ) ) { cb_login_confirm = cbfunc; }
+void judgeproto_cbreg_logout_confirm( void (*cbfunc)( int ) )              { cb_logout_confirm = cbfunc; }
+void judgeproto_cbreg_password_change_confirm( void (*cbfunc)( int ) ) { cb_password_change_confirm = cbfunc; }
+void judgeproto_cbreg_timer_set( void (*cbfunc)( unsigned int, unsigned int, unsigned int ) ) { cb_timer_set = cbfunc; }
+void judgeproto_cbreg_contest_start( void (*cbfunc)( void ) ) { cb_contest_start = cbfunc; }
+void judgeproto_cbreg_contest_stop( void (*cbfunc)( void ) )  { cb_contest_stop = cbfunc; }
+void judgeproto_cbreg_run_request( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t** ) )      { cb_run_request = cbfunc; }
+void judgeproto_cbreg_run_request_dlfin( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t* ) ) { cb_run_request_dlfin = cbfunc; }
+void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int, unsigned int, wchar_t**, wchar_t**, wchar_t** ) ) { cb_problem_update = cbfunc; }
+void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_update_dlfin = cbfunc;}
+void judgeproto_cbreg_problem_remove( void (*cbfunc)( unsigned int problem_id ) ) { cb_problem_remove = cbfunc; }
+void judgeproto_cbreg_take_result( void (*cbfunc)( unsigned int, int ) ) { cb_take_result = cbfunc; }
+void judgeproto_cbreg_clar_request( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, int, wchar_t* ) ) { cb_clar_request = cbfunc; }
+void judgeproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t*, wchar_t* ) ) { cb_clar_reply = cbfunc; }
 
 /* thread function */
 void *judgeproto_reqhand_thread( void *args );
@@ -28,6 +46,18 @@ void *judgeproto_reqhand_thread( void *args );
 /* external sync variable (from proto_commonfunction.c) */
 extern pthread_mutex_t proto_sockfd_pass_mutex;
 extern pthread_cond_t proto_sockfd_pass_cv;
+
+/* callback registration check function */
+static int judgeproto_cbcheck( void )
+{
+	if( cb_login_confirm == NULL || cb_logout_confirm == NULL || cb_password_change_confirm == NULL ||
+		cb_timer_set == NULL || cb_contest_start == NULL || cb_contest_stop == NULL || cb_run_request == NULL ||
+		cb_run_request_dlfin == NULL || cb_problem_update == NULL || cb_problem_update_dlfin == NULL ||
+		cb_problem_remove == NULL || cb_take_result == NULL || cb_clar_request == NULL || cb_clar_reply == NULL )
+		return 0;
+	else
+		return 1;
+}
 
 int judgeproto_listen( char *localaddr )
 {
@@ -118,10 +148,15 @@ void *judgeproto_reqhand_thread( void *args )
 		{
 			proto_problem_update( sockfd, msgptr );
 		}
+		else if( RQID == OPID_PREMOVE )
+		{
+			proto_problem_remove( msgptr );
+		}
 		else if( RQID == OPID_TAKE_RESULT )
 		{
 			char *run_id_str = proto_str_split( msgptr, &msgptr );
 			char *success_str = proto_str_split( msgptr, NULL );
+
 
 			unsigned int run_id = atoi( run_id_str );
 			int success = atoi( success_str );
@@ -159,6 +194,7 @@ void *judgeproto_reqhand_thread( void *args )
 	pthread_exit( NULL );
 }
 
+
 int judgeproto_login( char *destip, wchar_t *account, char *password )
 {
 	return proto_login( destip, OPSR_JUDGE, account, password );
@@ -167,6 +203,11 @@ int judgeproto_login( char *destip, wchar_t *account, char *password )
 int judgeproto_logout( char *destip, unsigned int account_id )
 {
 	return proto_logout( destip, OPSR_JUDGE, account_id );
+}
+
+int judgeproto_password_change( char *destip, unsigned int account_id, char *new_password )
+{
+	return proto_password_change( destip, OPSR_JUDGE, account_id, new_password );
 }
 
 /* run result */
@@ -199,13 +240,13 @@ int judgeproto_judge_result( char *destip, unsigned int run_id, wchar_t *result_
 	return 0;
 }
 
-int judgeproto_run_update( char *destip )
+int judgeproto_run_sync( char *destip )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
 	char *msgptr = NULL;
-	
-	msgptr = proto_srid_comb( sendbuf, OPSR_JUDGE, OPID_UPDATE_RUN );
+
+	msgptr = proto_srid_comb( sendbuf, OPSR_JUDGE, OPID_RUN_SYNC );
 
 	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_SERVER ) ) < 0 )
 	{
@@ -243,44 +284,49 @@ int judgeproto_take_run( char *destip, unsigned int run_id )
 	send_sp( sockfd, sendbuf, BUFLEN );
 
 	shutdown_wr_sp( sockfd );
-
+	free( run_id_str );
 	return 0;
 }
 
+
 int judgeproto_clar_result( char *destip, unsigned int clar_id, int private_byte, wchar_t *result_string )
 {
-	if( proto_clar_result( destip, OPSR_JUDGE, clar_id, private_byte, result_string ) < 0 )
+	return proto_clar_result( destip, OPSR_JUDGE, clar_id, private_byte, result_string );
+}
+
+int judgeproto_timer_sync( char *destip )
+{
+	return proto_timer_sync( destip, OPSR_JUDGE );
+}
+
+int judgeproto_contest_state_sync( char *destip )
+{
+	return proto_contest_state_sync( destip, OPSR_JUDGE );
+}
+
+int judgeproto_clar_sync( char *destip )
+{
+	return proto_clar_sync( destip, OPSR_JUDGE );
+}
+
+int judgeproto_problem_sync( char *destip )
+{
+	int sockfd;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL;
+
+	msgptr = proto_srid_comb( sendbuf, OPSR_JUDGE, OPID_JPROBLEM_SYNC );
+
+	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_SERVER ) ) < 0 )
 	{
 #if PROTO_DBG > 0
-		printf("[judgeproto_clar_result()] proto_clar_result() call failed.\n");
+		printf("[judgeproto_problem_sync()] tcp_connect() call failed.\n");
 #endif
 		return -1;
 	}
 
+	send_sp( sockfd, sendbuf, BUFLEN );
+
+	shutdown_wr_sp( sockfd );
 	return 0;
-}
-
-
-void judgeproto_cbreg_login_confirm( void (*cbfunc)( int, unsigned int ) ) { cb_login_confirm = cbfunc; }
-void judgeproto_cbreg_logout_confirm( void (*cbfunc)( int ) )              { cb_logout_confirm = cbfunc; }
-void judgeproto_cbreg_timer_set( void (*cbfunc)( unsigned int, unsigned int, unsigned int ) ) { cb_timer_set = cbfunc; }
-void judgeproto_cbreg_contest_start( void (*cbfunc)( void ) ) { cb_contest_start = cbfunc; }
-void judgeproto_cbreg_contest_stop( void (*cbfunc)( void ) )  { cb_contest_stop = cbfunc; }
-void judgeproto_cbreg_run_request( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t** ) )      { cb_run_request = cbfunc; }
-void judgeproto_cbreg_run_request_dlfin( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t* ) ) { cb_run_request_dlfin = cbfunc; }
-void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int, unsigned int, wchar_t**, wchar_t**, wchar_t** ) ) { cb_problem_update = cbfunc; }
-void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) {cb_problem_update_dlfin = cbfunc;}
-void judgeproto_cbreg_take_result( void (*cbfunc)( unsigned int, int ) ) { cb_take_result = cbfunc; }
-void judgeproto_cbreg_clar_request( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, int, wchar_t* ) ) { cb_clar_request = cbfunc; }
-void judgeproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t*, wchar_t* ) );
-
-static int judgeproto_cbcheck( void )
-{
-	if( cb_login_confirm == NULL || cb_logout_confirm == NULL ||
-		cb_timer_set == NULL || cb_contest_start == NULL || cb_contest_stop == NULL ||
-		cb_run_request == NULL || cb_run_request_dlfin == NULL || cb_problem_update == NULL ||
-		cb_problem_update_dlfin == NULL || cb_clar_request == NULL || cb_clar_reply == NULL )
-		return 0;
-	else
-		return 1;
 }

@@ -18,7 +18,6 @@
 #define LISTEN_PORT_ADMIN 27016
 #define LISTEN_PORT_JUDGE 27017
 #define LISTEN_PORT_TEAM 27018
-#define VSFTP_PORT 27020
 
 #ifdef _WIN32
 /* Win32 has no bzero implementation, but has an ZeroMemory which is identical to bzero in usage (implementation not sure). */
@@ -102,12 +101,27 @@ void proto_sb_update( char *msgptr );
 
 /* internal common problem update function -- common to admin and judge client */
 void proto_problem_update( int sockfd, char *msgptr );
+/* this one is for problem removal */
+void proto_problem_remove( char *msgptr );
 
-/* internal common login & logout functions */
+/* internal common account management functions */
 int proto_login( char *destip, short src, wchar_t *account, char *password );
 int proto_logout( char *destip, short src, unsigned int account_id );
+int proto_password_change( char *destip, short src, unsigned int account_id, char *new_password );
 
 /* internal clarification result function common to administrator client and judge client */
 int proto_clar_result( char *destip, short srctype, unsigned int clar_id, int private_byte, wchar_t *result_string );
+
+/* internal common scoreboard sync function -- common to admin and team client */
+int proto_sb_sync( char *destip, short srctype );
+
+/* internal common timer sync function -- common to all clients */
+int proto_timer_sync( char *destip, short srctype );
+
+/* internal contest state sync function -- common to all clients */
+int proto_contest_state_sync( char *destip, short srctype );
+
+/* internal clarification sync function -- common to admin and judge client */
+int proto_clar_sync( char *destip, short srctype );
 
 #endif

@@ -101,3 +101,20 @@ released on 2011.06.02   by Infinity
 
 protocol 0 revision 5
 ongoing
+ NOTE: Because deadline is near, specification document will no longer be
+ updated.
+ + common: All update "request" functions are now unified to the naming scheme
+ "sync".  All update "operations" are remained "update".  Sorry for the
+ frequent name change, but this one is necessary.  Otherwise, all update
+ functions will be in a chaos.
+ + clients: Timer & contest state sync functions.
+ + admin&judge: Clarification sync function.
+ + admin&team: Scoreboard sync function.
+ + team: Run sync which updates runs submitted by that team.
+ + judge: Problem sync callback added.
+ + server: All above requests callback.
+
+ * common: For all update functions, add a remove_byte to indicate a "delete"
+ update.
+ * common: Some other changes.  A function name mapping list will be published
+ later.
