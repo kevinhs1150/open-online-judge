@@ -80,7 +80,6 @@ class AdminGUI : public wxFrame
 	private:
 	
 	protected:
-		wxStaticText* m_staticTextTime;
 		
 		wxStaticText* m_staticTextName;
 		wxButton* m_buttonChangePassword;
@@ -176,6 +175,7 @@ class AdminGUI : public wxFrame
 		
 	
 	public:
+		wxStaticText* m_staticTextTime;
 		wxListCtrl* m_listCtrlAdmin;
 		wxListCtrl* m_listCtrlJudge;
 		wxListCtrl* m_listCtrlTeam;
