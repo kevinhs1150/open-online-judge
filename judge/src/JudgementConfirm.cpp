@@ -28,19 +28,19 @@ void JudgementConfirmFrame::setJudgementVal(int result)
 	wxString judgementVal;
 	
 	if(result == YES){
-		judgementVal("Yes.",wxConvUTF8);
+		judgementVal.Printf(wxT("Yes."));
 	}
 	else if(result == COMPLIE_ERROR){
-		judgementVal("Complie error.",wxConvUTF8);
+		judgementVal.Printf(wxT("Complie error."));
 	}
 	else if(result == WRONG_ANSWER){
-		judgementVal("Wrong answer.",wxConvUTF8);
+		judgementVal.Printf(wxT("Wrong answer."));
 	}
 	else if(result == TIME_LIMIT_EXCEED){
-		judgementVal("Time-limit exceed.",wxConvUTF8);
+		judgementVal.Printf(wxT("Time-limit exceed."));
 	}
 	else{
-		judgementVal("Other error.",wxConvUTF8);
+		judgementVal.Printf(wxT("Other error."));
 	}
 	
 	m_staticTextJudgementVal->SetLabel(judgementVal);

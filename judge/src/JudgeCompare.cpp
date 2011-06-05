@@ -41,7 +41,7 @@ void JudgeCompareFrame::setProblemID(unsigned int problem_id)
             fclose(fptr2);
         }
         else{
-			userOutput("File opening failure.",wxConvUTF8);
+			userOutput.Printf(wxT("File opening failure."));
         }
 		
 		ch = get(fptr1);
@@ -52,7 +52,7 @@ void JudgeCompareFrame::setProblemID(unsigned int problem_id)
         fclose(fptr1);
     }
     else{
-		officialOutput("File opening failure.",wxConvUTF8);
+		officialOutput.Printf(wxT("File opening failure."));
     }
 	
 	m_textCtrlOfficialOutput->SetValue(officialOutput);
