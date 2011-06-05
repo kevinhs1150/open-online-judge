@@ -14,11 +14,19 @@ class AdminFrame: public AdminGUI
 		bool isLogin;
 	
     private:
+		bool isProblemInfoEnable;
+	
 		//void OnClose( wxCloseEvent& event );
+		void ProblemInfoEnable(bool enable);
+		
 		void OnButtonClickChangePassword( wxCommandEvent& event );
 		void OnButtonClickLogout( wxCommandEvent& event );
 		void OnButtonClickNewAccount( wxCommandEvent& event );
 		void OnButtonClickDeleteAccount( wxCommandEvent& event );
+		void OnButtonClickStart( wxCommandEvent& event );
+		void OnButtonClickStop( wxCommandEvent& event );
+		void OnListItemDeselectedProblem( wxListEvent& event );
+		void OnListItemSelectedProblem( wxListEvent& event );
 		void OnButtonClickAddProblem( wxCommandEvent& event );
 		void OnButtonClickDelProblem( wxCommandEvent& event );
 
