@@ -106,7 +106,8 @@
 
 /* password change confirmation code */
 #define PASSWD_SUCCESS		1
-#define PASSWD_FAIL			2
+#define PASSWD_MISMATCH		2
+#define PASSWD_INVALID		3
 
 /* take success code */
 #define TAKE_FAIL		0

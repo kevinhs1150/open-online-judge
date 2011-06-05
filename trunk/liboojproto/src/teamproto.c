@@ -206,9 +206,9 @@ int teamproto_logout( char *destip, unsigned int account_id )
 	return proto_logout( destip, OPSR_TEAM, account_id );
 }
 
-int teamproto_password_change( char *destip, unsigned int account_id, char *new_password )
+int teamproto_password_change( char *destip, unsigned int account_id, char *old_password, char *new_password )
 {
-	return proto_password_change( destip, OPSR_TEAM, account_id, new_password );
+	return proto_password_change( destip, OPSR_TEAM, account_id, old_password, new_password );
 }
 
 int teamproto_submission( char *destip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )

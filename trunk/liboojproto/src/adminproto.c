@@ -195,9 +195,9 @@ int adminproto_logout( char *destip, unsigned int account_id )
 	return proto_logout( destip, OPSR_ADMIN, account_id );
 }
 
-int adminproto_password_change( char *destip, unsigned int account_id, char *new_password )
+int adminproto_password_change( char *destip, unsigned int account_id, char *old_password, char *new_password )
 {
-	return proto_password_change( destip, OPSR_ADMIN, account_id, new_password );
+	return proto_password_change( destip, OPSR_ADMIN, account_id, old_password, new_password );
 }
 
 int adminproto_account_add( char *destip, unsigned int type, wchar_t *account, char *password )

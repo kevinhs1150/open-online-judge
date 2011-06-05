@@ -9,7 +9,7 @@ static int serverproto_cbcheck( void );
 /* callback functions */
 void (*cb_login_request)( char *srcip, short srctype, wchar_t *account, char *password ) = NULL;
 void (*cb_logout_request)( char *srcip, short srctype, unsigned int account_id )         = NULL;
-void (*cb_password_change)( char *srcip, short srctype, unsigned int account_id, char *new_password )       = NULL;
+void (*cb_password_change)( char *srcip, short srctype, unsigned int account_id, char *old_password, char *new_password )       = NULL;
 void (*cb_timer_sync)( char *srcip, short srctype ) = NULL;
 void (*cb_contest_state_sync)( char *srcip, short srctype ) = NULL;
 void (*cb_admin_timer_set)( char *srcip, unsigned int hours, unsigned int minutes, unsigned int seconds ) = NULL;
@@ -40,7 +40,7 @@ void (*cb_clar_result)( char *srcip, unsigned int clar_id, int private_byte, wch
 /* callback registration functions */
 void serverproto_cbreg_login_request( void (*cbfunc)( char*, short, wchar_t*, char* ) )  { cb_login_request = cbfunc; }
 void serverproto_cbreg_logout_request( void (*cbfunc)( char*, short, unsigned int ) )    { cb_logout_request = cbfunc; }
-void serverproto_cbreg_password_change( void (*cbfunc)( char*, short, unsigned int, char* ) )   { cb_password_change = cbfunc; }
+void serverproto_cbreg_password_change( void (*cbfunc)( char*, short, unsigned int, char*, char* ) )   { cb_password_change = cbfunc; }
 void serverproto_cbreg_timer_sync( void (*cbfunc)( char*, short ) ) { cb_timer_sync = cbfunc; }
 void serverproto_cbreg_contest_state_sync( void (*cbfunc)( char*, short ) ) { cb_contest_state_sync = cbfunc; }
 void serverproto_cbreg_admin_timer_set( void (*cbfunc)( char*, unsigned int, unsigned int, unsigned int ) ) { cb_admin_timer_set = cbfunc; }
@@ -179,13 +179,15 @@ void *serverproto_reqhand_thread( void *args )
 		else if( RQID = OPID_PASSWD_CHANGE )
 		{
 			char *account_id_str = proto_str_split( msgptr, &msgptr );
+			char *old_password = proto_str_split( msgptr, &msgptr );
 			char *new_password = proto_str_split( msgptr, NULL );
 
 			unsigned int account_id = atoi( account_id_str );
 
-			(*cb_password_change)( src_ipaddr, RQSR, account_id, new_password );
+			(*cb_password_change)( src_ipaddr, RQSR, account_id, old_password, new_password );
 
 			free( account_id_str );
+			free( old_password );
 			free( new_password );
 		}
 	}

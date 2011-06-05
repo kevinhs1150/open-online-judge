@@ -79,7 +79,7 @@ int teamproto_login( char *destip, wchar_t *account, char *password );
 int teamproto_logout( char *destip, unsigned int account_id );
 
 /* password change */
-int teamproto_password_change( char *destip, unsigned int account_id, char *new_password );
+int teamproto_password_change( char *destip, unsigned int account_id, char *old_password, char *new_password );
 
 /* submit */
 int teamproto_submission( char *destip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code );

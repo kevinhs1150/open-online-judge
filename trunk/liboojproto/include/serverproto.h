@@ -28,7 +28,7 @@ void serverproto_cbreg_logout_request( void (*cbfunc)( char *srcip, short srctyp
  * Server should store the changed password into database and give the client a reply.
  *   reply function: serverproto_password_change_reply()
  *   confirmation code defined in proto_commondefine.h */
-void serverproto_cbreg_password_change( void (*cbfunc)( char *srcip, short srctype, unsigned int account_id, char *new_password ) );
+void serverproto_cbreg_password_change( void (*cbfunc)( char *srcip, short srctype, unsigned int account_id, char *old_password, char *new_password ) );
 
 /* Callback for timer sync. (from all clients)
  * Server should sync the timer with the requesting client.

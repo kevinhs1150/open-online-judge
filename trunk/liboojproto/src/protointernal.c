@@ -580,7 +580,7 @@ int proto_logout( char *destip, short src, unsigned int account_id )
 	return 0;
 }
 
-int proto_password_change( char *destip, short src, unsigned int account_id, char *new_password )
+int proto_password_change( char *destip, short src, unsigned int account_id, char *old_password, char *new_password )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -589,6 +589,7 @@ int proto_password_change( char *destip, short src, unsigned int account_id, cha
 
 	msgptr = proto_srid_comb( sendbuf, src, OPID_PASSWD_CHANGE );
 	msgptr = proto_str_comb( msgptr, account_id_str );
+	msgptr = proto_str_comb( msgptr, old_password );
 	msgptr = proto_str_comb( msgptr, new_password );
 
 	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_SERVER ) ) < 0 )

@@ -107,7 +107,7 @@ void proto_problem_remove( char *msgptr );
 /* internal common account management functions */
 int proto_login( char *destip, short src, wchar_t *account, char *password );
 int proto_logout( char *destip, short src, unsigned int account_id );
-int proto_password_change( char *destip, short src, unsigned int account_id, char *new_password );
+int proto_password_change( char *destip, short src, unsigned int account_id, char *old_password, char *new_password );
 
 /* internal clarification result function common to administrator client and judge client */
 int proto_clar_result( char *destip, short srctype, unsigned int clar_id, int private_byte, wchar_t *result_string );
