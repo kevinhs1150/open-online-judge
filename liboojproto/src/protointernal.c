@@ -388,7 +388,7 @@ int proto_commonreq( int RQSR, int RQID, char *msgptr )
 
 			int confirm_code = atoi( confirm_code_str );
 
-			(*cb_passwd_change_confirm)( confirm_code );
+			(*cb_password_change_confirm)( confirm_code );
 
 			free( confirm_code_str );
 		}
