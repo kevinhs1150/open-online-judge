@@ -107,7 +107,6 @@ class AdminGUI : public wxFrame
 		wxSpinCtrl* m_spinCtrlTimeScheduleTotalMin;
 		
 		wxButton* m_buttonTimeScheduleSet;
-		wxStaticLine* m_staticline8;
 		wxRadioButton* m_radioBtnTimeManual;
 		wxStaticText* m_staticTextTimeScheduleTotal1;
 		wxSpinCtrl* m_spinCtrlTimeScheduleTotalHr1;
@@ -115,6 +114,11 @@ class AdminGUI : public wxFrame
 		wxSpinCtrl* m_spinCtrlTimeScheduleTotalMin1;
 		
 		wxButton* m_buttonTimeScheduleSet1;
+		wxStaticLine* m_staticline8;
+		
+		wxButton* m_buttonContestStart;
+		wxButton* m_buttonContestStop;
+		
 		wxPanel* m_panelProblems;
 		wxStaticText* m_staticTextProblems;
 		wxListCtrl* m_listCtrlProblems;
@@ -124,21 +128,21 @@ class AdminGUI : public wxFrame
 		wxTextCtrl* m_textCtrlProblemName;
 		wxCheckBox* m_checkBoxProblemFile;
 		wxFilePickerCtrl* m_filePickerProblemFile;
-		wxStaticText* m_staticText47;
-		wxSpinCtrl* m_spinCtrl13;
-		wxStaticText* m_staticText48;
-		wxCheckBox* m_checkBox2;
-		wxStaticText* m_staticText40;
+		wxStaticText* m_staticTextTimeLimit;
+		wxSpinCtrl* m_spinCtrlTimeLimitVal;
+		wxStaticText* m_staticTextTimeLimitUnit;
+		wxCheckBox* m_checkBoxProblemSampleData;
+		wxStaticText* m_staticTextProblemSampleDataInput;
 		wxFilePickerCtrl* m_filePicker2;
 		wxStaticText* m_staticText401;
 		wxFilePickerCtrl* m_filePicker21;
-		wxStaticText* m_staticText402;
-		wxFilePickerCtrl* m_filePicker22;
-		wxStaticText* m_staticText4011;
-		wxFilePickerCtrl* m_filePicker211;
+		wxStaticText* m_staticTextProblemInputData;
+		wxFilePickerCtrl* m_filePickerProblemInputData;
+		wxStaticText* m_staticTextProblemOutputData;
+		wxFilePickerCtrl* m_filePickerProblemOutputData;
 		
 		
-		wxButton* m_button27;
+		wxButton* m_buttonProblemApply;
 		wxPanel* m_panelClar;
 		wxStaticText* m_staticText62;
 		wxChoice* m_choice6;
@@ -156,8 +160,13 @@ class AdminGUI : public wxFrame
 		virtual void OnButtonClickLogout( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickNewAccount( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickDeleteAccount( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickStart( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickStop( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnListItemDeselectedProblem( wxListEvent& event ) { event.Skip(); }
+		virtual void OnListItemSelectedProblem( wxListEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickAddProblem( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickDelProblem( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickProblemApply( wxCommandEvent& event ) { event.Skip(); }
 		
 	
 	public:
@@ -246,8 +255,7 @@ class TeamGUI : public wxFrame
 		wxButton* m_buttonLogout;
 		wxChoice* m_choiceProblem;
 		wxButton* m_buttonDownload;
-		wxTextCtrl* m_textCtrlFilePath;
-		wxButton* m_buttonBrowse;
+		wxFilePickerCtrl* m_filePicker;
 		wxChoice* m_choiceLang;
 		wxButton* m_buttonTest;
 		wxButton* m_buttonSubmit;
@@ -260,7 +268,6 @@ class TeamGUI : public wxFrame
 		virtual void OnButtonClickChangePassword( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickLogout( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickDownload( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnButtonClickBrowse( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickTest( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickSubmit( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickAsk( wxCommandEvent& event ) { event.Skip(); }

@@ -1,4 +1,5 @@
 #include "AdminMain.h"
+#include "NewAccountDialog.h"
 extern "C"
 {
 #include "adminproto.h"
@@ -86,6 +87,8 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	int ip1, ip2, ip3, ip4;
 	FILE *ipFile;
 	
+	isProblemInfoEnable = false;
+	
 	AdminFrameGlobal = this;
 	
 	loginDialog = new LoginDialog(NULL);
@@ -136,24 +139,74 @@ void AdminFrame::OnClose( wxCloseEvent& event ){
 }
 */
 
+void AdminFrame::ProblemInfoEnable(bool enable){
+	if(isProblemInfoEnable == enable)
+		return;
+	
+	m_staticTextProblemName->Enable(enable);
+	m_textCtrlProblemName->Enable(enable);
+	m_checkBoxProblemFile->Enable(enable);
+	m_filePickerProblemFile->Enable(enable);
+	m_staticTextTimeLimit->Enable(enable);
+	m_spinCtrlTimeLimitVal->Enable(enable);
+	m_staticTextTimeLimitUnit->Enable(enable);
+	m_staticTextProblemInputData->Enable(enable);
+	m_filePickerProblemInputData->Enable(enable);
+	m_staticTextProblemOutputData->Enable(enable);
+	m_filePickerProblemOutputData->Enable(enable);
+	m_buttonProblemApply->Enable(enable);
+	isProblemInfoEnable = enable;
+	//wxMessageBox(_("Change"));
+	
+	return;
+}
+
 void AdminFrame::OnButtonClickChangePassword( wxCommandEvent& event ){
 
 }
 
 void AdminFrame::OnButtonClickLogout( wxCommandEvent& event ){
-
+	m_listCtrlProblems->InsertItem(1, _("Data"));
 }
 
 void AdminFrame::OnButtonClickNewAccount( wxCommandEvent& event ){
-
+	NewAccountDialog *newAccountDialog = new NewAccountDialog(this);
+	newAccountDialog->ShowModal();
+	newAccountDialog->Destroy();
+	
+	return;
 }
 
 void AdminFrame::OnButtonClickDeleteAccount( wxCommandEvent& event ){
 
 }
 
+void AdminFrame::OnButtonClickStart( wxCommandEvent& event ){
+	if(adminproto_contest_start(server_ip) < 0)
+		wxMessageBox(_("Cannot start contest!"));
+	
+	return;
+}
+
+void AdminFrame::OnButtonClickStop( wxCommandEvent& event ){
+	if(adminproto_contest_start(server_ip) < 0)
+		wxMessageBox(_("Cannot stop contest!"));
+	
+	return;
+}
+
+void AdminFrame::OnListItemDeselectedProblem( wxListEvent& event ){
+	ProblemInfoEnable(false);
+}
+
+void AdminFrame::OnListItemSelectedProblem( wxListEvent& event ){
+	ProblemInfoEnable(true);
+}
+
 void AdminFrame::OnButtonClickAddProblem( wxCommandEvent& event ){
 	m_textCtrlProblemName->Clear();
+	m_filePickerProblemFile->SetPath(wxEmptyString);
+	m_spinCtrlTimeLimitVal->SetValue(3000);
 }
 
 void AdminFrame::OnButtonClickDelProblem( wxCommandEvent& event ){

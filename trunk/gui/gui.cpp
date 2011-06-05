@@ -231,30 +231,46 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	m_staticTextTimeScheduleFrom = new wxStaticText( m_panelContestInfo, wxID_ANY, wxT("From"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextTimeScheduleFrom->Wrap( -1 );
+	m_staticTextTimeScheduleFrom->Enable( false );
+	
 	bSizerTimeScheduleFromTo->Add( m_staticTextTimeScheduleFrom, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_spinCtrlTimeScheduleFromHr = new wxSpinCtrl( m_panelContestInfo, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), wxSP_ARROW_KEYS, 0, 24, 0 );
+	m_spinCtrlTimeScheduleFromHr->Enable( false );
+	
 	bSizerTimeScheduleFromTo->Add( m_spinCtrlTimeScheduleFromHr, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_staticTextTimeScheduleColonFrom = new wxStaticText( m_panelContestInfo, wxID_ANY, wxT(":"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextTimeScheduleColonFrom->Wrap( -1 );
+	m_staticTextTimeScheduleColonFrom->Enable( false );
+	
 	bSizerTimeScheduleFromTo->Add( m_staticTextTimeScheduleColonFrom, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_spinCtrlTimeScheduleFromMin = new wxSpinCtrl( m_panelContestInfo, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), wxSP_ARROW_KEYS, 0, 59, 0 );
+	m_spinCtrlTimeScheduleFromMin->Enable( false );
+	
 	bSizerTimeScheduleFromTo->Add( m_spinCtrlTimeScheduleFromMin, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_staticTextTimeScheduleTo = new wxStaticText( m_panelContestInfo, wxID_ANY, wxT("To"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextTimeScheduleTo->Wrap( -1 );
+	m_staticTextTimeScheduleTo->Enable( false );
+	
 	bSizerTimeScheduleFromTo->Add( m_staticTextTimeScheduleTo, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_spinCtrlTimeScheduleToHr = new wxSpinCtrl( m_panelContestInfo, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), wxSP_ARROW_KEYS, 0, 24, 0 );
+	m_spinCtrlTimeScheduleToHr->Enable( false );
+	
 	bSizerTimeScheduleFromTo->Add( m_spinCtrlTimeScheduleToHr, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_staticTextTimeScheduleColonTo = new wxStaticText( m_panelContestInfo, wxID_ANY, wxT(":"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextTimeScheduleColonTo->Wrap( -1 );
+	m_staticTextTimeScheduleColonTo->Enable( false );
+	
 	bSizerTimeScheduleFromTo->Add( m_staticTextTimeScheduleColonTo, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_spinCtrlTimeScheduleToMin = new wxSpinCtrl( m_panelContestInfo, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), wxSP_ARROW_KEYS, 0, 59, 0 );
+	m_spinCtrlTimeScheduleToMin->Enable( false );
+	
 	bSizerTimeScheduleFromTo->Add( m_spinCtrlTimeScheduleToMin, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	bSizerTimeSchedule->Add( bSizerTimeScheduleFromTo, 0, wxEXPAND, 5 );
@@ -264,35 +280,43 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	m_staticTextTimeScheduleTotal = new wxStaticText( m_panelContestInfo, wxID_ANY, wxT("Total"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextTimeScheduleTotal->Wrap( -1 );
+	m_staticTextTimeScheduleTotal->Enable( false );
+	
 	bSizerTimeScheduleTotal->Add( m_staticTextTimeScheduleTotal, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_spinCtrlTimeScheduleTotalHr = new wxSpinCtrl( m_panelContestInfo, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), wxSP_ARROW_KEYS, 0, 99, 0 );
+	m_spinCtrlTimeScheduleTotalHr->Enable( false );
+	
 	bSizerTimeScheduleTotal->Add( m_spinCtrlTimeScheduleTotalHr, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_staticTextTimeScheduleTotalColon = new wxStaticText( m_panelContestInfo, wxID_ANY, wxT(":"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextTimeScheduleTotalColon->Wrap( -1 );
+	m_staticTextTimeScheduleTotalColon->Enable( false );
+	
 	bSizerTimeScheduleTotal->Add( m_staticTextTimeScheduleTotalColon, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_spinCtrlTimeScheduleTotalMin = new wxSpinCtrl( m_panelContestInfo, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), wxSP_ARROW_KEYS, 0, 59, 0 );
+	m_spinCtrlTimeScheduleTotalMin->Enable( false );
+	
 	bSizerTimeScheduleTotal->Add( m_spinCtrlTimeScheduleTotalMin, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	
 	bSizerTimeScheduleTotal->Add( 0, 0, 1, wxEXPAND, 5 );
 	
 	m_buttonTimeScheduleSet = new wxButton( m_panelContestInfo, wxID_ANY, wxT("Set"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_buttonTimeScheduleSet->Enable( false );
+	
 	bSizerTimeScheduleTotal->Add( m_buttonTimeScheduleSet, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	bSizerTimeSchedule->Add( bSizerTimeScheduleTotal, 0, wxEXPAND, 5 );
 	
 	sbSizerContestInfoTime->Add( bSizerTimeSchedule, 0, wxEXPAND, 5 );
 	
-	m_staticline8 = new wxStaticLine( m_panelContestInfo, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
-	sbSizerContestInfoTime->Add( m_staticline8, 0, wxEXPAND | wxALL, 5 );
-	
 	wxBoxSizer* bSizerTimeManual;
 	bSizerTimeManual = new wxBoxSizer( wxVERTICAL );
 	
 	m_radioBtnTimeManual = new wxRadioButton( m_panelContestInfo, wxID_ANY, wxT("Manual"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_radioBtnTimeManual->SetValue( true ); 
 	bSizerTimeManual->Add( m_radioBtnTimeManual, 0, wxALL, 5 );
 	
 	wxBoxSizer* bSizerTimeManualTotal;
@@ -322,12 +346,32 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	sbSizerContestInfoTime->Add( bSizerTimeManual, 0, wxEXPAND, 5 );
 	
+	m_staticline8 = new wxStaticLine( m_panelContestInfo, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+	sbSizerContestInfoTime->Add( m_staticline8, 0, wxEXPAND | wxALL, 5 );
+	
+	wxStaticBoxSizer* sbSizerContestCtrl;
+	sbSizerContestCtrl = new wxStaticBoxSizer( new wxStaticBox( m_panelContestInfo, wxID_ANY, wxT("Contest Control") ), wxHORIZONTAL );
+	
+	
+	sbSizerContestCtrl->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_buttonContestStart = new wxButton( m_panelContestInfo, wxID_ANY, wxT("Start"), wxDefaultPosition, wxDefaultSize, 0 );
+	sbSizerContestCtrl->Add( m_buttonContestStart, 0, wxALL, 5 );
+	
+	m_buttonContestStop = new wxButton( m_panelContestInfo, wxID_ANY, wxT("Stop"), wxDefaultPosition, wxDefaultSize, 0 );
+	sbSizerContestCtrl->Add( m_buttonContestStop, 0, wxALL, 5 );
+	
+	
+	sbSizerContestCtrl->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	sbSizerContestInfoTime->Add( sbSizerContestCtrl, 0, wxEXPAND, 5 );
+	
 	bSizerContestInfoPage->Add( sbSizerContestInfoTime, 1, wxEXPAND, 5 );
 	
 	m_panelContestInfo->SetSizer( bSizerContestInfoPage );
 	m_panelContestInfo->Layout();
 	bSizerContestInfoPage->Fit( m_panelContestInfo );
-	m_notebook->AddPage( m_panelContestInfo, wxT("Contest Info"), false );
+	m_notebook->AddPage( m_panelContestInfo, wxT("Contest Info"), true );
 	m_panelProblems = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerProblemsPage;
 	bSizerProblemsPage = new wxBoxSizer( wxHORIZONTAL );
@@ -342,16 +386,16 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_listCtrlProblems = new wxListCtrl( m_panelProblems, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_LIST );
 	bSizerProblemList->Add( m_listCtrlProblems, 1, wxALL|wxEXPAND, 5 );
 	
-	wxBoxSizer* bSizerProblemsButton;
-	bSizerProblemsButton = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizerProblemButton;
+	bSizerProblemButton = new wxBoxSizer( wxHORIZONTAL );
 	
 	m_buttonProblemAdd = new wxButton( m_panelProblems, wxID_ANY, wxT("Add"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizerProblemsButton->Add( m_buttonProblemAdd, 1, wxALL, 5 );
+	bSizerProblemButton->Add( m_buttonProblemAdd, 1, wxALL, 5 );
 	
 	m_buttonProblemDel = new wxButton( m_panelProblems, wxID_ANY, wxT("Del"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizerProblemsButton->Add( m_buttonProblemDel, 1, wxALL, 5 );
+	bSizerProblemButton->Add( m_buttonProblemDel, 1, wxALL, 5 );
 	
-	bSizerProblemList->Add( bSizerProblemsButton, 0, wxEXPAND, 5 );
+	bSizerProblemList->Add( bSizerProblemButton, 0, wxEXPAND, 5 );
 	
 	bSizerProblemsPage->Add( bSizerProblemList, 1, wxEXPAND, 5 );
 	
@@ -376,108 +420,118 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_checkBoxProblemFile = new wxCheckBox( m_panelProblems, wxID_ANY, wxT("Problem File:"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizerProblemFile->Add( m_checkBoxProblemFile, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_filePickerProblemFile = new wxFilePickerCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	m_filePickerProblemFile = new wxFilePickerCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxT("Select problem file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
 	bSizerProblemFile->Add( m_filePickerProblemFile, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	bSizerProblemInfo->Add( bSizerProblemFile, 0, wxEXPAND, 5 );
 	
-	wxBoxSizer* bSizer64;
-	bSizer64 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizerProblemTimeLimit;
+	bSizerProblemTimeLimit = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_staticText47 = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Time Limit:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText47->Wrap( -1 );
-	bSizer64->Add( m_staticText47, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_staticTextTimeLimit = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Time Limit:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextTimeLimit->Wrap( -1 );
+	bSizerProblemTimeLimit->Add( m_staticTextTimeLimit, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_spinCtrl13 = new wxSpinCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
-	bSizer64->Add( m_spinCtrl13, 0, wxALL, 5 );
+	m_spinCtrlTimeLimitVal = new wxSpinCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
+	bSizerProblemTimeLimit->Add( m_spinCtrlTimeLimitVal, 0, wxALL, 5 );
 	
-	m_staticText48 = new wxStaticText( m_panelProblems, wxID_ANY, wxT("ms"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText48->Wrap( -1 );
-	bSizer64->Add( m_staticText48, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_staticTextTimeLimitUnit = new wxStaticText( m_panelProblems, wxID_ANY, wxT("ms"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextTimeLimitUnit->Wrap( -1 );
+	bSizerProblemTimeLimit->Add( m_staticTextTimeLimitUnit, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	bSizerProblemInfo->Add( bSizer64, 0, wxEXPAND, 5 );
+	bSizerProblemInfo->Add( bSizerProblemTimeLimit, 0, wxEXPAND, 5 );
 	
-	wxStaticBoxSizer* sbSizer12;
-	sbSizer12 = new wxStaticBoxSizer( new wxStaticBox( m_panelProblems, wxID_ANY, wxT("Sample Data") ), wxVERTICAL );
+	wxStaticBoxSizer* sbSizerProblemSampleData;
+	sbSizerProblemSampleData = new wxStaticBoxSizer( new wxStaticBox( m_panelProblems, wxID_ANY, wxT("Sample Data") ), wxVERTICAL );
 	
-	m_checkBox2 = new wxCheckBox( m_panelProblems, wxID_ANY, wxT("Offering sample data"), wxDefaultPosition, wxDefaultSize, 0 );
-	sbSizer12->Add( m_checkBox2, 0, wxALL, 5 );
+	m_checkBoxProblemSampleData = new wxCheckBox( m_panelProblems, wxID_ANY, wxT("Offering sample data"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_checkBoxProblemSampleData->Enable( false );
+	
+	sbSizerProblemSampleData->Add( m_checkBoxProblemSampleData, 0, wxALL, 5 );
 	
 	wxBoxSizer* bSizerTestingInput;
 	bSizerTestingInput = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_staticText40 = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Input:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText40->Wrap( -1 );
-	bSizerTestingInput->Add( m_staticText40, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_staticTextProblemSampleDataInput = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Input:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextProblemSampleDataInput->Wrap( -1 );
+	m_staticTextProblemSampleDataInput->Enable( false );
+	
+	bSizerTestingInput->Add( m_staticTextProblemSampleDataInput, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_filePicker2 = new wxFilePickerCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	m_filePicker2->Enable( false );
+	
 	bSizerTestingInput->Add( m_filePicker2, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	sbSizer12->Add( bSizerTestingInput, 0, wxEXPAND, 5 );
+	sbSizerProblemSampleData->Add( bSizerTestingInput, 0, wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizerTestingInput1;
 	bSizerTestingInput1 = new wxBoxSizer( wxHORIZONTAL );
 	
 	m_staticText401 = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Output:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText401->Wrap( -1 );
+	m_staticText401->Enable( false );
+	
 	bSizerTestingInput1->Add( m_staticText401, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_filePicker21 = new wxFilePickerCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	m_filePicker21->Enable( false );
+	
 	bSizerTestingInput1->Add( m_filePicker21, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	sbSizer12->Add( bSizerTestingInput1, 0, wxEXPAND, 5 );
+	sbSizerProblemSampleData->Add( bSizerTestingInput1, 0, wxEXPAND, 5 );
 	
-	bSizerProblemInfo->Add( sbSizer12, 0, wxEXPAND, 5 );
+	bSizerProblemInfo->Add( sbSizerProblemSampleData, 0, wxEXPAND, 5 );
 	
-	wxStaticBoxSizer* sbSizer121;
-	sbSizer121 = new wxStaticBoxSizer( new wxStaticBox( m_panelProblems, wxID_ANY, wxT("Official Data") ), wxVERTICAL );
+	wxStaticBoxSizer* sbSizerProblemData;
+	sbSizerProblemData = new wxStaticBoxSizer( new wxStaticBox( m_panelProblems, wxID_ANY, wxT("Official Data") ), wxVERTICAL );
 	
-	wxBoxSizer* bSizerTestingInput2;
-	bSizerTestingInput2 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizerProblemInput;
+	bSizerProblemInput = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_staticText402 = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Input:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText402->Wrap( -1 );
-	bSizerTestingInput2->Add( m_staticText402, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_staticTextProblemInputData = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Input:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextProblemInputData->Wrap( -1 );
+	bSizerProblemInput->Add( m_staticTextProblemInputData, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_filePicker22 = new wxFilePickerCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
-	bSizerTestingInput2->Add( m_filePicker22, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_filePickerProblemInputData = new wxFilePickerCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	bSizerProblemInput->Add( m_filePickerProblemInputData, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	sbSizer121->Add( bSizerTestingInput2, 0, wxEXPAND, 5 );
+	sbSizerProblemData->Add( bSizerProblemInput, 0, wxEXPAND, 5 );
 	
-	wxBoxSizer* bSizerTestingInput11;
-	bSizerTestingInput11 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizerProblemOutput;
+	bSizerProblemOutput = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_staticText4011 = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Output:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText4011->Wrap( -1 );
-	bSizerTestingInput11->Add( m_staticText4011, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_staticTextProblemOutputData = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Output:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextProblemOutputData->Wrap( -1 );
+	bSizerProblemOutput->Add( m_staticTextProblemOutputData, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_filePicker211 = new wxFilePickerCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
-	bSizerTestingInput11->Add( m_filePicker211, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_filePickerProblemOutputData = new wxFilePickerCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	bSizerProblemOutput->Add( m_filePickerProblemOutputData, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	sbSizer121->Add( bSizerTestingInput11, 0, wxEXPAND, 5 );
+	sbSizerProblemData->Add( bSizerProblemOutput, 0, wxEXPAND, 5 );
 	
-	bSizerProblemInfo->Add( sbSizer121, 0, wxEXPAND, 5 );
+	bSizerProblemInfo->Add( sbSizerProblemData, 0, wxEXPAND, 5 );
 	
 	
 	bSizerProblemInfo->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	wxBoxSizer* bSizer65;
-	bSizer65 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizerProblemInfoButton;
+	bSizerProblemInfoButton = new wxBoxSizer( wxHORIZONTAL );
 	
 	
-	bSizer65->Add( 0, 0, 1, wxEXPAND, 5 );
+	bSizerProblemInfoButton->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	m_button27 = new wxButton( m_panelProblems, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer65->Add( m_button27, 0, wxALL, 5 );
+	m_buttonProblemApply = new wxButton( m_panelProblems, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerProblemInfoButton->Add( m_buttonProblemApply, 0, wxALL, 5 );
 	
-	bSizerProblemInfo->Add( bSizer65, 0, wxEXPAND, 5 );
+	bSizerProblemInfo->Add( bSizerProblemInfoButton, 0, wxEXPAND, 5 );
 	
 	bSizerProblemsPage->Add( bSizerProblemInfo, 2, wxEXPAND, 5 );
 	
 	m_panelProblems->SetSizer( bSizerProblemsPage );
 	m_panelProblems->Layout();
 	bSizerProblemsPage->Fit( m_panelProblems );
-	m_notebook->AddPage( m_panelProblems, wxT("Problems"), true );
+	m_notebook->AddPage( m_panelProblems, wxT("Problems"), false );
 	m_panelClar = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerClarPage;
 	bSizerClarPage = new wxBoxSizer( wxHORIZONTAL );
@@ -578,8 +632,13 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_buttonLogout->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickLogout ), NULL, this );
 	m_buttonAccountNew->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickNewAccount ), NULL, this );
 	m_buttonAccountDelete->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDeleteAccount ), NULL, this );
+	m_buttonContestStart->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickStart ), NULL, this );
+	m_buttonContestStop->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickStop ), NULL, this );
+	m_listCtrlProblems->Connect( wxEVT_COMMAND_LIST_ITEM_DESELECTED, wxListEventHandler( AdminGUI::OnListItemDeselectedProblem ), NULL, this );
+	m_listCtrlProblems->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedProblem ), NULL, this );
 	m_buttonProblemAdd->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickAddProblem ), NULL, this );
 	m_buttonProblemDel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDelProblem ), NULL, this );
+	m_buttonProblemApply->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickProblemApply ), NULL, this );
 }
 
 AdminGUI::~AdminGUI()
@@ -589,8 +648,13 @@ AdminGUI::~AdminGUI()
 	m_buttonLogout->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickLogout ), NULL, this );
 	m_buttonAccountNew->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickNewAccount ), NULL, this );
 	m_buttonAccountDelete->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDeleteAccount ), NULL, this );
+	m_buttonContestStart->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickStart ), NULL, this );
+	m_buttonContestStop->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickStop ), NULL, this );
+	m_listCtrlProblems->Disconnect( wxEVT_COMMAND_LIST_ITEM_DESELECTED, wxListEventHandler( AdminGUI::OnListItemDeselectedProblem ), NULL, this );
+	m_listCtrlProblems->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedProblem ), NULL, this );
 	m_buttonProblemAdd->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickAddProblem ), NULL, this );
 	m_buttonProblemDel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDelProblem ), NULL, this );
+	m_buttonProblemApply->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickProblemApply ), NULL, this );
 	
 }
 
@@ -801,16 +865,8 @@ TeamGUI::TeamGUI( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	wxBoxSizer* bSizerSubmit;
 	bSizerSubmit = new wxBoxSizer( wxVERTICAL );
 	
-	wxBoxSizer* bSizerBrowse;
-	bSizerBrowse = new wxBoxSizer( wxHORIZONTAL );
-	
-	m_textCtrlFilePath = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	bSizerBrowse->Add( m_textCtrlFilePath, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	m_buttonBrowse = new wxButton( this, wxID_ANY, wxT("..."), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizerBrowse->Add( m_buttonBrowse, 0, wxALL, 5 );
-	
-	bSizerSubmit->Add( bSizerBrowse, 1, wxEXPAND, 5 );
+	m_filePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select your source code file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	bSizerSubmit->Add( m_filePicker, 0, wxALL|wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizerLangSubmit;
 	bSizerLangSubmit = new wxBoxSizer( wxHORIZONTAL );
@@ -873,7 +929,6 @@ TeamGUI::TeamGUI( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	m_buttonChangePassword->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickLogout ), NULL, this );
 	m_buttonDownload->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickDownload ), NULL, this );
-	m_buttonBrowse->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickBrowse ), NULL, this );
 	m_buttonTest->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickTest ), NULL, this );
 	m_buttonSubmit->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickSubmit ), NULL, this );
 	m_buttonAsk->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickAsk ), NULL, this );
@@ -885,7 +940,6 @@ TeamGUI::~TeamGUI()
 	m_buttonChangePassword->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickLogout ), NULL, this );
 	m_buttonDownload->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickDownload ), NULL, this );
-	m_buttonBrowse->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickBrowse ), NULL, this );
 	m_buttonTest->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickTest ), NULL, this );
 	m_buttonSubmit->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickSubmit ), NULL, this );
 	m_buttonAsk->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickAsk ), NULL, this );
