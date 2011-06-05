@@ -26,6 +26,7 @@ class JudgeSubmissionFrame: public JudgeSubmissionGUI
         JudgeSubmissionFrame(wxFrame *frame);
         ~JudgeSubmissionFrame();
 		
+		void IP_set();
 		void setRunProblemID(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language);
 
     private:
@@ -33,6 +34,7 @@ class JudgeSubmissionFrame: public JudgeSubmissionGUI
 		unsigned int problem_id;
 		wchar_t *coding_language
 		int result;
+		char *IP;
 
 		void OnButtonClickShowInput( wxCommandEvent& event );
 		void OnButtonClickShowSource( wxCommandEvent& event );

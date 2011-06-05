@@ -7,6 +7,7 @@ extern "C"
 JudgeChangePassFrame::JudgeChangePassFrame(wxFrame *frame)
     : JudgeChangePassGUI(frame)
 {
+	judgeproto_cbreg_password_change_confirm( password_change_confirm );
 }
 
 JudgeChangePassFrame::~JudgeChangePassFrame()
@@ -56,4 +57,9 @@ void JudgeChangePassFrame::OnButtonClickOK( wxCommandEvent& event )
 void JudgeChangePassFrame::OnButtonClickCancel( wxCommandEvent& event )
 {
 	Destroy();
+}
+
+void password_change_confirm( int confirm_code )
+{
+	
 }
