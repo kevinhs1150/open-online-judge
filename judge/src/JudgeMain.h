@@ -24,13 +24,14 @@ class JudgeFrame: public JudgeGUI
         ~JudgeFrame();
 		void account_id_set(unsigned int account_id);
         void timer(unsigned int hours, unsigned int minutes, unsigned int seconds);
-		void set_problem_choice();
+		void setPtoblemFilterChoice(unsigned int problem_id);
         void start();
         void stop();
         void IP_set();
         char *IP_get();
 
     private:
+		void OnButtonClickChangePassword( wxCommandEvent& event );
 		void OnButtonClickLogout( wxCommandEvent& event );
 		unsigned int account_id;
         unsigned int timer_hours;

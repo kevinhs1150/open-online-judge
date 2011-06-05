@@ -4,14 +4,40 @@ extern "C"
     #include "judgeproto.h"
 }
 
+JudgeChangePassFrame *changePassFrame = NULL;
+
+void password_change_confirm( int confirm_code );
+
 JudgeChangePassFrame::JudgeChangePassFrame(wxFrame *frame)
     : JudgeChangePassGUI(frame)
 {
 	judgeproto_cbreg_password_change_confirm( password_change_confirm );
+	changePassFrame = this;
 }
 
 JudgeChangePassFrame::~JudgeChangePassFrame()
 {
+}
+
+void JudgeChangePassFrame::set_account_id(unsigned int account_id)
+{
+	this->account_id = account_id;
+}
+
+void JudgeChangePassFrame::IP_set()
+{
+    FILE *fptr1;
+
+    fptr1=fopen("config.txt","r");
+    fscanf (fptr1, "%s", IP);
+    fclose(fptr1);
+}
+
+void JudgeChangePassFrame::textCtrlClear()
+{
+	m_textCtrlOldPass->Clear();
+	m_textCtrlNewPass->Clear();
+	m_textCtrlConfirmPass->Clear();
 }
 
 void JudgeChangePassFrame::OnButtonClickOK( wxCommandEvent& event )
@@ -22,9 +48,7 @@ void JudgeChangePassFrame::OnButtonClickOK( wxCommandEvent& event )
 	
 	if(m_textCtrlOldPass->isEmpty || m_textCtrlNewPass->isEmpty || m_textCtrlConfirmPass->isEmpty){
         wxMessageBox("Change Password Error.\nPromble: Old password, new password or confirm password isn't entered.","Change Password Error",wxOK|wxICON_EXCLAMATION);
-        m_textCtrlOldPass->Clear();
-		m_textCtrlNewPass->Clear();
-		m_textCtrlConfirmPass->Clear();
+		textCtrlClear();
     }
     else{
         wxString getOldPassword = m_textCtrlOldPass->GetValue();
@@ -37,20 +61,14 @@ void JudgeChangePassFrame::OnButtonClickOK( wxCommandEvent& event )
 		
 		if(strcmp(newPass,confirmPass)){
 			wxMessageBox("Change Password Error.\nPromble: New password and confirm password are not the same.","Change Password Error",wxOK|wxICON_EXCLAMATION);
-			m_textCtrlOldPass->Clear();
-			m_textCtrlNewPass->Clear();
-			m_textCtrlConfirmPass->Clear();
+			textCtrlClear();
 			return;
 		}
-		if(1){/**ÂÂ±K½X¿ù»~ from server**/
-			wxMessageBox("Change Password Error.\nPromble: Old password is WRONG.","Change Password Error",wxOK|wxICON_EXCLAMATION);
-			m_textCtrlOldPass->Clear();
-			m_textCtrlNewPass->Clear();
-			m_textCtrlConfirmPass->Clear();
-			return;
+		
+		if((judgeproto_password_change( this->IP, this->account_id, oldPass, newPass )) != 0){
+			wxMessageBox("Change Password Error.\nPromble: Socket error.","Change Password Error",wxOK|wxICON_EXCLAMATION);
+			textCtrlClear();
 		}
-		/**ÅÜ§ó±K½X to server**/
-		Destroy();
     }
 }
 
@@ -61,5 +79,15 @@ void JudgeChangePassFrame::OnButtonClickCancel( wxCommandEvent& event )
 
 void password_change_confirm( int confirm_code )
 {
-	
+	if(confirm_code == PASSWD_SUCCESS){
+		changePassFrame->Destroy();
+	}
+	else if(confirm_code == PASSWD_MISMATCH){
+		wxMessageBox("Change Password Error.\nPromble: Old password is WRONG.","Change Password Error",wxOK|wxICON_EXCLAMATION);
+		changePassFrame->textCtrlClear();	
+	}
+	else if(confirm)code == PASSWD_INVALID){
+		wxMessageBox("Change Password Error.\nPromble: Password is invalid.","Change Password Error",wxOK|wxICON_EXCLAMATION);
+		changePassFrame->textCtrlClear();	
+	}
 }
