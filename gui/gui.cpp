@@ -161,7 +161,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxStaticBoxSizer* sbSizerAdmin;
 	sbSizerAdmin = new wxStaticBoxSizer( new wxStaticBox( m_panelAccounts, wxID_ANY, wxT("Admin") ), wxVERTICAL );
 	
-	m_listCtrlAdmin = new wxListCtrl( m_panelAccounts, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_LIST );
+	m_listCtrlAdmin = new wxListCtrl( m_panelAccounts, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL );
 	sbSizerAdmin->Add( m_listCtrlAdmin, 1, wxALL|wxEXPAND, 5 );
 	
 	bSizerAdminJudge->Add( sbSizerAdmin, 1, wxEXPAND, 5 );
@@ -169,7 +169,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxStaticBoxSizer* sbSizerJudge;
 	sbSizerJudge = new wxStaticBoxSizer( new wxStaticBox( m_panelAccounts, wxID_ANY, wxT("Judge") ), wxVERTICAL );
 	
-	m_listCtrlJudge = new wxListCtrl( m_panelAccounts, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_LIST );
+	m_listCtrlJudge = new wxListCtrl( m_panelAccounts, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL );
 	sbSizerJudge->Add( m_listCtrlJudge, 1, wxALL|wxEXPAND, 5 );
 	
 	bSizerAdminJudge->Add( sbSizerJudge, 1, wxEXPAND, 5 );
@@ -179,7 +179,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxStaticBoxSizer* sbSizerTeam;
 	sbSizerTeam = new wxStaticBoxSizer( new wxStaticBox( m_panelAccounts, wxID_ANY, wxT("Team") ), wxVERTICAL );
 	
-	m_listCtrlTeam = new wxListCtrl( m_panelAccounts, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_LIST );
+	m_listCtrlTeam = new wxListCtrl( m_panelAccounts, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL );
 	sbSizerTeam->Add( m_listCtrlTeam, 1, wxALL|wxEXPAND, 5 );
 	
 	bSizerAccount->Add( sbSizerTeam, 1, wxEXPAND, 5 );
@@ -200,7 +200,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelAccounts->SetSizer( bSizerAccountPage );
 	m_panelAccounts->Layout();
 	bSizerAccountPage->Fit( m_panelAccounts );
-	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), false );
+	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), true );
 	m_panelContestInfo = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerContestInfoPage;
 	bSizerContestInfoPage = new wxBoxSizer( wxVERTICAL );
@@ -616,7 +616,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelClar->SetSizer( bSizerClarPage );
 	m_panelClar->Layout();
 	bSizerClarPage->Fit( m_panelClar );
-	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), true );
+	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), false );
 	
 	bSizerNotebook->Add( m_notebook, 1, wxEXPAND|wxALL, 5 );
 	
@@ -631,8 +631,11 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_buttonChangePassword->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickLogout ), NULL, this );
 	m_listCtrlAdmin->Connect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( AdminGUI::OnListItemActivatedAdmin ), NULL, this );
+	m_listCtrlAdmin->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedAdmin ), NULL, this );
 	m_listCtrlJudge->Connect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( AdminGUI::OnListItemActivatedJudge ), NULL, this );
+	m_listCtrlJudge->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedJudge ), NULL, this );
 	m_listCtrlTeam->Connect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( AdminGUI::OnListItemActivatedTeam ), NULL, this );
+	m_listCtrlTeam->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedTeam ), NULL, this );
 	m_buttonAccountNew->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickNewAccount ), NULL, this );
 	m_buttonAccountDelete->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDeleteAccount ), NULL, this );
 	m_buttonContestStart->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickStart ), NULL, this );
@@ -650,8 +653,11 @@ AdminGUI::~AdminGUI()
 	m_buttonChangePassword->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickLogout ), NULL, this );
 	m_listCtrlAdmin->Disconnect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( AdminGUI::OnListItemActivatedAdmin ), NULL, this );
+	m_listCtrlAdmin->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedAdmin ), NULL, this );
 	m_listCtrlJudge->Disconnect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( AdminGUI::OnListItemActivatedJudge ), NULL, this );
+	m_listCtrlJudge->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedJudge ), NULL, this );
 	m_listCtrlTeam->Disconnect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( AdminGUI::OnListItemActivatedTeam ), NULL, this );
+	m_listCtrlTeam->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedTeam ), NULL, this );
 	m_buttonAccountNew->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickNewAccount ), NULL, this );
 	m_buttonAccountDelete->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDeleteAccount ), NULL, this );
 	m_buttonContestStart->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickStart ), NULL, this );
@@ -767,17 +773,17 @@ AccountGUI::AccountGUI( wxWindow* parent, wxWindowID id, const wxString& title, 
 	wxStaticBoxSizer* sbSizerLoginInfo;
 	sbSizerLoginInfo = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Login Info") ), wxVERTICAL );
 	
-	wxBoxSizer* bSizerID;
-	bSizerID = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizerName;
+	bSizerName = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_staticTextID = new wxStaticText( this, wxID_ANY, wxT("ID:"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
-	m_staticTextID->Wrap( -1 );
-	bSizerID->Add( m_staticTextID, 2, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_staticTextName = new wxStaticText( this, wxID_ANY, wxT("Name:"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
+	m_staticTextName->Wrap( -1 );
+	bSizerName->Add( m_staticTextName, 2, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_textCtrlID = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	bSizerID->Add( m_textCtrlID, 3, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	bSizerName->Add( m_textCtrlID, 3, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	sbSizerLoginInfo->Add( bSizerID, 0, wxEXPAND, 5 );
+	sbSizerLoginInfo->Add( bSizerName, 0, wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizerPassword;
 	bSizerPassword = new wxBoxSizer( wxHORIZONTAL );
@@ -1311,6 +1317,7 @@ JudgeGUI::JudgeGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	// Connect Events
 	m_buttonChangePassword->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeGUI::OnButtonClickLogout ), NULL, this );
+	m_checkBoxAutoJudge->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( JudgeGUI::OnCheckBoxAutoJudge ), NULL, this );
 }
 
 JudgeGUI::~JudgeGUI()
@@ -1318,6 +1325,7 @@ JudgeGUI::~JudgeGUI()
 	// Disconnect Events
 	m_buttonChangePassword->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeGUI::OnButtonClickLogout ), NULL, this );
+	m_checkBoxAutoJudge->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( JudgeGUI::OnCheckBoxAutoJudge ), NULL, this );
 	
 }
 

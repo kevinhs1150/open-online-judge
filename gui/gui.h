@@ -159,8 +159,11 @@ class AdminGUI : public wxFrame
 		virtual void OnButtonClickChangePassword( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickLogout( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnListItemActivatedAdmin( wxListEvent& event ) { event.Skip(); }
+		virtual void OnListItemSelectedAdmin( wxListEvent& event ) { event.Skip(); }
 		virtual void OnListItemActivatedJudge( wxListEvent& event ) { event.Skip(); }
+		virtual void OnListItemSelectedJudge( wxListEvent& event ) { event.Skip(); }
 		virtual void OnListItemActivatedTeam( wxListEvent& event ) { event.Skip(); }
+		virtual void OnListItemSelectedTeam( wxListEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickNewAccount( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickDeleteAccount( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickStart( wxCommandEvent& event ) { event.Skip(); }
@@ -224,7 +227,7 @@ class AccountGUI : public wxDialog
 		wxRadioButton* m_radioBtnAdmin;
 		wxRadioButton* m_radioBtnJudge;
 		wxRadioButton* m_radioBtnTeam;
-		wxStaticText* m_staticTextID;
+		wxStaticText* m_staticTextName;
 		wxTextCtrl* m_textCtrlID;
 		wxStaticText* m_staticTextPassword;
 		wxTextCtrl* m_textCtrlPassword;
@@ -402,6 +405,7 @@ class JudgeGUI : public wxFrame
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnButtonClickChangePassword( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickLogout( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCheckBoxAutoJudge( wxCommandEvent& event ) { event.Skip(); }
 		
 	
 	public:
