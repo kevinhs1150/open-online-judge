@@ -3,7 +3,7 @@
 /* variables used globally over liboojproto */
 void (*cb_login_confirm)( int confirm_code, unsigned int account_id ) = NULL;
 void (*cb_logout_confirm)( int confirm_code ) = NULL;
-void (*cb_passwd_change_confirm)( int confirm_code ) = NULL;
+void (*cb_password_change_confirm)( int confirm_code ) = NULL;
 void (*cb_timer_set)( unsigned int hours, unsigned int minutes, unsigned int seconds ) = NULL;
 void (*cb_contest_start)( void ) = NULL;
 void (*cb_contest_stop)( void ) = NULL;
