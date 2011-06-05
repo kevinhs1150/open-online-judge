@@ -371,7 +371,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelContestInfo->SetSizer( bSizerContestInfoPage );
 	m_panelContestInfo->Layout();
 	bSizerContestInfoPage->Fit( m_panelContestInfo );
-	m_notebook->AddPage( m_panelContestInfo, wxT("Contest Info"), true );
+	m_notebook->AddPage( m_panelContestInfo, wxT("Contest Info"), false );
 	m_panelProblems = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerProblemsPage;
 	bSizerProblemsPage = new wxBoxSizer( wxHORIZONTAL );
@@ -616,7 +616,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelClar->SetSizer( bSizerClarPage );
 	m_panelClar->Layout();
 	bSizerClarPage->Fit( m_panelClar );
-	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), false );
+	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), true );
 	
 	bSizerNotebook->Add( m_notebook, 1, wxEXPAND|wxALL, 5 );
 	
@@ -630,6 +630,9 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	// Connect Events
 	m_buttonChangePassword->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickLogout ), NULL, this );
+	m_listCtrlAdmin->Connect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( AdminGUI::OnListItemActivatedAdmin ), NULL, this );
+	m_listCtrlJudge->Connect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( AdminGUI::OnListItemActivatedJudge ), NULL, this );
+	m_listCtrlTeam->Connect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( AdminGUI::OnListItemActivatedTeam ), NULL, this );
 	m_buttonAccountNew->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickNewAccount ), NULL, this );
 	m_buttonAccountDelete->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDeleteAccount ), NULL, this );
 	m_buttonContestStart->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickStart ), NULL, this );
@@ -646,6 +649,9 @@ AdminGUI::~AdminGUI()
 	// Disconnect Events
 	m_buttonChangePassword->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickLogout ), NULL, this );
+	m_listCtrlAdmin->Disconnect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( AdminGUI::OnListItemActivatedAdmin ), NULL, this );
+	m_listCtrlJudge->Disconnect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( AdminGUI::OnListItemActivatedJudge ), NULL, this );
+	m_listCtrlTeam->Disconnect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( AdminGUI::OnListItemActivatedTeam ), NULL, this );
 	m_buttonAccountNew->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickNewAccount ), NULL, this );
 	m_buttonAccountDelete->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDeleteAccount ), NULL, this );
 	m_buttonContestStart->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickStart ), NULL, this );
@@ -737,7 +743,7 @@ ChangePassGUI::~ChangePassGUI()
 	
 }
 
-NewAccountGUI::NewAccountGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+AccountGUI::AccountGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 	
@@ -805,15 +811,15 @@ NewAccountGUI::NewAccountGUI( wxWindow* parent, wxWindowID id, const wxString& t
 	this->Centre( wxBOTH );
 	
 	// Connect Events
-	m_buttonOK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccountGUI::OnButtonClickOK ), NULL, this );
-	m_buttonCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccountGUI::OnButtonClickCancel ), NULL, this );
+	m_buttonOK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AccountGUI::OnButtonClickOK ), NULL, this );
+	m_buttonCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AccountGUI::OnButtonClickCancel ), NULL, this );
 }
 
-NewAccountGUI::~NewAccountGUI()
+AccountGUI::~AccountGUI()
 {
 	// Disconnect Events
-	m_buttonOK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccountGUI::OnButtonClickOK ), NULL, this );
-	m_buttonCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewAccountGUI::OnButtonClickCancel ), NULL, this );
+	m_buttonOK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AccountGUI::OnButtonClickOK ), NULL, this );
+	m_buttonCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AccountGUI::OnButtonClickCancel ), NULL, this );
 	
 }
 

@@ -1,5 +1,5 @@
 #include "AdminMain.h"
-#include "NewAccountDialog.h"
+#include "AccountDialog.h"
 extern "C"
 {
 #include "adminproto.h"
@@ -156,7 +156,6 @@ void AdminFrame::ProblemInfoEnable(bool enable){
 	m_filePickerProblemOutputData->Enable(enable);
 	m_buttonProblemApply->Enable(enable);
 	isProblemInfoEnable = enable;
-	//wxMessageBox(_("Change"));
 	
 	return;
 }
@@ -166,13 +165,31 @@ void AdminFrame::OnButtonClickChangePassword( wxCommandEvent& event ){
 }
 
 void AdminFrame::OnButtonClickLogout( wxCommandEvent& event ){
-	m_listCtrlProblems->InsertItem(1, _("Data"));
+	m_listCtrlAdmin->InsertItem(1, _("Data"));
+}
+
+void AdminFrame::OnListItemActivatedAdmin( wxListEvent& event ){
+	AccountDialog *accountDialog = new AccountDialog(this, event.GetText(), SRC_ADMIN, event.GetIndex());
+	accountDialog->ShowModal();
+	accountDialog->Destroy();
+}
+
+void AdminFrame::OnListItemActivatedJudge( wxListEvent& event ){
+	AccountDialog *accountDialog = new AccountDialog(this, event.GetText(), SRC_JUDGE, event.GetIndex());
+	accountDialog->ShowModal();
+	accountDialog->Destroy();
+}
+
+void AdminFrame::OnListItemActivatedTeam( wxListEvent& event ){
+	AccountDialog *accountDialog = new AccountDialog(this, event.GetText(), SRC_TEAM, event.GetIndex());
+	accountDialog->ShowModal();
+	accountDialog->Destroy();
 }
 
 void AdminFrame::OnButtonClickNewAccount( wxCommandEvent& event ){
-	NewAccountDialog *newAccountDialog = new NewAccountDialog(this);
-	newAccountDialog->ShowModal();
-	newAccountDialog->Destroy();
+	AccountDialog *accountDialog = new AccountDialog(this);
+	accountDialog->ShowModal();
+	accountDialog->Destroy();
 	
 	return;
 }
