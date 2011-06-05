@@ -15,6 +15,11 @@
 #define OUTPUT_OPEN_ERROR -5
 #define TIME_OUT -6
 
+#define YES 0
+#define COMPLIE_ERROR -1
+#define WRONG_ANSWER -2
+#define TIME_LIMIT_EXCEED -3
+
 class JudgeSubmissionFrame: public JudgeSubmissionGUI
 {
     public:
