@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-/* callback registration functions */
+/*----------------------------- callback functions -----------------------------*/
 
 /* Callback for login confirmation. (from server)
  * Pass the confirmation code and account id to judge client.
@@ -18,6 +18,11 @@ void judgeproto_cbreg_login_confirm( void (*cbfun)( int confirm_code, unsigned i
  * Pass the confirmation code to judge client.
  * Judge client can ignore this message, since it is currently noot meaningful.*/
 void judgeproto_cbreg_logout_confirm( void (*cbfunc)( int confirm_code ) );
+
+/* Callback for password change confirmation. (from server)
+ * Pass the confirmation code to client.
+ * Client should pop out a notification about the change result. */
+void judgeproto_cbreg_password_change_confirm( void (*cbfunc)( int confirm_code ) );
 
 /* Callback for timer set. (from server)
  * Pass time components(hr, min, sec) to server program.
@@ -41,9 +46,12 @@ void judgeproto_cbreg_run_request_dlfin( void (*cbfunc)( unsigned int run_id, un
  * The rest three strings should be filled with path to store "problem description", "input data" and "correct answer" respectively. */
 void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
 void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
+/* This one is for problem deletion. */
+void judgeproto_cbreg_problem_remove( void (*cbfunc)( unsigned int problem_id ) );
 
 /* Callback for take result. (from server)
- * Pass the run id and success indicator to judge client. */
+ * Pass the run id and success indicator to judge client.
+ * If judge client received TAKE_FAIL in success indicator, it must remove that run_id from its run list. */
 void judgeproto_cbreg_take_result( void (*cbfunc)( unsigned int run_id, int success ) );
 
 /* Callback for clarification request. (from server)
@@ -57,8 +65,10 @@ void judgeproto_cbreg_clar_request( void (*cbfunc)( unsigned int clar_id, unsign
 void judgeproto_cbreg_clar_reply( void (*cbfunc)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string ) );
 
 
-/* listen thread
- * This function should be called in initial routine.  It listens for data from server. */
+/*----------------------------- tool functions -----------------------------*/
+
+/* This function should be called in initial routine.  It listens for data from clients.
+ * Note that all callbacks should be registered before invoking listen(). */
 int judgeproto_listen( char *localaddr );
 int judgeproto_stop_listen( void );
 /* This function checks whether the listen socket is currently active or not. */
@@ -70,16 +80,31 @@ int judgeproto_login( char *destip, wchar_t *account, char *password );
 /* logout */
 int judgeproto_logout( char *destip, unsigned int account_id );
 
+/* password change */
+int judgeproto_password_change( char *destip, unsigned int account_id, char *new_password );
+
 /* run result */
 int judgeproto_judge_result( char *destip, unsigned int run_id, wchar_t *result_string );
 
 /* run update request */
-int judgeproto_run_update( char *destip );
+int judgeproto_run_sync( char *destip );
 
 /* run take */
 int judgeproto_take_run( char *destip, unsigned int run_id );
 
 /* clarification reply */
 int judgeproto_clar_result( char *destip, unsigned int clar_id, int private_byte, wchar_t *result_string );
+
+/* timer sync request */
+int judgeproto_timer_sync( char *destip );
+
+/* contest state sync request */
+int judgeproto_contest_state_sync( char *destip );
+
+/* clarification sync request */
+int judgeproto_clar_sync( char *destip );
+
+/* problem sync request */
+int judgeproto_problem_sync( char *destip );
 
 #endif

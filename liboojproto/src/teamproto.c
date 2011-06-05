@@ -17,11 +17,28 @@ void (*cb_pch_mod)( unsigned int problem_id ) = NULL;
 /* callback functions extern-ed from protointernal.c */
 extern void (*cb_login_confirm)( int confirm_code, unsigned int account_id );
 extern void (*cb_logout_confirm)( int confirm_code );
+extern void (*cb_password_change_confirm)( int confirm_code );
 extern void (*cb_timer_set)( unsigned int hours, unsigned int minutes, unsigned int seconds );
 extern void (*cb_contest_start)( void );
 extern void (*cb_contest_stop)( void );
 extern void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
 extern void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
+
+/* callback registration functions */
+void teamproto_cbreg_login_confirm( void (*cbfunc)( int, unsigned int ) ) { cb_login_confirm = cbfunc; }
+void teamproto_cbreg_logout_confirm( void( *cbfunc )( int ) ) { cb_logout_confirm = cbfunc; }
+void teamproto_cbreg_password_change_confirm( void (*cbfunc)( int ) ) { cb_password_change_confirm = cbfunc; }
+void teamproto_cbreg_timer_set( void (*cbfunc)( unsigned int, unsigned int, unsigned int ) ) { cb_timer_set = cbfunc; }
+void teamproto_cbreg_contest_start( void (*cbfunc)( void ) )  { cb_contest_start = cbfunc; }
+void teamproto_cbreg_contest_stop( void (*cbfunc)( void ) )   { cb_contest_stop = cbfunc; }
+void teamproto_cbreg_run_reply( void (*cbfunc)( unsigned int, unsigned int, wchar_t* ) )  { cb_run_reply = cbfunc; }
+void teamproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t*, wchar_t* ) ) { cb_clar_reply = cbfunc; }
+void teamproto_cbreg_sb_update( void (*cbfunc)( unsigned int, wchar_t*, unsigned int, unsigned int ) ) { cb_sb_update = cbfunc; }
+void teamproto_cbreg_pu_request( void (*cbfunc)( wchar_t** ) )     { cb_pu_request = cbfunc; }
+void teamproto_cbreg_pu_request_dlfin( void (*cbfunc)( wchar_t*) ) { cb_pu_request_dlfin = cbfunc; }
+void teamproto_cbreg_problem_add( void (*cbfunc)( unsigned int ) ) { cb_pch_add = cbfunc; }
+void teamproto_cbreg_problem_del( void (*cbfunc)( unsigned int ) ) { cb_pch_del = cbfunc; }
+void teamproto_cbreg_problem_mod( void (*cbfunc)( unsigned int ) ) { cb_pch_mod = cbfunc; }
 
 /* thread function */
 void *teamproto_reqhand_thread( void *args );
@@ -29,6 +46,19 @@ void *teamproto_reqhand_thread( void *args );
 /* external sync variable (from proto_commonfunction.c) */
 extern pthread_mutex_t proto_sockfd_pass_mutex;
 extern pthread_cond_t proto_sockfd_pass_cv;
+
+/* callback registration check function */
+static int teamproto_cbcheck( void )
+{
+	if( cb_login_confirm == NULL || cb_logout_confirm == NULL || cb_password_change_confirm == NULL ||
+		cb_timer_set == NULL || cb_contest_start == NULL || cb_contest_stop == NULL ||
+		cb_run_reply == NULL || cb_clar_reply == NULL || cb_sb_update == NULL ||
+		cb_pu_request == NULL || cb_pu_request_dlfin == NULL ||
+		cb_pch_add == NULL || cb_pch_del == NULL || cb_pch_mod == NULL )
+		return 0;
+	else
+		return 1;
+}
 
 int teamproto_listen( char *localaddr )
 {
@@ -176,6 +206,11 @@ int teamproto_logout( char *destip, unsigned int account_id )
 	return proto_logout( destip, OPSR_TEAM, account_id );
 }
 
+int teamproto_password_change( char *destip, unsigned int account_id, char *new_password )
+{
+	return proto_password_change( destip, OPSR_TEAM, account_id, new_password );
+}
+
 int teamproto_submission( char *destip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
 {
 	int sockfd;
@@ -272,28 +307,43 @@ int teamproto_problem_download( char *destip, unsigned int account_id, unsigned 
 	return 0;
 }
 
-void teamproto_cbreg_login_confirm( void (*cbfunc)( int, unsigned int ) ) { cb_login_confirm = cbfunc; }
-void teamproto_cbreg_logout_confirm( void( *cbfunc )( int ) ) { cb_logout_confirm = cbfunc; }
-void teamproto_cbreg_timer_set( void (*cbfunc)( unsigned int, unsigned int, unsigned int ) ) { cb_timer_set = cbfunc; }
-void teamproto_cbreg_contest_start( void (*cbfunc)( void ) )  { cb_contest_start = cbfunc; }
-void teamproto_cbreg_contest_stop( void (*cbfunc)( void ) )   { cb_contest_stop = cbfunc; }
-void teamproto_cbreg_run_reply( void (*cbfunc)( unsigned int, unsigned int, wchar_t* ) )  { cb_run_reply = cbfunc; }
-void teamproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t*, wchar_t* ) ) { cb_clar_reply = cbfunc; }
-void teamproto_cbreg_sb_update( void (*cbfunc)( unsigned int, wchar_t*, unsigned int, unsigned int ) ) { cb_sb_update = cbfunc; }
-void teamproto_cbreg_pu_request( void (*cbfunc)( wchar_t** ) )     { cb_pu_request = cbfunc; }
-void teamproto_cbreg_pu_request_dlfin( void (*cbfunc)( wchar_t*) ) { cb_pu_request_dlfin = cbfunc; }
-void teamproto_cbreg_problem_add( void (*cbfunc)( unsigned int ) ) { cb_pch_add = cbfunc; }
-void teamproto_cbreg_problem_del( void (*cbfunc)( unsigned int ) ) { cb_pch_del = cbfunc; }
-void teamproto_cbreg_problem_mod( void (*cbfunc)( unsigned int ) ) { cb_pch_mod = cbfunc; }
-
-static int teamproto_cbcheck( void )
+int teamproto_sb_sync( char *destip )
 {
-	if( cb_login_confirm == NULL || cb_logout_confirm == NULL ||
-		cb_timer_set == NULL || cb_contest_start == NULL || cb_contest_stop == NULL ||
-		cb_run_reply == NULL || cb_clar_reply == NULL || cb_sb_update == NULL ||
-		cb_pu_request == NULL || cb_pu_request_dlfin == NULL ||
-		cb_pch_add == NULL || cb_pch_del == NULL || cb_pch_mod == NULL )
-		return 0;
-	else
-		return 1;
+	return proto_sb_sync( destip, OPSR_TEAM );
+}
+
+int teamproto_run_sync( char *destip, unsigned int account_id )
+{
+	int sockfd;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL;
+	char *account_id_str = uint2str( account_id );
+
+	msgptr = proto_srid_comb( sendbuf, OPSR_TEAM, OPID_TRUN_SYNC );
+	msgptr = proto_str_comb( msgptr, account_id_str );
+
+	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_SERVER ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[teamproto_run_sync()] tcp_connect() call failed.\n");
+#endif
+		return -1;
+	}
+
+	send_sp( sockfd, sendbuf, BUFLEN );
+
+	shutdown_wr_sp( sockfd );
+	free( account_id_str );
+
+	return 0;
+}
+
+int teamproto_timer_sync( char *destip )
+{
+	return proto_timer_sync( destip, OPSR_TEAM );
+}
+
+int teamproto_contest_state_sync( char *destip )
+{
+	return proto_contest_state_sync( destip, OPSR_TEAM );
 }
