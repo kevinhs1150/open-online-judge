@@ -10201,7 +10201,7 @@
                                         <event name="OnListDeleteItem"></event>
                                         <event name="OnListEndLabelEdit"></event>
                                         <event name="OnListInsertItem"></event>
-                                        <event name="OnListItemActivated"></event>
+                                        <event name="OnListItemActivated">OnListItemActivatedRuns</event>
                                         <event name="OnListItemDeselected"></event>
                                         <event name="OnListItemFocused"></event>
                                         <event name="OnListItemMiddleClick"></event>
@@ -10289,7 +10289,7 @@
                                         <event name="OnListDeleteItem"></event>
                                         <event name="OnListEndLabelEdit"></event>
                                         <event name="OnListInsertItem"></event>
-                                        <event name="OnListItemActivated"></event>
+                                        <event name="OnListItemActivated">OnListItemActivatedClar</event>
                                         <event name="OnListItemDeselected"></event>
                                         <event name="OnListItemFocused"></event>
                                         <event name="OnListItemMiddleClick"></event>

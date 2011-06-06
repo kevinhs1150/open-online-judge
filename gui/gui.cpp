@@ -1333,6 +1333,8 @@ JudgeGUI::JudgeGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_buttonChangePassword->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeGUI::OnButtonClickLogout ), NULL, this );
 	m_checkBoxAutoJudge->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( JudgeGUI::OnCheckBoxAutoJudge ), NULL, this );
+	m_listCtrlRuns->Connect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( JudgeGUI::OnListItemActivatedRuns ), NULL, this );
+	m_listCtrlClars->Connect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( JudgeGUI::OnListItemActivatedClar ), NULL, this );
 }
 
 JudgeGUI::~JudgeGUI()
@@ -1341,6 +1343,8 @@ JudgeGUI::~JudgeGUI()
 	m_buttonChangePassword->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeGUI::OnButtonClickChangePassword ), NULL, this );
 	m_buttonLogout->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeGUI::OnButtonClickLogout ), NULL, this );
 	m_checkBoxAutoJudge->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( JudgeGUI::OnCheckBoxAutoJudge ), NULL, this );
+	m_listCtrlRuns->Disconnect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( JudgeGUI::OnListItemActivatedRuns ), NULL, this );
+	m_listCtrlClars->Disconnect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( JudgeGUI::OnListItemActivatedClar ), NULL, this );
 	
 }
 
