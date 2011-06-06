@@ -1643,6 +1643,42 @@ JudgeCompareGUI::~JudgeCompareGUI()
 	
 }
 
+ShowClarGUI::ShowClarGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizerMain;
+	bSizerMain = new wxBoxSizer( wxVERTICAL );
+	
+	wxStaticBoxSizer* sbSizerQuestion;
+	sbSizerQuestion = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Question") ), wxVERTICAL );
+	
+	m_textCtrlQuestion = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+	sbSizerQuestion->Add( m_textCtrlQuestion, 1, wxALL|wxEXPAND, 5 );
+	
+	bSizerMain->Add( sbSizerQuestion, 1, wxEXPAND, 5 );
+	
+	wxStaticBoxSizer* sbSizerAnswer;
+	sbSizerAnswer = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Answer") ), wxVERTICAL );
+	
+	m_textCtrlAnswer = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+	sbSizerAnswer->Add( m_textCtrlAnswer, 1, wxALL|wxEXPAND, 5 );
+	
+	bSizerMain->Add( sbSizerAnswer, 1, wxEXPAND, 5 );
+	
+	m_buttonClose = new wxButton( this, wxID_ANY, wxT("Close"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerMain->Add( m_buttonClose, 0, wxALL|wxEXPAND, 5 );
+	
+	this->SetSizer( bSizerMain );
+	this->Layout();
+	
+	this->Centre( wxBOTH );
+}
+
+ShowClarGUI::~ShowClarGUI()
+{
+}
+
 ServerGUI::ServerGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );

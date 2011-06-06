@@ -180,7 +180,7 @@ class AdminGUI : public wxFrame
 		wxListCtrl* m_listCtrlJudge;
 		wxListCtrl* m_listCtrlTeam;
 		
-		AdminGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 753,553 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		AdminGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Admin"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 753,553 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		~AdminGUI();
 	
 };
@@ -410,7 +410,7 @@ class JudgeGUI : public wxFrame
 	
 	public:
 		
-		JudgeGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 643,468 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		JudgeGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Judge"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 643,468 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		~JudgeGUI();
 	
 };
@@ -522,6 +522,25 @@ class JudgeCompareGUI : public wxDialog
 		
 		JudgeCompareGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Compare Outputs"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
 		~JudgeCompareGUI();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ShowClarGUI
+///////////////////////////////////////////////////////////////////////////////
+class ShowClarGUI : public wxFrame 
+{
+	private:
+	
+	protected:
+		wxTextCtrl* m_textCtrlQuestion;
+		wxTextCtrl* m_textCtrlAnswer;
+		wxButton* m_buttonClose;
+	
+	public:
+		
+		ShowClarGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 400,400 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		~ShowClarGUI();
 	
 };
 
