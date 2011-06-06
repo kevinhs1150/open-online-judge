@@ -120,9 +120,10 @@ class AdminGUI : public wxFrame
 		
 		wxPanel* m_panelProblems;
 		wxStaticText* m_staticTextProblems;
-		wxListCtrl* m_listCtrlProblems;
 		wxButton* m_buttonProblemAdd;
 		wxButton* m_buttonProblemDel;
+		wxStaticText* m_staticTextProblemID;
+		wxTextCtrl* m_textCtrlProblemIDVal;
 		wxStaticText* m_staticTextProblemName;
 		wxTextCtrl* m_textCtrlProblemName;
 		wxCheckBox* m_checkBoxProblemFile;
@@ -179,6 +180,7 @@ class AdminGUI : public wxFrame
 		wxListCtrl* m_listCtrlAdmin;
 		wxListCtrl* m_listCtrlJudge;
 		wxListCtrl* m_listCtrlTeam;
+		wxListCtrl* m_listCtrlProblems;
 		
 		AdminGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Admin"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 753,553 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		~AdminGUI();
@@ -536,6 +538,10 @@ class ShowClarGUI : public wxFrame
 		wxTextCtrl* m_textCtrlQuestion;
 		wxTextCtrl* m_textCtrlAnswer;
 		wxButton* m_buttonClose;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnButtonClickClose( wxCommandEvent& event ) { event.Skip(); }
+		
 	
 	public:
 		
