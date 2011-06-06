@@ -127,6 +127,8 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	m_staticTextTime = new wxStaticText( this, wxID_ANY, wxT("00:00:00"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextTime->Wrap( -1 );
+	m_staticTextTime->SetFont( wxFont( 12, 74, 90, 92, false, wxEmptyString ) );
+	
 	bSizerTitle->Add( m_staticTextTime, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	
@@ -324,25 +326,25 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxBoxSizer* bSizerTimeManualTotal;
 	bSizerTimeManualTotal = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_staticTextTimeScheduleTotal1 = new wxStaticText( m_panelContestInfo, wxID_ANY, wxT("Total"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticTextTimeScheduleTotal1->Wrap( -1 );
-	bSizerTimeManualTotal->Add( m_staticTextTimeScheduleTotal1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_staticTextTimeManualTotal = new wxStaticText( m_panelContestInfo, wxID_ANY, wxT("Total"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextTimeManualTotal->Wrap( -1 );
+	bSizerTimeManualTotal->Add( m_staticTextTimeManualTotal, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_spinCtrlTimeScheduleTotalHr1 = new wxSpinCtrl( m_panelContestInfo, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), wxSP_ARROW_KEYS, 0, 99, 0 );
-	bSizerTimeManualTotal->Add( m_spinCtrlTimeScheduleTotalHr1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_spinCtrlTimeManualTotalHr = new wxSpinCtrl( m_panelContestInfo, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), wxSP_ARROW_KEYS, 0, 99, 0 );
+	bSizerTimeManualTotal->Add( m_spinCtrlTimeManualTotalHr, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_staticTextTimeScheduleTotalColon1 = new wxStaticText( m_panelContestInfo, wxID_ANY, wxT(":"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticTextTimeScheduleTotalColon1->Wrap( -1 );
-	bSizerTimeManualTotal->Add( m_staticTextTimeScheduleTotalColon1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_staticTextTimeManualTotalColon = new wxStaticText( m_panelContestInfo, wxID_ANY, wxT(":"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextTimeManualTotalColon->Wrap( -1 );
+	bSizerTimeManualTotal->Add( m_staticTextTimeManualTotalColon, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_spinCtrlTimeScheduleTotalMin1 = new wxSpinCtrl( m_panelContestInfo, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), wxSP_ARROW_KEYS, 0, 59, 0 );
-	bSizerTimeManualTotal->Add( m_spinCtrlTimeScheduleTotalMin1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_spinCtrlTimeManualTotalMin = new wxSpinCtrl( m_panelContestInfo, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), wxSP_ARROW_KEYS, 0, 59, 0 );
+	bSizerTimeManualTotal->Add( m_spinCtrlTimeManualTotalMin, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	
 	bSizerTimeManualTotal->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	m_buttonTimeScheduleSet1 = new wxButton( m_panelContestInfo, wxID_ANY, wxT("Set"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizerTimeManualTotal->Add( m_buttonTimeScheduleSet1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_buttonTimeManualSet = new wxButton( m_panelContestInfo, wxID_ANY, wxT("Set"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerTimeManualTotal->Add( m_buttonTimeManualSet, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	bSizerTimeManual->Add( bSizerTimeManualTotal, 1, wxEXPAND, 5 );
 	
@@ -373,7 +375,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelContestInfo->SetSizer( bSizerContestInfoPage );
 	m_panelContestInfo->Layout();
 	bSizerContestInfoPage->Fit( m_panelContestInfo );
-	m_notebook->AddPage( m_panelContestInfo, wxT("Contest Info"), false );
+	m_notebook->AddPage( m_panelContestInfo, wxT("Contest Info"), true );
 	m_panelProblems = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerProblemsPage;
 	bSizerProblemsPage = new wxBoxSizer( wxHORIZONTAL );
@@ -542,7 +544,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelProblems->SetSizer( bSizerProblemsPage );
 	m_panelProblems->Layout();
 	bSizerProblemsPage->Fit( m_panelProblems );
-	m_notebook->AddPage( m_panelProblems, wxT("Problems"), true );
+	m_notebook->AddPage( m_panelProblems, wxT("Problems"), false );
 	m_panelClar = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerClarPage;
 	bSizerClarPage = new wxBoxSizer( wxHORIZONTAL );
@@ -649,6 +651,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_listCtrlTeam->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedTeam ), NULL, this );
 	m_buttonAccountNew->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickNewAccount ), NULL, this );
 	m_buttonAccountDelete->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDeleteAccount ), NULL, this );
+	m_buttonTimeManualSet->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickManualTimeSet ), NULL, this );
 	m_buttonContestStart->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickStart ), NULL, this );
 	m_buttonContestStop->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickStop ), NULL, this );
 	m_listCtrlProblems->Connect( wxEVT_COMMAND_LIST_ITEM_DESELECTED, wxListEventHandler( AdminGUI::OnListItemDeselectedProblem ), NULL, this );
@@ -671,6 +674,7 @@ AdminGUI::~AdminGUI()
 	m_listCtrlTeam->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedTeam ), NULL, this );
 	m_buttonAccountNew->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickNewAccount ), NULL, this );
 	m_buttonAccountDelete->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDeleteAccount ), NULL, this );
+	m_buttonTimeManualSet->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickManualTimeSet ), NULL, this );
 	m_buttonContestStart->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickStart ), NULL, this );
 	m_buttonContestStop->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickStop ), NULL, this );
 	m_listCtrlProblems->Disconnect( wxEVT_COMMAND_LIST_ITEM_DESELECTED, wxListEventHandler( AdminGUI::OnListItemDeselectedProblem ), NULL, this );
