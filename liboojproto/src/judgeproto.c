@@ -20,8 +20,8 @@ extern void (*cb_contest_start)( void );
 extern void (*cb_contest_stop)( void );
 extern void (*cb_clar_request)( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg );
 extern void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
-extern void (*cb_problem_update)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
-extern void (*cb_problem_update_dlfin)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+extern void (*cb_problem_update)( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
+extern void (*cb_problem_update_dlfin)( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
 extern void (*cb_problem_remove)( unsigned int problem_id );
 
 /* callback registration functions */
@@ -33,8 +33,8 @@ void judgeproto_cbreg_contest_start( void (*cbfunc)( void ) ) { cb_contest_start
 void judgeproto_cbreg_contest_stop( void (*cbfunc)( void ) )  { cb_contest_stop = cbfunc; }
 void judgeproto_cbreg_run_request( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t** ) )      { cb_run_request = cbfunc; }
 void judgeproto_cbreg_run_request_dlfin( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t* ) ) { cb_run_request_dlfin = cbfunc; }
-void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int, unsigned int, wchar_t**, wchar_t**, wchar_t** ) ) { cb_problem_update = cbfunc; }
-void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_update_dlfin = cbfunc;}
+void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int, wchar_t*, unsigned int, wchar_t**, wchar_t**, wchar_t** ) ) { cb_problem_update = cbfunc; }
+void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int, wchar_t*, unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_update_dlfin = cbfunc;}
 void judgeproto_cbreg_problem_remove( void (*cbfunc)( unsigned int problem_id ) ) { cb_problem_remove = cbfunc; }
 void judgeproto_cbreg_take_result( void (*cbfunc)( unsigned int, int ) ) { cb_take_result = cbfunc; }
 void judgeproto_cbreg_clar_request( void (*cbfunc)( unsigned int, unsigned int, wchar_t*, int, wchar_t* ) ) { cb_clar_request = cbfunc; }

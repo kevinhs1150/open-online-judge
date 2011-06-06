@@ -11,8 +11,8 @@ void (*cb_contest_stop)( void ) = NULL;
 /* callback common to admin and judge */
 void (*cb_clar_request)( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg ) = NULL;
 void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ) = NULL;
-void (*cb_problem_update)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) = NULL;
-void (*cb_problem_update_dlfin)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
+void (*cb_problem_update)( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) = NULL;
+void (*cb_problem_update_dlfin)( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
 void (*cb_problem_remove)( unsigned int problem_id ) = NULL;
 
 /* callback common to all clients */
@@ -495,22 +495,26 @@ void proto_sb_update( char *msgptr )
 void proto_problem_update( int sockfd, char *msgptr )
 {
 	char *problem_id_str = proto_str_split( msgptr, &msgptr );
+	char *problem_name_mb = proto_str_split( msgptr, &msgptr );
 	char *time_limit_str = proto_str_split( msgptr, NULL );
 	wchar_t *path_description = NULL, *path_input = NULL, *path_answer = NULL;
 
 	unsigned int problem_id = atoi( problem_id_str );
+	wchar_t *problem_name = proto_str_postrecv( problem_name_mb );
 	unsigned int time_limit = atoi( time_limit_str );
 
-	(*cb_problem_update)( problem_id, time_limit, &path_description, &path_input, &path_answer );
+	(*cb_problem_update)( problem_id, problem_name, time_limit, &path_description, &path_input, &path_answer );
 
 	/* download file */
 	filerecv( sockfd, path_description );
 	filerecv( sockfd, path_input );
 	filerecv( sockfd, path_answer );
 
-	(*cb_problem_update_dlfin)( problem_id, time_limit, path_description, path_input, path_answer );
+	(*cb_problem_update_dlfin)( problem_id, problem_name, time_limit, path_description, path_input, path_answer );
 
 	free( problem_id_str );
+	free( problem_name_mb );
+	free( problem_name );
 	free( time_limit_str );
 	free( path_description );
 	free( path_input );

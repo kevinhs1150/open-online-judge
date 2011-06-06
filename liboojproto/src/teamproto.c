@@ -10,9 +10,9 @@ static int teamproto_cbcheck( void );
 void (*cb_run_reply)( unsigned int run_id, unsigned int problem_id, wchar_t *result_string )   = NULL;
 void (*cb_pu_request)( wchar_t **path_description )      = NULL;
 void (*cb_pu_request_dlfin)( wchar_t *path_description ) = NULL;
-void (*cb_pch_add)( unsigned int problem_id ) = NULL;
+void (*cb_pch_add)( unsigned int problem_id, wchar_t *problem_name ) = NULL;
 void (*cb_pch_del)( unsigned int problem_id ) = NULL;
-void (*cb_pch_mod)( unsigned int problem_id ) = NULL;
+void (*cb_pch_mod)( unsigned int problem_id, wchar_t *problem_name ) = NULL;
 
 /* callback functions extern-ed from protointernal.c */
 extern void (*cb_login_confirm)( int confirm_code, unsigned int account_id );
@@ -36,9 +36,9 @@ void teamproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t*, wchar_t
 void teamproto_cbreg_sb_update( void (*cbfunc)( unsigned int, wchar_t*, unsigned int, unsigned int ) ) { cb_sb_update = cbfunc; }
 void teamproto_cbreg_pu_request( void (*cbfunc)( wchar_t** ) )     { cb_pu_request = cbfunc; }
 void teamproto_cbreg_pu_request_dlfin( void (*cbfunc)( wchar_t*) ) { cb_pu_request_dlfin = cbfunc; }
-void teamproto_cbreg_problem_add( void (*cbfunc)( unsigned int ) ) { cb_pch_add = cbfunc; }
+void teamproto_cbreg_problem_add( void (*cbfunc)( unsigned int, wchar_t* ) ) { cb_pch_add = cbfunc; }
 void teamproto_cbreg_problem_del( void (*cbfunc)( unsigned int ) ) { cb_pch_del = cbfunc; }
-void teamproto_cbreg_problem_mod( void (*cbfunc)( unsigned int ) ) { cb_pch_mod = cbfunc; }
+void teamproto_cbreg_problem_mod( void (*cbfunc)( unsigned int, wchar_t* ) ) { cb_pch_mod = cbfunc; }
 
 /* thread function */
 void *teamproto_reqhand_thread( void *args );
@@ -165,15 +165,26 @@ void *teamproto_reqhand_thread( void *args )
 			unsigned int pch_opid = atoi( pch_opid_str );
 
 			/* extract problem id */
-			char *problem_id_str = proto_str_split( msgptr ,NULL );
+			char *problem_id_str = proto_str_split( msgptr ,&msgptr );
 			unsigned int problem_id = atoi( problem_id_str );
-
+			
 			if( pch_opid == PCH_OPID_ADD )
-				(*cb_pch_add)( problem_id );
+			{
+				/* extract problem name */
+				char *problem_name_mb = proto_str_split( msgptr, NULL );
+				wchar_t *problem_name = proto_str_postrecv( problem_name_mb );
+				
+				(*cb_pch_add)( problem_id, problem_name );
+			}
 			else if( pch_opid == PCH_OPID_DEL )
 				(*cb_pch_del)( problem_id );
 			else if( pch_opid == PCH_OPID_MOD )
-				(*cb_pch_mod)( problem_id );
+			{
+				/* extract problem_name */
+				char *problem_name_mb = proto_str_split( msgptr, NULL );
+				wchar_t *problem_name = proto_str_postrecv( problem_name_mb );
+				(*cb_pch_mod)( problem_id, problem_name );
+			}
 
 			free( pch_opid_str );
 			free( problem_id_str );

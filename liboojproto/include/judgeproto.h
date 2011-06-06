@@ -44,8 +44,8 @@ void judgeproto_cbreg_run_request_dlfin( void (*cbfunc)( unsigned int run_id, un
 /* Callback for problem update. (from server)
  * Pass the problem id to judge client.
  * The rest three strings should be filled with path to store "problem description", "input data" and "correct answer" respectively. */
-void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
-void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
+void judgeproto_cbreg_problem_update( void (*cbfunc)( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
+void judgeproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
 /* This one is for problem deletion. */
 void judgeproto_cbreg_problem_remove( void (*cbfunc)( unsigned int problem_id ) );
 

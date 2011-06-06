@@ -55,8 +55,8 @@ void adminproto_cbreg_account_remove( void (*cbfunc)( unsigned int account_id ) 
  * Pass "problem id" to administrator client.
  * The three string should be filled respectively with path where "problem description", "input data" and "correct answer" will be stored.
  * Administrator client should store the files and update its own list of problems. */
-void adminproto_cbreg_problem_update( void (*cbfunc)( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
-void adminproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
+void adminproto_cbreg_problem_update( void (*cbfunc)( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
+void adminproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
 /* This one is for problem deletion. */
 void adminproto_cbreg_problem_remove( void (*cbfunc)( unsigned int problem_id ) );
 
@@ -93,9 +93,9 @@ int adminproto_account_mod( char *destip, unsigned int account_id, wchar_t *new_
 int adminproto_account_sync( char *destip );
 
 /* problem management */
-int adminproto_problem_add( char *destip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+int adminproto_problem_add( char *destip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
 int adminproto_problem_del( char *destip, unsigned int problem_id );
-int adminproto_problem_mod( char *destip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+int adminproto_problem_mod( char *destip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
 int adminproto_problem_sync( char *destip );
 
 /* clarification reply */
