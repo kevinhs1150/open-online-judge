@@ -39,12 +39,17 @@ void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_
 void run_request_dlfin( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code );
 void contest_start( void );
 void contest_stop( void );
+//modify
 void problem_update( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
 void problem_update_dlfin(unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+//modify end
 void problem_remove( unsigned int problem_id );
 void take_result( unsigned int run_id, int success );
+//modify
 void clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg );
+//modify end
 void clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
+unsigned int unJudgeNumCount(void);
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language);
 void problem_insert(unsigned int problem_id);
 int problem_search(unsigned int problem_id);
@@ -122,6 +127,19 @@ void JudgeFrame::setPtoblemFilterChoice(unsigned int problem_id)
 	m_choiceFilter->Append(choice);
 }
 
+void JudgeFrame::deleteProblemFilterChoice(unsigned int problem_count)
+{
+	m_choiceFilter->Delete(problem_count);
+}
+
+void JudgeFrame::setUnJudgeNum(unsigned int unJudgeNum)
+{
+	wxString unJudgeNumStr;
+	
+	unJudgeNumStr.Printf("%u",unJudgeNum);
+	m_staticTextNewUnjudgeCount->SetLabel(unJudgeNumStr);
+}
+
 void JudgeFrame::start()
 {
     state = START;
@@ -161,6 +179,11 @@ void JudgeFrame::OnButtonClickLogout( wxCommandEvent& event )
 	else{
 		this->Destroy();
 	}
+}
+
+void OnCheckBoxAutoJudge( wxCommandEvent& event )
+{
+	/////////////////////////////////////////////////////HERE!!!!!
 }
 
 //call back function use
@@ -220,8 +243,11 @@ void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_
 
 void run_request_dlfin( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
 {
+	unsigned int unJudgeNum;
     /**TODO: UI**/
     id_insert(run_id,problem_id,coding_language);
+	unJudgeNum = unJudgeNumCount();
+	mainFrame->setUnJudgeNum(unJudgeNum);
 }
 
 void problem_update( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
@@ -344,6 +370,25 @@ void clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string 
 }
 
 //run_request_id & problem_all linked list modify
+unsigned int unJudgeNumCount(void)
+{
+	unsigned int unJudgeNum = 0;
+	
+	run_request_id *cptr = pptr;
+
+    if(cptr == NULL){
+        return unJudgeNum;
+    }
+	unJudgeNum++;
+
+    while( cptr->next != NULL ){
+		unJudgeNum++;
+        cptr = cptr->next;
+    }
+	
+	return unJudgeNum;
+}
+
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language)
 {
     run_request_id *currentPtr = pptr;
@@ -412,6 +457,8 @@ int problem_search(unsigned int problem_id)
 
 void problem_search_delete(unsigned int problem_id)
 {
+	unsigned int problem_count = 0;
+
 	problem_all *cptr = problem_hptr;
     problem_all *dptr = problem_hptr;
     problem_all *nptr = problem_hptr;
@@ -419,16 +466,19 @@ void problem_search_delete(unsigned int problem_id)
     if(dptr->problem_id == problem_id){
         problem_hptr = problem_hptr->next;
         delete(dptr);
+		mainFrame->deleteProblemFilterChoice(problem_count);
         return;
     }
 
     while( dptr->next != NULL ){
+		problem_count++;
         cptr = dptr;
         dptr = dptr->next;
         if(dptr->problem_id == problem_id){
             nptr = dptr->next;
             delete(dptr);
             cptr->next = nptr;
+			mainFrame->deleteProblemFilterChoice(problem_count);
             break;
         }
     }
@@ -714,13 +764,11 @@ int judge(unsigned int problem_id){
             fclose(fptr2);
         }
         else{
-            //printf("Error: ans.txt opening failure\n");
             return -1;
         }
         fclose(fptr1);
     }
     else{
-        //printf("Error: problem/%s_answer.txt opening failure\n");
         return -1;
     }
 
