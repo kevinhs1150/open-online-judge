@@ -12,12 +12,14 @@ class AdminFrame: public AdminGUI
         ~AdminFrame();
 		
 		bool isLogin;
-	
+		
     private:
 		bool isProblemInfoEnable;
+		int m_selectedProblem;
 	
 		//void OnClose( wxCloseEvent& event );
 		void InitAccountList();
+		void InitProblemList();
 		void ProblemInfoEnable(bool enable);
 		
 		void OnButtonClickChangePassword( wxCommandEvent& event );
@@ -36,6 +38,7 @@ class AdminFrame: public AdminGUI
 		void OnListItemSelectedProblem( wxListEvent& event );
 		void OnButtonClickAddProblem( wxCommandEvent& event );
 		void OnButtonClickDelProblem( wxCommandEvent& event );
+		void OnButtonClickProblemApply( wxCommandEvent& event );
 
 };
 

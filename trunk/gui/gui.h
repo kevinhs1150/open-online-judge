@@ -27,6 +27,7 @@
 #include <wx/icon.h>
 #include <wx/radiobut.h>
 #include <wx/spinctrl.h>
+#include <wx/valtext.h>
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
 #include <wx/choice.h>
@@ -123,7 +124,7 @@ class AdminGUI : public wxFrame
 		wxButton* m_buttonProblemAdd;
 		wxButton* m_buttonProblemDel;
 		wxStaticText* m_staticTextProblemID;
-		wxTextCtrl* m_textCtrlProblemIDVal;
+		wxTextCtrl* m_textCtrlProblemID;
 		wxStaticText* m_staticTextProblemName;
 		wxTextCtrl* m_textCtrlProblemName;
 		wxCheckBox* m_checkBoxProblemFile;
@@ -181,6 +182,7 @@ class AdminGUI : public wxFrame
 		wxListCtrl* m_listCtrlJudge;
 		wxListCtrl* m_listCtrlTeam;
 		wxListCtrl* m_listCtrlProblems;
+		wxString IDFilter; 
 		
 		AdminGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Admin"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 753,553 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		~AdminGUI();
