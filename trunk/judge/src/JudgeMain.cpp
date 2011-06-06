@@ -57,6 +57,8 @@ void problem_search_delete(unsigned int problem_id);
 void run_search_delete(unsigned int problem_id);
 run_request_id *search(unsigned int run_id);
 void id_delete(unsigned int run_id);
+void autoJudge_take(void);
+void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language);
 int compile(wchar_t [], wchar_t []);
 int complie_result(void);
 int judge(unsigned int problem_id);
@@ -183,7 +185,9 @@ void JudgeFrame::OnButtonClickLogout( wxCommandEvent& event )
 
 void OnCheckBoxAutoJudge( wxCommandEvent& event )
 {
-	/////////////////////////////////////////////////////HERE!!!!!
+	if((m_checkBoxAutoJudge->IsChecked) == true && unJudgeNumCount() > 0){
+		autoJudge_take();
+	}
 }
 
 //call back function use
@@ -244,10 +248,14 @@ void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_
 void run_request_dlfin( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
 {
 	unsigned int unJudgeNum;
-    /**TODO: UI**/
+	
     id_insert(run_id,problem_id,coding_language);
 	unJudgeNum = unJudgeNumCount();
 	mainFrame->setUnJudgeNum(unJudgeNum);
+	
+	if(unJufgeNum == 1 && (mainFrame->m_checkBoxAutoJudge->IsChecked) == true){
+		autoJudge_take();
+	}
 }
 
 void problem_update( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
@@ -291,71 +299,26 @@ void problem_remove( unsigned int problem_id )
 
 void take_result( unsigned int run_id, int success )
 {
-    wchar_t file_name[50];
-    int errtyp;
-    wchar_t type[20];
-
-    if(1/**auto judge**/){
-        if(success == TAKE_SUCCESS){
-            /**TODO:show message**/
-            run_request_id *proptr = search(run_id);
-            id_delete(run_id);
-            swprintf(file_name, L"%u", run_id);
-            wcscpy(type, proptr->coding_language);
-            errtyp = compile(file_name, type);
-            if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
-                if(time() == 0){
-                    if(judge(proptr->problem_id) != 0){
-                        errtyp = OUTPUT_ERROR;
-                    }
-                }
-                else{
-                    errtyp = TIME_OUT;
-                }
-            }
-            if(errtyp == SUCCESS){
-                //printf("compile success\n");
-            }
-            else if(errtyp == SUCCESS_WITH_WARNING){
-                //printf("compile success, but has warning\n");
-            }
-            else if(errtyp == COMPLIE_ERROR){
-                //printf("compile error\n");
-            }
-            else if(errtyp == OUTPUT_ERROR){
-                //printf("output error\n");
-            }
-            else if(errtyp == TYPE_ERROR){
-                //printf("type error\n");
-            }
-            else if(errtyp == FILE_OPEN_ERROR){
-                //printf("file open error\n");
-            }
-            else if(errtyp == OUTPUT_OPEN_ERROR){
-                //printf("output.txt open error\n");
-            }
-            else if(errtyp == TIME_OUT){
-                //printf("time out error\n");
-            }
-            else{
-                //printf("other unexpected error\n");
-            }
-        }
-        else{
-            id_delete(run_id);
-            judgeproto_take_run(mainFrame->IP_get(),pptr->run_id);
-        }
-    }
-    else{
-        if(success == TAKE_SUCCESS){
-            run_request_id *proptr = search(run_id);
-            id_delete(run_id);
-            swprintf(file_name, L"%s", run_id);
-            wcscpy(type, proptr->coding_language);
-            errtyp = compile(file_name, type);
-            }
-    }
-
+    run_request_id *proptr = search(run_id);
+    id_delete(run_id);
+	
+	if(success == TAKE_SUCCESS){
+		if(mainFrame->m_checkBoxAutoJudge->IsChecked){
+			autoJudge(proptr->run_id,proptr->problem_id, proptr->coding_language);
+		}
+		else{
+			submissionFrame = new JudgeSubmissionFrame(0L);
+			submissionFrame->setRunProblemID(proptr->run_id,proptr->problem_id, proptr->coding_language);
+		}
+	}
+	else{
+		if(mainFrame->m_checkBoxAutoJudge->IsChecked){
+			autoJudge_take();
+		}
+		else{
+			wxMessageBox( wxT("Take run Error.\nPromble: This problem has been judged."), wxT("Take run Error"),wxOK|wxICON_EXCLAMATION);
+		}
+	}
 }
 
 void clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg )
@@ -415,6 +378,7 @@ void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_lan
 		problem_insert(problem_id);
 		mainFrame->setPtoblemFilterChoice(unsigned int problem_id);
 	}
+	//////////////////////////////變更list顯示
 }
 
 void problem_insert(unsigned int problem_id)
@@ -545,6 +509,7 @@ void id_delete(unsigned int run_id)
             break;
         }
     }
+	///////////////////////////////變更list顯示
 }
 
 //clar_request_id linked list modify
@@ -570,6 +535,7 @@ void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg)
 
 		currentPtr->next = temp;
 	}
+	//////////////////////////變更clar list
 }
 
 clar_request_id *clar_search(unsigned int clar_id)
@@ -614,6 +580,60 @@ void clar_delete(unsigned int clar_id)
 }
 
 //do judge
+void autoJudge_take(void)
+{
+	judgeproto_take_run(mainFrame->IP_get(),pptr->run_id);
+}
+
+void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language)
+{
+	wchar_t file_name[50];
+    int errtyp;
+    wchar_t type[20];
+	wchar_t result_string[20];
+	unsigned int unJudgeNum;
+
+    swprintf(file_name, L"%u", run_id);
+    wcscpy(type, coding_language);
+    errtyp = compile(file_name, type);
+    if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
+        if(time() == 0){
+            if(judge(problem_id) != 0){
+                errtyp = OUTPUT_ERROR;
+			}
+        }
+		else{
+			errtyp = TIME_OUT;
+		}
+    }
+	
+	if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
+		swprintf(result_string,L"yes");
+	}
+	else if(errtyp == COMPLIE_ERROR || errtyp == TYPE_ERROR || errtyp == FILE_OPEN_ERROR){
+		swprintf(result_string,L"complie error");
+	}
+	else if(errtyp == OUTPUT_ERROR || errtyp == OUTPUT_OPEN_ERROR){
+		swprintf(result_string,L"wrong answer");
+	}
+	else if(errtyp == TIME_OUT){
+		swprintf(result_string,L"time-limit exceed");
+	}
+	else{
+		swprintf(result_string,L"complie error");
+	}
+	
+	if(judgeproto_judge_result(this->IP,trun_id,result_string) != 0){
+		wxMessageBox("Judgement Submission Error.\nPromble: Socket error.","Judgement Submission Error",wxOK|wxICON_EXCLAMATION);
+	}
+	else{
+		unJudgeNum = unJudgeNumCount();
+		if(unJufgeNum == 1 && (mainFrame->m_checkBoxAutoJudge->IsChecked) == true){
+			autoJudge_take();
+		}
+	}
+}
+
 int compile(wchar_t file_name[], wchar_t type[])
 {
     FILE *fptr1;
@@ -654,13 +674,11 @@ int compile(wchar_t file_name[], wchar_t type[])
             return(complie_result());
         }
         else{
-            //printf("Error: type error!!!\n");
             return TYPE_ERROR;
         }
         fclose(fptr1);
     }
     else{
-        //printf("Error: file opening failure!!\n");
         return FILE_OPEN_ERROR;
     }
 }
@@ -677,12 +695,10 @@ int complie_result(){
         {
             while((ch = getc(fptr2))!= EOF){
                 result = SUCCESS_WITH_WARNING;
-                //printf("%c",ch);
             }
             fclose(fptr2);
         }
         else{
-            //printf("Error: output.txt opening failure!!\n");
             result = OUTPUT_OPEN_ERROR;
         }
         fclose(fptr1);
@@ -692,12 +708,10 @@ int complie_result(){
         if(fptr2 != NULL)
         {
             while((ch = getc(fptr2))!= EOF){
-                //printf("%c",ch);
             }
             fclose(fptr2);
         }
         else{
-            //printf("Error: output.txt opening failure!!\n");
             result = OUTPUT_OPEN_ERROR;
         }
     }

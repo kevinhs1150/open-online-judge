@@ -116,7 +116,7 @@ void JudgeSubmissionFrame::OnButtonClickShowOutput( wxCommandEvent& event )
 
 void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 {
-	int column = m_choiceJudgement->GetSelection(); /**取得choice的選擇**/
+	int column = m_choiceJudgement->GetSelection();
 	wchar_t result_string[20];
 	
 	if(column == 0){
