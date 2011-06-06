@@ -56,9 +56,9 @@ void teamproto_cbreg_pu_request_dlfin( void (*cbfunc)( wchar_t *path_description
 
 /* Callback for problem change notification. (from server, due to administrator changed some problem)
  * Team client should update its problem listing and, possibly pop up a window to nofity the user about the change. */
-void teamproto_cbreg_problem_add( void (*cbfunc)( unsigned int problem_id ) );
+void teamproto_cbreg_problem_add( void (*cbfunc)( unsigned int problem_id, wchar_t *problem_name ) );
 void teamproto_cbreg_problem_del( void (*cbfunc)( unsigned int problem_id ) );
-void teamproto_cbreg_problem_mod( void (*cbfunc)( unsigned int problem_id ) );
+void teamproto_cbreg_problem_mod( void (*cbfunc)( unsigned int problem_id, wchar_t *problem_name ) );
 
 
 /*----------------------------- tool functions -----------------------------*/

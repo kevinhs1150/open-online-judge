@@ -132,8 +132,8 @@ void serverproto_cbreg_account_sync( void (*cbfunc)( char *srcip ) );
  * Server should record the new data into db.
  *   reply function: serverproto_problem_update()
  *   forward function: serverproto_problem_update() and serverproto_problem_change_add() */
-void serverproto_cbreg_problem_add( void (*cbfunc)( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
-void serverproto_cbreg_problem_add_dlfin( void (*cbfunc)( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
+void serverproto_cbreg_problem_add( void (*cbfunc)( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
+void serverproto_cbreg_problem_add_dlfin( void (*cbfunc)( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
 
 /* Callback for problem delete request. (from admin)
  * Pass "problem id" to server program.
@@ -148,8 +148,8 @@ void serverproto_cbreg_problem_del( void (*cbfunc)( char *srcip, unsigned int pr
  * The three strings is the same as problem_add().
  *   reply function: serverproto_problem_update()
  *   forward function: serverproto_problem_update() and serverproto_problem_change_mod() */
-void serverproto_cbreg_problem_mod( void (*cbfunc)( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
-void serverproto_cbreg_problem_mod_dlfin( void(*cbfunc)( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
+void serverproto_cbreg_problem_mod( void (*cbfunc)( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) );
+void serverproto_cbreg_problem_mod_dlfin( void(*cbfunc)( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) );
 
 /* Callback for problem sync request. (from admin or judge)
  * Server should reply immediately all problem information to requested client.
@@ -206,9 +206,9 @@ int serverproto_clar_reply( char *destip, short desttype, unsigned int clar_id, 
 
 /* problem modification notify (to team)
  * notify team client about changes on problem listing */
-int serverproto_problem_change_add( char *destip, unsigned int problem_id );
+int serverproto_problem_change_add( char *destip, unsigned int problem_id, wchar_t *problem_name );
 int serverproto_problem_change_del( char *destip, unsigned int problem_id );
-int serverproto_problem_change_mod( char *destip, unsigned int problem_id );
+int serverproto_problem_change_mod( char *destip, unsigned int problem_id, wchar_t *problem_name );
 
 /* scoreboard update (to team and admin)
  * notify team and admin client about scoreboard updates */
@@ -234,7 +234,7 @@ int serverproto_account_remove( char *destip, unsigned int account_id );
 
 /* problem information update (to admin and judge)
  * updates problem listing to admin and judge clients */
-int serverproto_problem_update( char *destip, short desttype, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+int serverproto_problem_update( char *destip, short desttype, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
 /* this one notifies about problem removal */
 int serverproto_problem_remove( char *destip, short desttype, unsigned int problem_id );
 

@@ -29,11 +29,11 @@ void (*cb_account_add)( char *srcip, unsigned int type, wchar_t *account, char *
 void (*cb_account_del)( char *srcip, unsigned int account_id ) = NULL;
 void (*cb_account_mod)( char *srcip, unsigned int account_id, wchar_t *new_account, char *new_password ) = NULL;
 void (*cb_account_sync)( char *srcip )      = NULL;
-void (*cb_problem_add)( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )    = NULL;
-void (*cb_problem_add_dlfin)( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
+void (*cb_problem_add)( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )    = NULL;
+void (*cb_problem_add_dlfin)( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
 void (*cb_problem_del)( char *srcip, unsigned int problem_id )                                                                             = NULL;
-void (*cb_problem_mod)( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )    = NULL;
-void (*cb_problem_mod_dlfin)( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
+void (*cb_problem_mod)( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )    = NULL;
+void (*cb_problem_mod_dlfin)( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
 void (*cb_problem_sync)( char *srcip, short srctype )      = NULL;
 void (*cb_clar_result)( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string ) = NULL;
 
@@ -60,11 +60,11 @@ void serverproto_cbreg_account_add( void (*cbfunc)( char*, unsigned int, wchar_t
 void serverproto_cbreg_account_del( void (*cbfunc)( char*, unsigned int ) )                  { cb_account_del = cbfunc; }
 void serverproto_cbreg_account_mod( void (*cbfunc)( char*, unsigned int, wchar_t*, char* ) ) { cb_account_mod = cbfunc; }
 void serverproto_cbreg_account_sync( void (*cbfunc)( char* ) )                             { cb_account_sync = cbfunc; }
-void serverproto_cbreg_problem_add( void (*cbfunc)( char*, unsigned int, unsigned int, wchar_t**, wchar_t**, wchar_t** ) )    { cb_problem_add = cbfunc; }
-void serverproto_cbreg_problem_add_dlfin( void (*cbfunc)( char*, unsigned int, unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_add_dlfin = cbfunc; }
+void serverproto_cbreg_problem_add( void (*cbfunc)( char*, unsigned int, wchar_t*, unsigned int, wchar_t**, wchar_t**, wchar_t** ) )    { cb_problem_add = cbfunc; }
+void serverproto_cbreg_problem_add_dlfin( void (*cbfunc)( char*, unsigned int, wchar_t*, unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_add_dlfin = cbfunc; }
 void serverproto_cbreg_problem_del( void (*cbfunc)( char*, unsigned int ) )                  { cb_problem_del = cbfunc; }
-void serverproto_cbreg_problem_mod( void (*cbfunc)( char*, unsigned int, unsigned int, wchar_t**, wchar_t**, wchar_t** ) )    { cb_problem_mod = cbfunc; }
-void serverproto_cbreg_problem_mod_dlfin( void (*cbfunc)( char*, unsigned int, unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_mod_dlfin = cbfunc; }
+void serverproto_cbreg_problem_mod( void (*cbfunc)( char*, unsigned int, wchar_t*, unsigned int, wchar_t**, wchar_t**, wchar_t** ) )    { cb_problem_mod = cbfunc; }
+void serverproto_cbreg_problem_mod_dlfin( void (*cbfunc)( char*, unsigned int, wchar_t*, unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_mod_dlfin = cbfunc; }
 void serverproto_cbreg_problem_sync( void (*cbfunc)( char*, short ) )                      { cb_problem_sync = cbfunc; }
 void serverproto_cbreg_clar_result( void (*cbfunc)( char*, unsigned int, int, wchar_t* ) )   { cb_clar_result = cbfunc; }
 
@@ -318,22 +318,26 @@ void *serverproto_reqhand_thread( void *args )
 			if( p_opid == P_OPID_ADD )
 			{
 				char *problem_id_str = proto_str_split( msgptr, &msgptr );
+				char *problem_name_mb = proto_str_split( msgptr, &msgptr );
 				char *time_limit_str = proto_str_split( msgptr ,NULL );
 
 				unsigned int problem_id = atoi( problem_id_str );
+				wchar_t *problem_name = proto_str_postrecv( problem_name_mb );
 				unsigned int time_limit = atoi( time_limit_str );
 				wchar_t *path_description = NULL, *path_input = NULL, *path_answer = NULL;
 
-				(*cb_problem_add)( src_ipaddr, problem_id, time_limit, &path_description, &path_input, &path_answer );
+				(*cb_problem_add)( src_ipaddr, problem_id, problem_name, time_limit, &path_description, &path_input, &path_answer );
 
 				/* download files */
 				filerecv( sockfd, path_description );
 				filerecv( sockfd, path_input );
 				filerecv( sockfd, path_answer );
 
-				(*cb_problem_add_dlfin)( src_ipaddr, problem_id, time_limit, path_description, path_input, path_answer );
+				(*cb_problem_add_dlfin)( src_ipaddr, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
 
 				free( problem_id_str );
+				free( problem_name_mb );
+				free( problem_name );
 				free( time_limit_str );
 				free( path_description );
 				free( path_input );
@@ -352,22 +356,26 @@ void *serverproto_reqhand_thread( void *args )
 			else if( p_opid == P_OPID_MOD )
 			{
 				char *problem_id_str = proto_str_split( msgptr, &msgptr );
+				char *problem_name_mb = proto_str_split( msgptr, &msgptr );
 				char *time_limit_str = proto_str_split( msgptr, NULL );
 
 				unsigned int problem_id = atoi( problem_id_str );
+				wchar_t *problem_name = proto_str_postrecv( problem_name_mb );
 				unsigned int time_limit = atoi( time_limit_str );
 				wchar_t *path_description = NULL, *path_input = NULL, *path_answer = NULL;
 
-				(*cb_problem_mod)( src_ipaddr, problem_id, time_limit, &path_description, &path_input, &path_answer );
+				(*cb_problem_mod)( src_ipaddr, problem_id, problem_name, time_limit, &path_description, &path_input, &path_answer );
 
 				/* download files */
 				filerecv( sockfd, path_description );
 				filerecv( sockfd, path_input );
 				filerecv( sockfd, path_answer );
 
-				(*cb_problem_mod_dlfin)( src_ipaddr, problem_id, time_limit, path_description, path_input, path_answer );
+				(*cb_problem_mod_dlfin)( src_ipaddr, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
 
 				free( problem_id_str );
+				free( problem_name_mb );
+				free( problem_name );
 				free( time_limit_str );
 				free( path_description );
 				free( path_input );
@@ -553,7 +561,6 @@ int serverproto_login_reply( char *destip, short srctype, int confirmation, unsi
 	shutdown_wr_sp( sockfd );
 	free( confirmation_str );
 	free( account_id_str );
-
 	return 0;
 }
 
@@ -594,7 +601,6 @@ int serverproto_logout_reply( char *destip, short srctype, int confirmation )
 
 	shutdown_wr_sp( sockfd );
 	free( confirmation_str );
-
 	return 0;
 }
 
@@ -635,7 +641,6 @@ int serverproto_password_change_reply( char *destip, short desttype, int confirm
 
 	shutdown_wr_sp( sockfd );
 	free( confirmation_str );
-
 	return 0;
 }
 
@@ -682,9 +687,7 @@ int serverproto_timer_set( char *destip, short desttype, unsigned int hours, uns
 	free( hours_str );
 	free( minutes_str );
 	free( seconds_str );
-
 	return 0;
-
 }
 
 int serverproto_contest_start( char *destip, short desttype )
@@ -721,7 +724,6 @@ int serverproto_contest_start( char *destip, short desttype )
 	send_sp( sockfd, sendbuf, BUFLEN );
 
 	shutdown_wr_sp( sockfd );
-
 	return 0;
 }
 
@@ -759,7 +761,6 @@ int serverproto_contest_stop( char *destip, short desttype )
 	send_sp( sockfd, sendbuf, BUFLEN );
 
 	shutdown_wr_sp( sockfd );
-
 	return 0;
 }
 
@@ -791,7 +792,6 @@ int serverproto_run_reply( char *destip, unsigned int run_id, unsigned int probl
 	free( run_id_str );
 	free( problem_id_str );
 	free( result_mb );
-
 	return 0;
 }
 
@@ -838,21 +838,22 @@ int serverproto_clar_reply( char *destip, short desttype, unsigned int clar_id, 
 	free( clar_id_str );
 	free( clarmsg_mb );
 	free( result_mb );
-
 	return 0;
 }
 
-int serverproto_problem_change_add( char *destip, unsigned int problem_id )
+int serverproto_problem_change_add( char *destip, unsigned int problem_id, wchar_t *problem_name )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *pch_opid_str = uint2str( PCH_OPID_ADD );
 	char *problem_id_str = uint2str( problem_id );
+	char *problem_name_mb = proto_str_presend( problem_name );
 
 	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_P_CHANGE );
 	msgptr = proto_str_comb( msgptr, pch_opid_str );
 	msgptr = proto_str_comb( msgptr, problem_id_str );
+	msgptr = proto_str_comb( msgptr, problem_name_mb );
 
 	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_TEAM ) ) < 0 )
 	{
@@ -867,7 +868,7 @@ int serverproto_problem_change_add( char *destip, unsigned int problem_id )
 	shutdown_wr_sp( sockfd );
 	free( pch_opid_str );
 	free( problem_id_str );
-
+	free( problem_name_mb );
 	return 0;
 }
 
@@ -896,21 +897,22 @@ int serverproto_problem_change_del( char *destip, unsigned int problem_id )
 	shutdown_wr_sp( sockfd );
 	free( pch_opid_str );
 	free( problem_id_str );
-
 	return 0;
 }
 
-int serverproto_problem_change_mod( char *destip, unsigned int problem_id )
+int serverproto_problem_change_mod( char *destip, unsigned int problem_id, wchar_t *problem_name )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *pch_opid_str = uint2str( PCH_OPID_MOD );
 	char *problem_id_str = uint2str( problem_id );
+	char *problem_name_mb = proto_str_presend( problem_name );
 
 	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_P_CHANGE );
 	msgptr = proto_str_comb( msgptr, pch_opid_str );
 	msgptr = proto_str_comb( msgptr, problem_id_str );
+	msgptr = proto_str_comb( msgptr, problem_name_mb );
 
 	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_TEAM ) ) < 0 )
 	{
@@ -925,7 +927,7 @@ int serverproto_problem_change_mod( char *destip, unsigned int problem_id )
 	shutdown_wr_sp( sockfd );
 	free( pch_opid_str );
 	free( problem_id_str );
-
+	free( problem_name_mb );
 	return 0;
 }
 
@@ -973,7 +975,6 @@ int serverproto_sb_update( char *destip, short desttype, unsigned int upd_acc_id
 	free( new_account_mb );
 	free( new_accept_count_str );
 	free( new_time_str );
-
 	return 0;
 }
 
@@ -999,7 +1000,6 @@ int serverproto_problem_upload( char *destip, wchar_t *path_description )
 	filesend( sockfd, path_description );
 
 	shutdown_wr_sp( sockfd );
-
 	return 0;
 }
 
@@ -1034,7 +1034,6 @@ int serverproto_run_request( char *destip, unsigned int run_id, unsigned int pro
 	free( run_id_str );
 	free( problem_id_str );
 	free( coding_language_mb );
-
 	return 0;
 }
 
@@ -1063,7 +1062,6 @@ int serverproto_take_result( char *destip, unsigned int run_id, int success )
 	shutdown_wr_sp( sockfd );
 	free( run_id_str );
 	free( success_str );
-
 	return 0;
 }
 
@@ -1095,7 +1093,6 @@ int serverproto_account_update( char *destip, unsigned int account_id, unsigned 
 	free( account_id_str );
 	free( type_str );
 	free( account_mb );
-
 	return 0;
 }
 
@@ -1124,17 +1121,19 @@ int serverproto_account_remove( char *destip, unsigned int account_id )
 	return 0;
 }
 
-int serverproto_problem_update( char *destip, short desttype, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
+int serverproto_problem_update( char *destip, short desttype, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
 	int sockfd;
 	unsigned short listen_port;
 	char sendbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *problem_id_str = uint2str( problem_id );
+	char *problem_name_mb = proto_str_presend( problem_name );
 	char *time_limit_str = uint2str( time_limit );
 
 	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_PUPDATE );
 	msgptr = proto_str_comb( msgptr, problem_id_str );
+	msgptr = proto_str_comb( msgptr, problem_name_mb );
 	msgptr = proto_str_comb( msgptr, time_limit_str );
 
 	if( desttype == OPSR_ADMIN )
@@ -1166,8 +1165,8 @@ int serverproto_problem_update( char *destip, short desttype, unsigned int probl
 
 	shutdown_wr_sp( sockfd );
 	free( problem_id_str );
+	free( problem_name_mb );
 	free( time_limit_str );
-
 	return 0;
 }
 
@@ -1250,6 +1249,5 @@ int serverproto_clar_request( char *destip, short desttype, unsigned int clar_id
 	free( clar_id_str );
 	free( private_byte_str );
 	free( clarmsg_mb );
-
 	return 0;
 }

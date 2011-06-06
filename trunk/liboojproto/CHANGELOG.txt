@@ -1,44 +1,79 @@
 >> Open Online Judge Protocol Implementation Change Log <<
 
-protocol 0 revision 0 (follow specification 0.2)
-released on 2011.04.23   by Infinity
- + Initial release version.
+protocol 0 revision 5
+ongoing
+ NOTE: Because deadline is near, specification document will no longer be
+ updated.
+ + common: All update "request" functions are now unified to the naming scheme
+ "sync".  All update "operations" are remained "update".  Sorry for the
+ frequent name change, but this one is necessary.  Otherwise, all update
+ functions will be in a chaos.
+ + clients: Timer & contest state sync functions.
+ + admin&judge: Clarification sync function.
+ + admin&team: Scoreboard sync function.
+ + team: Run sync which updates runs submitted by that team.
+ + judge: Problem sync callback added.
+ + server: All above requests callback.
+
+ * common: For all update functions, add a remove_byte to indicate a "delete"
+ update.
+ * common: Some other changes.  A function name mapping list will be published
+ later.
+
+2011.06.06 quick fix
+ * common: Added problem name functionality.
+ Affected functions:
+  >> server <<
+   serverproto_cbreg_problem_add()
+   serverproto_cbreg_problem_add_dlfin()
+   serverproto_cbreg_problem_mod()
+   serverproto_cbreg_problem_mod_dlfin()
+   serverproto_problem_change_add()
+   serverproto_problem_change_mod()
+   serverproto_problem_update()
+  >> judge <<
+   judgeproto_cbreg_problem_update()
+   judgeproto_cbreg_problem_update_dlfin()
+  >> admin <<
+   adminproto_cbreg_problem_update()
+   adminproto_cbreg_problem_update_dlfin()
+   adminproto_problem_add()
+   adminproto_problem_mod()
+  >> team <<
+   teamproto_cbreg_problem_add()
+   teamproto_cbreg_problem_mod()
 
 
-protocol 0 revision 1 (follow specification 0.2)
-released on 2011.05.19   by Infinity
- + protointernal: send_sp(), recv_sp(), shutdown_wr_sp() function.  All functions
- related to send(), recv() and close() will be affected.  Please help report bugs.
- + protointernal: filerecv(), filesend() function.
 
- * teamproto: Fixed a problem where team clients' were not able to register
- their login_confirm and logout_confirm callback functions.
+protocol 0 revision 4 (follow specification 0.4)
+released on 2011.06.02   by Infinity
+ + team: Added three callbacks for team client to be able to receive problem
+ set modification from server.
+ + server: Added three functions for server to be able to notify team about
+ problem set modification.
+ + admin&judge: Added one callback for these clients to receive clarification
+ reply.  Team client is not affected.
 
- * judgeproto: Fixed a problem where judge clients' callback register functions
- were not defined.
- * judgeproto: Fixed a problem where judge clients do not receive message at all.
+ * team: Changed run_reply and clar_reply callbacks to send essential
+ information.
+ * server: Changed run_reply and clar_reply functions to send essential
+ information.
+ * internal: Generalized clarification functions for all clients.
 
- + common: Added a notification callback to notify file download completion.
- This applies to all functions involving file receiving.
- * common: Login/logout confirmation code defined.  Refer to
- proto_commondefine.h for their defined names.  Do not use your own definition
- as it might break client-server communication.
+2011.06.04 quick fix
+ + server: Totally forgot about the problem_update function = =|||....  Added
+ back now.
 
- * makefile: Seperated Win32 and Linux into two makefiles and shortened the
- naming scheme.
- * sourcecode: Directory structure altered for easier file management.
+ * server&admin&judge: For all clarification requesting functions, they will
+ now be notified the requester account.
+ * server&admin&judge: For all problem information and management related
+ functions, time limit can be specified now.
+ * server&admin: problem_info function renamed into problem_update for code
+ reuse.
+ * server&admin: account_info function renamed into account_update for naming
+ scheme consistency.
+ * internal: Generalized problem_update functions for admin and judge.
 
-
-protocol 0 revision 2 (follow specification 0.2)
-released on 2011.05.21   by Infinity and Fishy
- + common: Now able to test if a socket is listening. (Infinity)
-
- * judgeproto: Fixed a comment typo.
- * common: Changed some variables named "private" to "private_byte" to prevent
- C++ keywords problem. (Infinity)
-
- * makefile: Implement CMake auto makefile generation.  The old Makefile.win32
- and Makefile.linux are now deprecated. (Fishy)
 
 
 protocol 0 revision 3 (follow specification 0.3)
@@ -70,51 +105,45 @@ released on 2011.05.28   by Infinity
  definition glitches.
 
 
-protocol 0 revision 4 (follow specification 0.4)
-released on 2011.06.02   by Infinity
- + team: Added three callbacks for team client to be able to receive problem
- set modification from server.
- + server: Added three functions for server to be able to notify team about
- problem set modification.
- + admin&judge: Added one callback for these clients to receive clarification
- reply.  Team client is not affected.
 
- * team: Changed run_reply and clar_reply callbacks to send essential
- information.
- * server: Changed run_reply and clar_reply functions to send essential
- information.
- * internal: Generalized clarification functions for all clients.
+protocol 0 revision 2 (follow specification 0.2)
+released on 2011.05.21   by Infinity and Fishy
+ + common: Now able to test if a socket is listening. (Infinity)
 
-2011.06.04 quick fix
- + server: Totally forgot about the problem_update function = =|||....  Added
- back now.
+ * judgeproto: Fixed a comment typo.
+ * common: Changed some variables named "private" to "private_byte" to prevent
+ C++ keywords problem. (Infinity)
 
- * server&admin&judge: For all clarification requesting functions, they will 
- now be notified the requester account.
- * server&admin&judge: For all problem information and management related
- functions, time limit can be specified now.
- * server&admin: problem_info function renamed into problem_update for code
- reuse.
- * server&admin: account_info function renamed into account_update for naming
- scheme consistency.
- * internal: Generalized problem_update functions for admin and judge.
+ * makefile: Implement CMake auto makefile generation.  The old Makefile.win32
+ and Makefile.linux are now deprecated. (Fishy)
 
-protocol 0 revision 5
-ongoing
- NOTE: Because deadline is near, specification document will no longer be
- updated.
- + common: All update "request" functions are now unified to the naming scheme
- "sync".  All update "operations" are remained "update".  Sorry for the
- frequent name change, but this one is necessary.  Otherwise, all update
- functions will be in a chaos.
- + clients: Timer & contest state sync functions.
- + admin&judge: Clarification sync function.
- + admin&team: Scoreboard sync function.
- + team: Run sync which updates runs submitted by that team.
- + judge: Problem sync callback added.
- + server: All above requests callback.
 
- * common: For all update functions, add a remove_byte to indicate a "delete"
- update.
- * common: Some other changes.  A function name mapping list will be published
- later.
+
+protocol 0 revision 1 (follow specification 0.2)
+released on 2011.05.19   by Infinity
+ + protointernal: send_sp(), recv_sp(), shutdown_wr_sp() function.  All functions
+ related to send(), recv() and close() will be affected.  Please help report bugs.
+ + protointernal: filerecv(), filesend() function.
+
+ * teamproto: Fixed a problem where team clients' were not able to register
+ their login_confirm and logout_confirm callback functions.
+
+ * judgeproto: Fixed a problem where judge clients' callback register functions
+ were not defined.
+ * judgeproto: Fixed a problem where judge clients do not receive message at all.
+
+ + common: Added a notification callback to notify file download completion.
+ This applies to all functions involving file receiving.
+ * common: Login/logout confirmation code defined.  Refer to
+ proto_commondefine.h for their defined names.  Do not use your own definition
+ as it might break client-server communication.
+
+ * makefile: Seperated Win32 and Linux into two makefiles and shortened the
+ naming scheme.
+ * sourcecode: Directory structure altered for easier file management.
+
+
+
+protocol 0 revision 0 (follow specification 0.2)
+released on 2011.04.23   by Infinity
+ + Initial release version.
