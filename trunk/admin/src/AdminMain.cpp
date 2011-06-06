@@ -14,14 +14,20 @@ LoginDialog* loginDialog;
 /* callback functions */
 void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *account ){
 	wxString name(account);
+	wxString id = wxString() << account_id;
+	long tmp;
+	
 	if(type == SRC_ADMIN){
-		AdminFrameGlobal->m_listCtrlAdmin->InsertItem(account_id, name);
+		tmp = AdminFrameGlobal->m_listCtrlAdmin->InsertItem(AdminFrameGlobal->m_listCtrlAdmin->GetItemCount(), id);
+		AdminFrameGlobal->m_listCtrlAdmin->SetItem(tmp, 1, name);
 	}
 	else if(type == SRC_JUDGE){
-		AdminFrameGlobal->m_listCtrlJudge->InsertItem(account_id, name);
+		tmp = AdminFrameGlobal->m_listCtrlJudge->InsertItem(AdminFrameGlobal->m_listCtrlJudge->GetItemCount(), id);
+		AdminFrameGlobal->m_listCtrlJudge->SetItem(tmp, 1, name);
 	}
 	else if(type == SRC_TEAM){
-		AdminFrameGlobal->m_listCtrlTeam->InsertItem(account_id, name);
+		tmp = AdminFrameGlobal->m_listCtrlTeam->InsertItem(AdminFrameGlobal->m_listCtrlTeam->GetItemCount(), id);
+		AdminFrameGlobal->m_listCtrlTeam->SetItem(tmp, 1, name);
 	}
 	else{
 		// no definition, it must a mistake!
@@ -30,14 +36,47 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 }
 
 void cb_account_remove( unsigned int account_id ){
+	int i;
+	wxListItem item;
+	item.SetColumn(0);
+	item.SetMask(wxLIST_MASK_TEXT);
+	
+	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlAdmin->GetItemCount() ; i++){
+		item.SetId(i);
+		AdminFrameGlobal->m_listCtrlAdmin->GetItem(item);
+		if(atoi(item.GetText().char_str()) == account_id){
+			AdminFrameGlobal->m_listCtrlAdmin->DeleteItem(i);
+			return;
+		}
+	}
+
+	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlJudge->GetItemCount() ; i++){
+		item.SetId(i);
+		AdminFrameGlobal->m_listCtrlJudge->GetItem(item);
+		if(atoi(item.GetText().char_str()) == account_id){
+			AdminFrameGlobal->m_listCtrlJudge->DeleteItem(i);
+			return;
+		}
+	}
+	
+	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlTeam->GetItemCount() ; i++){
+		item.SetId(i);
+		AdminFrameGlobal->m_listCtrlTeam->GetItem(item);
+		if(atoi(item.GetText().char_str()) == account_id){
+			AdminFrameGlobal->m_listCtrlTeam->DeleteItem(i);
+			return;
+		}
+	}
+	
+	return;
 }
 
-void cb_problem_update( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
-{
+void cb_problem_update( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ){
+
 }
 
-void cb_problem_update_dlfin( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
-{
+void cb_problem_update_dlfin( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ){
+
 }
 
 
@@ -57,7 +96,8 @@ void cb_login_confirm( int confirm_code, unsigned int account_id ){
 }
 
 void cb_logout_confirm( int confirm_code ){
-
+	AdminFrameGlobal->Destroy();
+	return;
 }
 
 void cb_password_change_confirm( int confirm_code ){
@@ -213,9 +253,25 @@ void AdminFrame::OnButtonClickLogout( wxCommandEvent& event ){
 	tmp = m_listCtrlAdmin->InsertItem(0, _("Test A"));
 	m_listCtrlAdmin->SetItem(tmp, 1, _("Test B"));
 	
-	tmp = m_listCtrlAdmin->InsertItem(0, _("Test C"));
+	tmp = m_listCtrlAdmin->InsertItem(1, _("Test C"));
 	m_listCtrlAdmin->SetItem(tmp, 1, _("Test D"));
 	
+	tmp = m_listCtrlJudge->InsertItem(0, _("Test E"));
+	m_listCtrlJudge->SetItem(tmp, 1, _("Test F"));
+	
+	tmp = m_listCtrlJudge->InsertItem(1, _("Test G"));
+	m_listCtrlJudge->SetItem(tmp, 1, _("Test H"));
+	
+	tmp = m_listCtrlJudge->InsertItem(2, _("Test I"));
+	m_listCtrlJudge->SetItem(tmp, 1, _("Test J"));
+	
+	tmp = m_listCtrlTeam->InsertItem(0, _("Test K"));
+	m_listCtrlTeam->SetItem(tmp, 1, _("Test L"));
+	
+	tmp = m_listCtrlTeam->InsertItem(1, _("Test M"));
+	m_listCtrlTeam->SetItem(tmp, 1, _("Test N"));
+	
+	return;
 }
 
 void AdminFrame::OnListItemActivatedAdmin( wxListEvent& event ){
