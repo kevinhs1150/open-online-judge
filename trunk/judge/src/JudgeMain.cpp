@@ -368,7 +368,7 @@ void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_lan
 	
 	if(problem_search(problem_id) == 0){
 		problem_insert(problem_id);
-		mainFrame->set_problem_choice();
+		mainFrame->setPtoblemFilterChoice(unsigned int problem_id);
 	}
 }
 
@@ -391,7 +391,6 @@ void problem_insert(unsigned int problem_id)
 
 		currentPtr->next = temp_id;
 	}
-	mainFrame->setPtoblemFilterChoice(unsigned int problem_id);
 }
 
 int problem_search(unsigned int problem_id)
