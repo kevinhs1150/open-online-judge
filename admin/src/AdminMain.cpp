@@ -71,11 +71,11 @@ void cb_account_remove( unsigned int account_id ){
 	return;
 }
 
-void cb_problem_update( unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ){
+void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ){
 
 }
 
-void cb_problem_update_dlfin( unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ){
+void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ){
 
 }
 
@@ -130,7 +130,14 @@ void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsign
 }
 
 void cb_problem_remove( unsigned int problem_id ){
-
+	int i;
+	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlProblems->GetItemCount() ; i++){
+		if(AdminFrameGlobal->m_listCtrlProblems->GetItemData(i) == problem_id){
+			AdminFrameGlobal->m_listCtrlProblems->DeleteItem(i);
+		}
+	}
+	
+	return;
 }
 
 AdminFrame::AdminFrame(wxFrame *frame)
@@ -143,6 +150,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	isProblemInfoEnable = false;
 	AdminFrameGlobal = this;
 	InitAccountList();
+	InitProblemList();
 	
 	loginDialog = new LoginDialog(NULL);
 	
@@ -189,12 +197,6 @@ AdminFrame::~AdminFrame()
 {
 }
 
-/*
-void AdminFrame::OnClose( wxCloseEvent& event ){
-	//Destroy();
-}
-*/
-
 void AdminFrame::InitAccountList(){
 	wxListItem itemCol;
 	
@@ -219,6 +221,24 @@ void AdminFrame::InitAccountList(){
 	m_listCtrlAdmin->InsertColumn(1, itemCol);
 	m_listCtrlJudge->InsertColumn(1, itemCol);
 	m_listCtrlTeam->InsertColumn(1, itemCol);
+	
+	return;
+}
+
+void AdminFrame::InitProblemList(){
+	wxListItem itemCol;
+	
+	m_listCtrlProblems->DeleteAllItems();
+	while(m_listCtrlProblems->GetColumnCount())
+		m_listCtrlProblems->DeleteColumn(0);
+	
+	itemCol.SetText(_("ID"));
+	m_listCtrlProblems->InsertColumn(0, itemCol);
+	
+	itemCol.SetText(_("Name"));
+	m_listCtrlProblems->InsertColumn(1, itemCol);
+	
+	m_selectedProblem = -1;
 	
 	return;
 }
@@ -270,6 +290,9 @@ void AdminFrame::OnButtonClickLogout( wxCommandEvent& event ){
 	
 	tmp = m_listCtrlTeam->InsertItem(1, _("Test M"));
 	m_listCtrlTeam->SetItem(tmp, 1, _("Test N"));
+	
+	if(adminproto_logout(server_ip, login_id) < 0)
+		wxMessageBox(_("Server not responding"));
 	
 	return;
 }
@@ -371,18 +394,94 @@ void AdminFrame::OnButtonClickStop( wxCommandEvent& event ){
 
 void AdminFrame::OnListItemDeselectedProblem( wxListEvent& event ){
 	ProblemInfoEnable(false);
+	m_selectedProblem = -1;
 }
 
 void AdminFrame::OnListItemSelectedProblem( wxListEvent& event ){
 	ProblemInfoEnable(true);
+	m_selectedProblem = event.GetIndex();
 }
 
 void AdminFrame::OnButtonClickAddProblem( wxCommandEvent& event ){
+	int i;
+	for(i = 0 ; i < m_listCtrlProblems->GetItemCount() ; i++)
+		m_listCtrlProblems->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	m_selectedProblem = -1;
 	m_textCtrlProblemName->Clear();
 	m_filePickerProblemFile->SetPath(wxEmptyString);
 	m_spinCtrlTimeLimitVal->SetValue(3000);
 }
 
 void AdminFrame::OnButtonClickDelProblem( wxCommandEvent& event ){
-	event.Skip();
+	if(m_selectedProblem == -1){
+		wxMessageBox(_("No problem is selected"));
+	}
+	else{
+		wxListItem item;
+		item.SetId(m_selectedProblem);
+		item.SetColumn(0);
+		item.SetMask(wxLIST_MASK_TEXT);
+		m_listCtrlProblems->GetItem(item);
+		unsigned int id = wxAtoi(item.GetText());
+		adminproto_problem_del(server_ip, id);
+	}
+	
+	return;
+}
+
+void AdminFrame::OnButtonClickProblemApply( wxCommandEvent& event ){
+	if(m_selectedProblem == -1){
+		//new
+		if(m_textCtrlProblemID->IsEmpty()){
+			wxMessageBox(_("Problem ID cannot be empty!"));
+			return;
+		}
+		// check if problem id exist
+		int i;
+		wxListItem item;
+		item.SetColumn(0);
+		item.SetMask(wxLIST_MASK_TEXT);
+		unsigned int id = wxAtoi(m_textCtrlProblemID->GetLabel());
+		for(i = 0 ; i < m_listCtrlProblems->GetItemCount() ; i++){
+			item.SetId(i);
+			m_listCtrlProblems->GetItem(item);
+			if(wxAtoi(item.GetText()) == id){
+				wxMessageBox(_("Problem ID is existed!"));
+				return;
+			}
+		}
+		
+		if(m_textCtrlProblemName->IsEmpty()){
+			wxMessageBox(_("Problem name cannot be empty!"));
+			return;
+		}
+		
+		if(m_filePickerProblemFile->GetPath() == wxEmptyString){
+			wxMessageBox(_("Problem's path cannot be empty!"));
+			return;
+		}
+		
+		// check input and output data path is not empty
+		if(m_filePickerProblemInputData->GetPath() == wxEmptyString){
+			wxMessageBox(_("Input data's path cannot be empty!"));
+			return;
+		}
+		if(m_filePickerProblemOutputData->GetPath() == wxEmptyString){
+			wxMessageBox(_("Output data's path cannot be empty!"));
+			return;
+		}
+		
+		wchar_t *name = m_textCtrlProblemName->GetLabel().wchar_str();
+		wchar_t *p_path = m_filePickerProblemFile->GetPath().wchar_str();
+		unsigned int time_limit = m_spinCtrlTimeLimitVal->GetValue();
+		wchar_t *i_path = m_filePickerProblemInputData->GetPath().wchar_str();
+		wchar_t *o_path = m_filePickerProblemOutputData->GetPath().wchar_str();
+		
+		adminproto_problem_add(server_ip, id, name, time_limit, p_path, i_path, o_path);
+	}
+	else{
+		//edit
+	}
+	
+	return;
 }

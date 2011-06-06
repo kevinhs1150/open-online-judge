@@ -224,6 +224,8 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizerTimeSchedule = new wxBoxSizer( wxVERTICAL );
 	
 	m_radioBtnTimeSchedule = new wxRadioButton( m_panelContestInfo, wxID_ANY, wxT("Schedule"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
+	m_radioBtnTimeSchedule->Enable( false );
+	
 	bSizerTimeSchedule->Add( m_radioBtnTimeSchedule, 0, wxALL, 5 );
 	
 	wxBoxSizer* bSizerTimeScheduleFromTo;
@@ -383,7 +385,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_staticTextProblems->Wrap( -1 );
 	bSizerProblemList->Add( m_staticTextProblems, 0, wxALL, 5 );
 	
-	m_listCtrlProblems = new wxListCtrl( m_panelProblems, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_LIST );
+	m_listCtrlProblems = new wxListCtrl( m_panelProblems, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL );
 	bSizerProblemList->Add( m_listCtrlProblems, 1, wxALL|wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizerProblemButton;
@@ -409,8 +411,10 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_staticTextProblemID->Wrap( -1 );
 	bSizerProblemName->Add( m_staticTextProblemID, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_textCtrlProblemIDVal = new wxTextCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 40,-1 ), 0 );
-	bSizerProblemName->Add( m_textCtrlProblemIDVal, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_textCtrlProblemID = new wxTextCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 40,-1 ), 0 );
+	m_textCtrlProblemID->SetValidator( wxTextValidator( wxFILTER_NUMERIC, &IDFilter ) );
+	
+	bSizerProblemName->Add( m_textCtrlProblemID, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_staticTextProblemName = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Problem Name:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextProblemName->Wrap( -1 );
@@ -439,7 +443,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_staticTextTimeLimit->Wrap( -1 );
 	bSizerProblemTimeLimit->Add( m_staticTextTimeLimit, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_spinCtrlTimeLimitVal = new wxSpinCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
+	m_spinCtrlTimeLimitVal = new wxSpinCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, 1 );
 	bSizerProblemTimeLimit->Add( m_spinCtrlTimeLimitVal, 0, wxALL, 5 );
 	
 	m_staticTextTimeLimitUnit = new wxStaticText( m_panelProblems, wxID_ANY, wxT("ms"), wxDefaultPosition, wxDefaultSize, 0 );
