@@ -12,9 +12,10 @@ class JudgeShowClarFrame: public JudgeShowClarGUI
         JudgeShowClarFrame(wxFrame *frame);
         ~JudgeShowClarFrame();
 		
-		void setClarQA();
+		void setClarQA( wchar_t *clarmsg, wchar_t *result_string);
 
     private:
+		void OnButtonClickClose( wxCommandEvent& event );
 };
 
 #endif // _JUDGESHOWCLAR_H_
