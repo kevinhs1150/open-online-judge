@@ -27,6 +27,9 @@ typedef struct problem_list{
 } problem_all;
 
 JudgeLoginFrame *loginframe;
+JudgeChangePassFrame *changePassFrame;
+JudgeShowClarFrame *showClarFrame;
+JudgeSubmissionFrame *submissionFrame;
 JudgeFrame *mainFrame = NULL;
 run_request_id *pptr = NULL;
 clar_request_id *clar_hptr = NULL;
@@ -65,9 +68,12 @@ int judge(unsigned int problem_id);
 int time(void);
 void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg);
 clar_request_id *clar_search(unsigned int clar_id);
+unsigned int clarNumCount(void);
 void clar_delete(unsigned int clar_id);
 
+///////////////////////////////////////////////////
 //class public function
+///////////////////////////////////////////////////
 JudgeFrame::JudgeFrame(wxFrame *frame)
     : JudgeGUI(frame)
 {
@@ -85,6 +91,8 @@ JudgeFrame::JudgeFrame(wxFrame *frame)
     judgeproto_cbreg_clar_request(clar_request);
 	judgeproto_cbreg_clar_reply(clar_reply);
     judgeproto_listen("0.0.0.0");
+	setRunListColumn();
+	setClarListColumn();
 
     loginframe = new JudgeLoginFrame(0L);
     if(loginframe->ShowModal() == -1){
@@ -142,6 +150,38 @@ void JudgeFrame::setUnJudgeNum(unsigned int unJudgeNum)
 	m_staticTextNewUnjudgeCount->SetLabel(unJudgeNumStr);
 }
 
+void setRunListColumn()
+{
+	wxString columnString;
+	wxListItem columnListItem;
+	
+	columnString.Printf(wxT("run_id"));
+	columnListItem.SetText(columnString);
+	m_listCtrlRuns->SetColumn(0,columnListItem);
+	
+	columnString.Printf(wxT("problem_id"));
+	columnListItem.SetText(columnString);
+	m_listCtrlRuns->SetColumn(1,columnListItem);
+	
+	columnString.Printf(wxT("coding language"));
+	columnListItem.SetText(columnString);
+	m_listCtrlRuns->SetColumn(2,columnListItem);
+}
+
+void setClarListColumn()
+{
+	wxString columnString;
+	wxListItem columnListItem;
+	
+	columnString.Printf(wxT("clar_id"));
+	columnListItem.SetText(columnString);
+	m_listCtrlRuns->SetColumn(0,columnListItem);
+	
+	columnString.Printf(wxT("clarmsg"));
+	columnListItem.SetText(columnString);
+	m_listCtrlRuns->SetColumn(1,columnListItem);
+}
+
 void JudgeFrame::start()
 {
     state = START;
@@ -166,7 +206,9 @@ char *JudgeFrame::IP_get()
     return IP;
 }
 
+////////////////////////////////////////////////////////////////////
 //class private function
+////////////////////////////////////////////////////////////////////
 void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 {
 	changePassFrame = new JudgeChangePassFrame(0L);
@@ -190,7 +232,43 @@ void OnCheckBoxAutoJudge( wxCommandEvent& event )
 	}
 }
 
+void OnListItemActivatedRuns( wxListEvent& event )
+{
+	wxListItem item;
+	unsigned int run_id;
+	
+	item.SetId(event.GetIndex());
+	item.SetColumn(0);
+	item.SetMask(wxLIST_MASK_TEXT);
+	m_listCtrlRuns->GetItem(item);
+	
+	run_id = wxAtoi(item.GetText());
+	
+	judgeproto_take_run(this->IP_get(),run_id);
+}
+
+void OnListItemActivatedClar( wxListEvent& event )
+{
+	wxListItem item0;
+	wxListItem item1;
+	
+	item0.SetId(event.GetIndex());
+	item0.SetColumn(0);
+	item0.SetMask(wxLIST_MASK_TEXT);
+	m_listCtrlClars->GetItem(item0);
+	
+	item1.SetId(event.GetIndex());
+	item1.SetColumn(0);
+	item1.SetMask(wxLIST_MASK_TEXT);
+	m_listCtrlClars->GetItem(item1);
+	
+	showClarFrame = new JudgeShowClarFrame(0L);
+	showClarFrame->setClarQA( item0.GetText().wchar_str(), item1.GetText().wchar_str());
+}
+
+/////////////////////////////////////////////////////////////
 //call back function use
+/////////////////////////////////////////////////////////////
 void login_confirm( int confirm_code, unsigned int account_id )
 {
     if( confirm_code == LOGIN_VALID )
@@ -332,7 +410,9 @@ void clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string 
 	result_insertPtr->result_string = result_string;
 }
 
+///////////////////////////////////////////////////////////
 //run_request_id & problem_all linked list modify
+///////////////////////////////////////////////////////////
 unsigned int unJudgeNumCount(void)
 {
 	unsigned int unJudgeNum = 0;
@@ -355,6 +435,9 @@ unsigned int unJudgeNumCount(void)
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language)
 {
     run_request_id *currentPtr = pptr;
+	unsigned int row;
+	wxString insertString;
+	long tmp;
 
     run_request_id *temp_id = new run_request_id;
     temp_id->run_id = run_id;
@@ -378,7 +461,14 @@ void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_lan
 		problem_insert(problem_id);
 		mainFrame->setPtoblemFilterChoice(unsigned int problem_id);
 	}
-	//////////////////////////////變更list顯示
+	
+	row = unJudgeNumCount() + 1 ;
+	insertString.Printf("%d",run_id);
+	tmp = mainFrame->m_listCtrlRuns->InsertItem(row,insertString);
+	insertString.Printf("%d",problem_id);
+	mainFrame->m_listCtrlRuns->SetItem(tmp, 1, insertString);
+	insertString.Printf("%s",coding_language);
+	mainFrame->m_listCtrlRuns->SetItem(tmp, 2, insertString);
 }
 
 void problem_insert(unsigned int problem_id)
@@ -489,6 +579,8 @@ run_request_id *search(unsigned int run_id)
 
 void id_delete(unsigned int run_id)
 {
+	long itemCount = 0;
+	
     run_request_id *cptr = pptr;
     run_request_id *dptr = pptr;
     run_request_id *nptr = pptr;
@@ -496,26 +588,33 @@ void id_delete(unsigned int run_id)
     if(dptr->run_id == run_id){
         pptr = pptr->next;
         delete(dptr);
+		itemCount->m_listCtrlRuns->DeleteItem(itemCount);
         return;
     }
 
     while( dptr->next != NULL ){
+		itemCount++;
         cptr = dptr;
         dptr = dptr->next;
         if(dptr->run_id == run_id){
             nptr = dptr->next;
             delete(dptr);
             cptr->next = nptr;
+			itemCount->m_listCtrlRuns->DeleteItem(itemCount);
             break;
         }
     }
-	///////////////////////////////變更list顯示
 }
 
+////////////////////////////////////////////////////////////
 //clar_request_id linked list modify
+////////////////////////////////////////////////////////////
 void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg)
 {
     clar_request_id *currentPtr = clar_hptr;
+	unsigned int row;
+	wxString insertString;
+	long tmp;
 
     clar_request_id *temp = new clar_request_id;
     temp->clar_id = clar_id;
@@ -535,7 +634,12 @@ void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg)
 
 		currentPtr->next = temp;
 	}
-	//////////////////////////變更clar list
+	
+	row = clarNumCount() + 1 ;
+	insertString.Printf("%d",_clar_id);
+	tmp = mainFrame->m_listCtrlClars->InsertItem(row,insertString);
+	insertString.Printf("%s",clarmsg);
+	mainFrame->m_listCtrlClars->SetItem(tmp, 1, insertString);
 }
 
 clar_request_id *clar_search(unsigned int clar_id)
@@ -553,6 +657,25 @@ clar_request_id *clar_search(unsigned int clar_id)
         }
         tptr = tptr->next;
     }
+}
+
+unsigned int clarNumCount(void)
+{
+	unsigned int clarNum = 0;
+	
+	clar_request_id *cptr = clar_hptr;
+
+    if(cptr == NULL){
+        return clarNum;
+    }
+	clarNum++;
+
+    while( cptr->next != NULL ){
+		clarNum++;
+        cptr = cptr->next;
+    }
+	
+	return clarNum;
 }
 
 void clar_delete(unsigned int clar_id)
@@ -579,7 +702,9 @@ void clar_delete(unsigned int clar_id)
     }
 }
 
+/////////////////////////////////////////////////////
 //do judge
+/////////////////////////////////////////////////////
 void autoJudge_take(void)
 {
 	judgeproto_take_run(mainFrame->IP_get(),pptr->run_id);

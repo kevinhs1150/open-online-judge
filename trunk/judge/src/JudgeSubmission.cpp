@@ -4,6 +4,9 @@ extern "C"
     #include "judgeproto.h"
 }
 
+JudgeCompareFrame *CompareFrame;
+JudgementConfirmFrame *ConfirmFrame;
+
 int compile(wchar_t file_name[], wchar_t type[]);
 int complie_result();
 int time();
