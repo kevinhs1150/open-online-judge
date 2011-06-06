@@ -200,7 +200,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelAccounts->SetSizer( bSizerAccountPage );
 	m_panelAccounts->Layout();
 	bSizerAccountPage->Fit( m_panelAccounts );
-	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), true );
+	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), false );
 	m_panelContestInfo = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerContestInfoPage;
 	bSizerContestInfoPage = new wxBoxSizer( wxVERTICAL );
@@ -405,6 +405,13 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	wxBoxSizer* bSizerProblemName;
 	bSizerProblemName = new wxBoxSizer( wxHORIZONTAL );
 	
+	m_staticTextProblemID = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Problem ID:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextProblemID->Wrap( -1 );
+	bSizerProblemName->Add( m_staticTextProblemID, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_textCtrlProblemIDVal = new wxTextCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 40,-1 ), 0 );
+	bSizerProblemName->Add( m_textCtrlProblemIDVal, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
 	m_staticTextProblemName = new wxStaticText( m_panelProblems, wxID_ANY, wxT("Problem Name:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextProblemName->Wrap( -1 );
 	bSizerProblemName->Add( m_staticTextProblemName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
@@ -531,7 +538,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelProblems->SetSizer( bSizerProblemsPage );
 	m_panelProblems->Layout();
 	bSizerProblemsPage->Fit( m_panelProblems );
-	m_notebook->AddPage( m_panelProblems, wxT("Problems"), false );
+	m_notebook->AddPage( m_panelProblems, wxT("Problems"), true );
 	m_panelClar = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerClarPage;
 	bSizerClarPage = new wxBoxSizer( wxHORIZONTAL );
@@ -1673,10 +1680,16 @@ ShowClarGUI::ShowClarGUI( wxWindow* parent, wxWindowID id, const wxString& title
 	this->Layout();
 	
 	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_buttonClose->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ShowClarGUI::OnButtonClickClose ), NULL, this );
 }
 
 ShowClarGUI::~ShowClarGUI()
 {
+	// Disconnect Events
+	m_buttonClose->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ShowClarGUI::OnButtonClickClose ), NULL, this );
+	
 }
 
 ServerGUI::ServerGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
