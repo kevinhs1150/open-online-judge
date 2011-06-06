@@ -27,6 +27,8 @@ class JudgeFrame: public JudgeGUI
 		void setPtoblemFilterChoice(unsigned int problem_id);
 		void deleteProblemFilterChoice(unsigned int problem_count);
 		void setUnJudgeNum(unsigned int unJudgeNum);
+		void setRunListColumn();
+		void setClarListColumn();
         void start();
         void stop();
         void IP_set();
@@ -36,6 +38,8 @@ class JudgeFrame: public JudgeGUI
 		void OnButtonClickChangePassword( wxCommandEvent& event );
 		void OnButtonClickLogout( wxCommandEvent& event );
 		void OnCheckBoxAutoJudge( wxCommandEvent& event );
+		void OnListItemActivatedRuns( wxListEvent& event );
+		void OnListItemActivatedClar( wxListEvent& event );
 		unsigned int account_id;
         unsigned int timer_hours;
         unsigned int timer_minutes;
