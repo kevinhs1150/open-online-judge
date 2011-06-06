@@ -32,6 +32,7 @@ class AdminFrame: public AdminGUI
 		void OnListItemSelectedTeam( wxListEvent& event );
 		void OnButtonClickNewAccount( wxCommandEvent& event );
 		void OnButtonClickDeleteAccount( wxCommandEvent& event );
+		void OnButtonClickManualTimeSet( wxCommandEvent& event );
 		void OnButtonClickStart( wxCommandEvent& event );
 		void OnButtonClickStop( wxCommandEvent& event );
 		void OnListItemDeselectedProblem( wxListEvent& event );

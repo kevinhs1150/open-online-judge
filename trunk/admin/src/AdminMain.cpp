@@ -16,16 +16,82 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 	wxString name(account);
 	wxString id = wxString() << account_id;
 	long tmp;
+	unsigned int old_type;
+	int index;
+	int i;
+	bool found = false;
 	
-	if(type == SRC_ADMIN){
+	//find in the lists
+	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlAdmin->GetItemCount() ; i++)
+		if(AdminFrameGlobal->m_listCtrlAdmin->GetItemData(i) == account_id)
+			break;
+	if(i < AdminFrameGlobal->m_listCtrlAdmin->GetItemCount()){
+		index = i;
+		old_type = SRC_ADMIN;
+		found = true;
+	}
+	
+	if(!found){
+		for(i = 0 ; i < AdminFrameGlobal->m_listCtrlJudge->GetItemCount() ; i++)
+			if(AdminFrameGlobal->m_listCtrlJudge->GetItemData(i) == account_id)
+				break;
+		if(i < AdminFrameGlobal->m_listCtrlJudge->GetItemCount()){
+			index = i;
+			old_type = SRC_JUDGE;
+			found = true;
+		}
+	}
+	
+	if(!found){
+		for(i = 0 ; i < AdminFrameGlobal->m_listCtrlTeam->GetItemCount() ; i++)
+			if(AdminFrameGlobal->m_listCtrlTeam->GetItemData(i) == account_id)
+				break;
+		if(i < AdminFrameGlobal->m_listCtrlTeam->GetItemCount()){
+			index = i;
+			old_type = SRC_TEAM;
+			found = true;
+		}
+	}
+	
+	if(type == SRC_ADMIN){ // new type is admin
+		if(found && type == old_type){ // type no change
+			AdminFrameGlobal->m_listCtrlAdmin->SetItem(index, 1, name);
+			return;
+		}
+		if(found){ // type change
+			if(old_type == SRC_JUDGE)
+				AdminFrameGlobal->m_listCtrlJudge->DeleteItem(index);
+			else if(old_type == SRC_TEAM)
+				AdminFrameGlobal->m_listCtrlTeam->DeleteItem(index);
+		}
 		tmp = AdminFrameGlobal->m_listCtrlAdmin->InsertItem(AdminFrameGlobal->m_listCtrlAdmin->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlAdmin->SetItem(tmp, 1, name);
 	}
 	else if(type == SRC_JUDGE){
+		if(found && type == old_type){ // type no change
+			AdminFrameGlobal->m_listCtrlJudge->SetItem(index, 1, name);
+			return;
+		}
+		if(found){ // type change
+			if(old_type == SRC_ADMIN)
+				AdminFrameGlobal->m_listCtrlAdmin->DeleteItem(index);
+			else if(old_type == SRC_TEAM)
+				AdminFrameGlobal->m_listCtrlTeam->DeleteItem(index);
+		}
 		tmp = AdminFrameGlobal->m_listCtrlJudge->InsertItem(AdminFrameGlobal->m_listCtrlJudge->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlJudge->SetItem(tmp, 1, name);
 	}
 	else if(type == SRC_TEAM){
+		if(found && type == old_type){ // type no change
+			AdminFrameGlobal->m_listCtrlTeam->SetItem(index, 1, name);
+			return;
+		}
+		if(found){ // type change
+			if(old_type == SRC_JUDGE)
+				AdminFrameGlobal->m_listCtrlJudge->DeleteItem(index);
+			else if(old_type == SRC_ADMIN)
+				AdminFrameGlobal->m_listCtrlAdmin->DeleteItem(index);
+		}
 		tmp = AdminFrameGlobal->m_listCtrlTeam->InsertItem(AdminFrameGlobal->m_listCtrlTeam->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlTeam->SetItem(tmp, 1, name);
 	}
@@ -370,12 +436,52 @@ void AdminFrame::OnButtonClickNewAccount( wxCommandEvent& event ){
 	AccountDialog *accountDialog = new AccountDialog(this);
 	accountDialog->ShowModal();
 	accountDialog->Destroy();
-	
+	// update listctrl ???
 	return;
 }
 
 void AdminFrame::OnButtonClickDeleteAccount( wxCommandEvent& event ){
+	int i;
+	i = -1;
+	while(1){
+		i = m_listCtrlAdmin->GetNextItem(i, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if(i == -1)
+			break;
+		unsigned int account_id = m_listCtrlAdmin->GetItemData(i);
+		adminproto_account_del(server_ip, account_id);
+		m_listCtrlAdmin->DeleteItem(i);
+	}
+
+	i = -1;
+	while(1){
+		i = m_listCtrlJudge->GetNextItem(i, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if(i == -1)
+			break;
+		unsigned int account_id = m_listCtrlJudge->GetItemData(i);
+		adminproto_account_del(server_ip, account_id);
+		m_listCtrlJudge->DeleteItem(i);
+	}
 	
+	i = -1;
+	while(1){
+		i = m_listCtrlTeam->GetNextItem(i, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if(i == -1)
+			break;
+		unsigned int account_id = m_listCtrlTeam->GetItemData(i);
+		adminproto_account_del(server_ip, account_id);
+		m_listCtrlTeam->DeleteItem(i);
+	}
+	
+	return;
+}
+
+void AdminFrame::OnButtonClickManualTimeSet( wxCommandEvent& event ){
+	unsigned int hr = 0, min = 0, sec = 0;
+	hr = m_spinCtrlTimeManualTotalHr->GetValue();
+	min = m_spinCtrlTimeManualTotalMin->GetValue();
+	adminproto_timer_set(server_ip, hr, min, sec);
+	
+	return;
 }
 
 void AdminFrame::OnButtonClickStart( wxCommandEvent& event ){

@@ -108,12 +108,12 @@ class AdminGUI : public wxFrame
 		
 		wxButton* m_buttonTimeScheduleSet;
 		wxRadioButton* m_radioBtnTimeManual;
-		wxStaticText* m_staticTextTimeScheduleTotal1;
-		wxSpinCtrl* m_spinCtrlTimeScheduleTotalHr1;
-		wxStaticText* m_staticTextTimeScheduleTotalColon1;
-		wxSpinCtrl* m_spinCtrlTimeScheduleTotalMin1;
+		wxStaticText* m_staticTextTimeManualTotal;
+		wxSpinCtrl* m_spinCtrlTimeManualTotalHr;
+		wxStaticText* m_staticTextTimeManualTotalColon;
+		wxSpinCtrl* m_spinCtrlTimeManualTotalMin;
 		
-		wxButton* m_buttonTimeScheduleSet1;
+		wxButton* m_buttonTimeManualSet;
 		wxStaticLine* m_staticline8;
 		
 		wxButton* m_buttonContestStart;
@@ -167,6 +167,7 @@ class AdminGUI : public wxFrame
 		virtual void OnListItemSelectedTeam( wxListEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickNewAccount( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickDeleteAccount( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickManualTimeSet( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickStart( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickStop( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnListItemDeselectedProblem( wxListEvent& event ) { event.Skip(); }
