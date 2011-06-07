@@ -5,6 +5,10 @@ extern "C"
 #include "adminproto.h"
 }
 
+BEGIN_EVENT_TABLE(AdminFrame, wxFrame)
+    EVT_TIMER(-1, AdminFrame::OnTimerEvent)
+END_EVENT_TABLE()
+
 AdminFrame* AdminFrameGlobal;
 
 char server_ip[20];
@@ -207,7 +211,7 @@ void cb_problem_remove( unsigned int problem_id ){
 }
 
 AdminFrame::AdminFrame(wxFrame *frame)
-    : AdminGUI(frame)
+    : AdminGUI(frame), m_timer(this)
 {
 	char localaddr[20];
 	int ip1, ip2, ip3, ip4;
@@ -590,4 +594,16 @@ void AdminFrame::OnButtonClickProblemApply( wxCommandEvent& event ){
 	}
 	
 	return;
+}
+
+void AdminFrame::OnTimerEvent(wxTimerEvent &event){
+/*
+    m_usingTimeLeft--;
+    if(m_usingTimeLeft == 0)
+        Destroy();
+    //else if(m_usingTimeLeft > 10)
+    //    m_staticTextTimeLeftVal->SetLabel(_(""));
+    else
+        m_staticTextTimeLeftVal->SetLabel(wxString::Format(_("%d"), m_usingTimeLeft));
+*/
 }
