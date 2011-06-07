@@ -1,4 +1,5 @@
 #include "JudgeMain.h"
+#include "JudgeLogin.h"
 extern "C"
 {
     #include "judgeproto.h"
@@ -38,8 +39,8 @@ void JudgeLoginFrame::login()
     FILE *fptr1;
     char IP[20];
 
-    if(m_textCtrlID->isEmpty || m_textCtrlPassword->isEmpty){
-        wxMessageBox("Login Error.\nPromble: ID or password isn't entered.","Login Error",wxOK|wxICON_EXCLAMATION);
+    if((m_textCtrlID->GetValue()) == wxEmptyString || (m_textCtrlPassword->GetValue()) == wxEmptyString){
+        wxMessageBox(wxT("Login Error.\nPromble: ID or password isn't entered."),wxT("Login Error"),wxOK|wxICON_EXCLAMATION);
         m_textCtrlPassword->Clear();
     }
     else{

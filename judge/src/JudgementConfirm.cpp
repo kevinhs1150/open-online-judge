@@ -1,4 +1,5 @@
 #include "JudgeMain.h"
+#include "JudgementConfirm.h"
 extern "C"
 {
     #include "judgeproto.h"
@@ -13,12 +14,12 @@ JudgementConfirmFrame::~JudgementConfirmFrame()
 {
 }
 
-void JudgementConfirmFrame::OnButtonClickYes( wxCommandEvent& event );
+void JudgementConfirmFrame::OnButtonClickYes( wxCommandEvent& event )
 {
 	EndModal(0);
 }
 
-void JudgementConfirmFrame::OnButtonClickNo( wxCommandEvent& event );
+void JudgementConfirmFrame::OnButtonClickNo( wxCommandEvent& event )
 {
 	EndModal(-1);
 }

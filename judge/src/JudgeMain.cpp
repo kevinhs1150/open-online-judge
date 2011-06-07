@@ -316,7 +316,7 @@ void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_
     }
 
     /**TODO: new memory for *path_code**/
-    *path_code = (wchar_t *) malloc( (strlen(filename)) +1) * sizeof(wchar_t);
+    *path_code = (wchar_t *) malloc( (strlen(filename)) +1 * sizeof(wchar_t));
     wsprintf(*path_code, L"%s", filename );
 }
 
@@ -343,9 +343,9 @@ void problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned in
     sprintf(path, "problem/%u", problem_id);
 
     /**TODO: new memory for *path_code**/
-    *path_description = (wchar_t *) malloc( (strlen(path))+1 ) * sizeof(wchar_t);
-    *path_input = (wchar_t *)malloc( strlen(path)+1 ) * sizeof(wchar_t);
-    *path_answer = (wchar_t *)malloc( strlen(path)+1 ) * sizeof(wchar_t);
+    *path_description = (wchar_t *) malloc( (strlen(path))+1 * sizeof(wchar_t));
+    *path_input = (wchar_t *)malloc( strlen(path)+1 * sizeof(wchar_t));
+    *path_answer = (wchar_t *)malloc( strlen(path)+1 * sizeof(wchar_t));
 
     wsprintf(*path_description, L"%s.pdf", path );
     wsprintf(*path_input, L"%s_input.txt", path );
@@ -489,7 +489,7 @@ void problem_insert(unsigned int problem_id, wchar_t *problem_name, unsigned int
 	}
 }
 
-prolem_all *problem_search(unsigned int problem_id)
+problem_all *problem_search(unsigned int problem_id)
 {
 	problem_all *problem_all_hptr = problem_hptr;
 	
@@ -585,7 +585,7 @@ void id_delete(unsigned int run_id)
     if(dptr->run_id == run_id){
         pptr = pptr->next;
         delete(dptr);
-		itemCount->m_listCtrlRuns->DeleteItem(itemCount);
+		mainFrame->m_listCtrlRuns->DeleteItem(itemCount);
         return;
     }
 
@@ -597,7 +597,7 @@ void id_delete(unsigned int run_id)
             nptr = dptr->next;
             delete(dptr);
             cptr->next = nptr;
-			itemCount->m_listCtrlRuns->DeleteItem(itemCount);
+			mainFrame->m_listCtrlRuns->DeleteItem(itemCount);
             break;
         }
     }
@@ -635,9 +635,9 @@ void clar_insert(unsigned int clar_id, unsigned int account_id, wchar_t *account
 	}
 	
 	row = clarNumCount() + 1 ;
-	insertString.Printf("%d",_clar_id);
+	insertString.Printf(wxT("%d"),clar_id);
 	tmp = mainFrame->m_listCtrlClars->InsertItem(row,insertString);
-	insertString.Printf("%s",clarmsg);
+	insertString.Printf(wxT("%s"),clarmsg);
 	mainFrame->m_listCtrlClars->SetItem(tmp, 1, insertString);
 }
 
@@ -747,12 +747,12 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 		swprintf(result_string,L"complie error");
 	}
 	
-	if(judgeproto_judge_result(this->IP,trun_id,result_string) != 0){
-		wxMessageBox("Judgement Submission Error.\nPromble: Socket error.","Judgement Submission Error",wxOK|wxICON_EXCLAMATION);
+	if(judgeproto_judge_result(mainFrame->IP_get(),run_id,result_string) != 0){
+		wxMessageBox(wxT("Judgement Submission Error.\nPromble: Socket error."),wxT("Judgement Submission Error"),wxOK|wxICON_EXCLAMATION);
 	}
 	else{
 		unJudgeNum = unJudgeNumCount();
-		if(unJufgeNum == 1 && (mainFrame->m_checkBoxAutoJudge->IsChecked) == true){
+		if(unJudgeNum == 1 && (mainFrame->m_checkBoxAutoJudge->IsChecked()) == true){
 			autoJudge_take();
 		}
 	}
