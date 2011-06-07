@@ -401,7 +401,6 @@ class JudgeGUI : public wxFrame
 		wxButton* m_buttonChangePassword;
 		wxButton* m_buttonLogout;
 		wxChoice* m_choiceFilter;
-		wxCheckBox* m_checkBoxAutoJudge;
 		
 		wxStaticText* m_staticTextNewUnjudgeCount;
 		wxListCtrl* m_listCtrlRuns;
@@ -416,6 +415,7 @@ class JudgeGUI : public wxFrame
 		
 	
 	public:
+		wxCheckBox* m_checkBoxAutoJudge;
 		
 		JudgeGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Judge"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 643,468 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		~JudgeGUI();
