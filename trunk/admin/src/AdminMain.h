@@ -16,6 +16,7 @@ class AdminFrame: public AdminGUI
     private:
 		bool isProblemInfoEnable;
 		int m_selectedProblem;
+		wxTimer m_timer;
 	
 		//void OnClose( wxCloseEvent& event );
 		void InitAccountList();
@@ -40,7 +41,9 @@ class AdminFrame: public AdminGUI
 		void OnButtonClickAddProblem( wxCommandEvent& event );
 		void OnButtonClickDelProblem( wxCommandEvent& event );
 		void OnButtonClickProblemApply( wxCommandEvent& event );
-
+		
+		void OnTimerEvent(wxTimerEvent &event);
+		DECLARE_EVENT_TABLE()
 };
 
 
