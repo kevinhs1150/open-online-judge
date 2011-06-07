@@ -17,6 +17,7 @@ extern "C"
 class ServerFrame: public ServerGUI
 {
 	private:
+		bool is_contest_start, is_contest_stop;
 		/* Sqlite variable */
 		sqlite3 *db;
 		/* "CREATE TABLE" SQL */
@@ -58,7 +59,7 @@ class ServerFrame: public ServerGUI
 			"account_id		INTEGER,"
 			"time			INTEGER,"
 			"score			INTEGER,"
-			"FOREIGN KEY(account_id) REFERENCES user(account_id));";
+			"FOREIGN KEY(score_id) REFERENCES user(score_id));";
     public:
         ServerFrame(wxFrame *frame);
         ~ServerFrame();

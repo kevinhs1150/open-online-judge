@@ -42,14 +42,18 @@ void cb_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_
 void cb_clar_sync( char *destip, short srctype );
 
 /* database tool function */
-void serverdb_account_update(char *destip);
-void serverdb_problem_update(char *destip, short desttype);
-void serverdb_problem_change_all( int (*serverproto)(char *destip, unsigned int problem_id), unsigned int problem_id)
-void serverdb_clar_request_all( short desttype, unsigned int clar_id, int private_byte, wchar_t *clarmsg );
+void serverdb_contest( int (*serverproto)(char *destip, short desttype), short desttype );
+void serverdb_account_update( char *destip );
+void serverdb_problem_update( char *destip, short desttype );
+void serverdb_problem_change( int (*serverproto)(char *destip, unsigned int problem_id), unsigned int problem_id)
+void serverdb_clar_request( short desttype, unsigned int clar_id, int private_byte, wchar_t *clarmsg );
 
 ServerFrame::ServerFrame(wxFrame *frame)
     : ServerGUI(frame)
 {
+	/* set contest_state */
+	is_contest_start = false;
+	is_contest_stop = false;
 	/* create subdirectory to store files */
 	system( "mkdir submits" );
 	system( "mkdir problems" );
@@ -221,7 +225,15 @@ void cb_timer_sync( char *srcip, short srctype )
 
 void cb_contest_state_sync( char *srcip, short srctype )
 {
-
+	if(is_contest_stop)
+	{
+		serverproto_contest_stop( srcip, srctype );
+	}
+	else
+	{
+		if(is_contest_start)
+			serverproto_contest_start( srcip, srctype );
+	}
 }
 
 void cb_admin_timer_set( char *srcip, unsigned int hours, unsigned int minutes, unsigned int seconds )
@@ -231,18 +243,20 @@ void cb_admin_timer_set( char *srcip, unsigned int hours, unsigned int minutes, 
 
 void cb_admin_contest_start( char *srcip )
 {
-
+	serverdb_contest( serverproto_contest_start, OPSR_JUDGE );
+	serverdb_contest( serverproto_contest_start, OPSR_TEAM );
 }
 
 void cb_admin_contest_stop( char *srcip )
 {
-
+	serverdb_contest( serverproto_contest_stop, OPSR_JUDGE );
+	serverdb_contest( serverproto_contest_stop, OPSR_TEAM );
 }
 
 /* the function needs a subdirectory "submits/" */
 void cb_submission_request( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )
 {
-	char sqlquery[100], coding_language_char[10], path_code_char[30], **table, *errMsg;
+	char sqlquery[100], coding_language_char[10], path_code_char[30], **table, *errMsg = NULL;
 	int rows, cols;
 	
 	/* set path_code */
@@ -257,7 +271,7 @@ void cb_submission_request( char *srcip, unsigned int account_id, unsigned int p
 void cb_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
 {
 	char sqlquery[100], path_code_char[30], coding_language_char[10];
-	char **table, *errMsg;
+	char **table, *errMsg = NULL;
 	int rows, cols, i;
 	unsigned int run_id;
 	
@@ -282,7 +296,7 @@ void cb_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned
 
 void cb_pd_request( char *srcip, unsigned int account_id, unsigned int problem_id )
 {
-	char sqlquery[100], path_description_char[50], char path_description_wchar[50], **table, *errMsg;
+	char sqlquery[100], path_description_char[50], char path_description_wchar[50], **table, *errMsg = NULL;
 	int rows, cols;
 	
 	/* upload the corresponding problem pack to user  */
@@ -299,19 +313,20 @@ void cb_pd_request( char *srcip, unsigned int account_id, unsigned int problem_i
 
 void cb_sb_sync( char *srcip )
 {
-
+	
 }
 
 void cb_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result )
 {
-	char sqlquery[100], result_char[25], destip[20], **table, *errMsg;
+	char sqlquery[100], result_char[25], destip[20], **table, *errMsg = NULL;
 	int rows, cols;
 	unsigned int problem_id, account_id;
 	
 	/* record result information into db */
 	wcstombs(result_char, result, 25);
-	sprintf(sqlquery, "UPDATE submission SET judge_result = '%s' WHERE run_id = '%u';", result_char, run_id);
+ 	sprintf(sqlquery, "UPDATE submission SET judge_result = '%s' WHERE run_id = '%u';", result_char, run_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	
 	/* redirect the result to corresponding team */
 	sprintf(sqlquery, "SELECT account_id, problem_id FROM submission WHERE run_id = '%u';", run_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
@@ -328,12 +343,29 @@ void cb_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result )
 		sscanf(table[1 * cols + 0], "%s", destip);
 	}
 	sqlite3_free_table(table);
-	
 	serverproto_run_reply( destip, run_id, problem_id, result );
 }
 
 void cb_run_sync( char *srcip, unsigned int account_id )
 {
+	char sqlquery[100], **table, *errMsg = NULL;
+	int rows, cols, i;
+	unsigned int run_id, problem_id;
+	wchar_t lang_wchar[10], path_code_wchar[50];
+	
+	/* update all runs belong to that team to the reqesting client */
+	sprintf(sqlquery, "SELECT run_id, problem_id, lang, path_code FROM submission WHERE account_id = '%u';", account_id)
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	
+	for(i=1;i<=rows;i++)
+	{
+		sscanf(table[i * cols + 0], "%u", &run_id);
+		sscanf(table[i * cols + 1], "%u", &problem_id);
+		mbstowcs(lang_wchar, table[i * cols + 2], 10);
+		mbstowcs(path_code_wchar, table[i * cols + 3], 50);
+		serverproto_run_request(srcip, run_id, problem_id, lang_wchar, path_code_wchar);
+	}
+	sqlite3_free_table(table);
 	
 }
 
@@ -344,7 +376,7 @@ void cb_take_run( char *srcip, unsigned int run_id )
 
 void cb_account_add( char *srcip, unsigned int type, wchar_t *account, char *password )
 {
-	char sqlquery[100], account_char[25], *errMsg;
+	char sqlquery[100], account_char[25], *errMsg = NULL;
 	
 	/* record account information into db */
 	wcstombs(account_char, account, 25);
@@ -358,7 +390,7 @@ void cb_account_add( char *srcip, unsigned int type, wchar_t *account, char *pas
 
 void cb_account_del( char *srcip, unsigned int account_id )
 {
-	char sqlquery[100], *errMsg;
+	char sqlquery[100], *errMsg = NULL;
 	
 	/* remove the account from db and remove everything related to that account from the system */
 	sprintf(sqlquery, "DELETE FROM user WHERE account_id = '%u';", account_id);
@@ -371,7 +403,7 @@ void cb_account_del( char *srcip, unsigned int account_id )
 
 void cb_account_mod( char *srcip, unsigned int account_id, wchar_t *new_account, char *new_password )
 {
-	char sqlquery[100], *errMsg;
+	char sqlquery[100], *errMsg = NULL;
 	char new_account_char[25];
 	
 	/* modify the record in db */
@@ -416,7 +448,7 @@ void cb_problem_add( char *srcip, unsigned int problem_id, unsigned int time_lim
 
 void cb_problem_add_dlfin( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
-	char sqlquery[100], *errMsg;
+	char sqlquery[100], *errMsg = NULL;
 	char path_description_char[50], path_input_char[50], path_answer_char[50];
 	
 	/* record the new problem into db */
@@ -428,7 +460,7 @@ void cb_problem_add_dlfin( char *srcip, unsigned int problem_id, unsigned int ti
 	
 	/* reply function */
 	serverdb_problem_update(srcip, OPSR_ADMIN);
-	serverdb_problem_change_all(serverproto_problem_change_add, problem_id);
+	serverdb_problem_change(serverproto_problem_change_add, problem_id);
 }
 
 void cb_problem_del( char *srcip, unsigned int problem_id )
@@ -440,7 +472,7 @@ void cb_problem_del( char *srcip, unsigned int problem_id )
 	
 	/* reply function */
 	serverdb_problem_update(srcip, OPSR_ADMIN);
-	serverdb_problem_change_all(serverproto_problem_change_del, problem_id);
+	serverdb_problem_change(serverproto_problem_change_del, problem_id);
 }
 
 void cb_problem_mod( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
@@ -463,7 +495,7 @@ void cb_problem_mod( char *srcip, unsigned int problem_id, unsigned int time_lim
 void cb_problem_mod_dlfin( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
 	/* do the same thing as cb_problem_add_dlfin(), just copy and paste */
-	char sqlquery[100], *errMsg;
+	char sqlquery[100], *errMsg = NULL;
 	char path_description_char[50], path_input_char[50], path_answer_char[50];
 	
 	/* record the new problem into db */
@@ -475,7 +507,7 @@ void cb_problem_mod_dlfin( char *srcip, unsigned int problem_id, unsigned int ti
 	
 	/* reply function */
 	serverdb_problem_update(srcip, OPSR_ADMIN);
-	serverdb_problem_change_all( serverproto_problem_change_mod, problem_id);
+	serverdb_problem_change( serverproto_problem_change_mod, problem_id);
 }
 
 void cb_problem_sync( char *srcip, short srctype )
@@ -486,7 +518,7 @@ void cb_problem_sync( char *srcip, short srctype )
 
 void cb_clar_request( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg )
 {
-	char sqlquery[100], *errMsg, **table, clarmsg_char[100];
+	char sqlquery[100], *errMsg = NULL, **table, clarmsg_char[100];
 	unsigned int clar_id;
 	int rows, cols;
 
@@ -498,15 +530,15 @@ void cb_clar_request( char *srcip, unsigned int account_id, int private_byte, wc
 	
 	
 	/* redirect the request to admin */
-	serverdb_clar_request_all(OPSR_ADMIN, clar_id, private_byte, clarmsg);
+	serverdb_clar_request(OPSR_ADMIN, clar_id, private_byte, clarmsg);
 
 	/* redirect the request to judge */
-	serverdb_clar_request_all(OPSR_JUDGE, clar_id, private_byte, clarmsg);
+	serverdb_clar_request(OPSR_JUDGE, clar_id, private_byte, clarmsg);
 }
 
 void cb_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string )
 {
-	char sqlquery[100], **table, *errMsg, char result_string_char[100];
+	char sqlquery[100], **table, *errMsg = NULL, char result_string_char[100];
 	int rows, cols, i;
 	unsigned int account_id;
 	wchar_t msg_wchar[100];
@@ -542,7 +574,7 @@ void cb_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_
 
 void cb_clar_sync( char *srcip, short srctype )
 {
-	char sqlquery[100], **table, *errMsg, msg_wchar[100];
+	char sqlquery[100], **table, *errMsg = NULL, msg_wchar[100];
 	int rows, cols, i, private_byte;
 	unsigned int clar_id;
 	
@@ -554,6 +586,23 @@ void cb_clar_sync( char *srcip, short srctype )
 		mbstowcs(msg_wchar, table[i * cols + 1], 100);
 		sscanf(table[i * cols + 2], "%d", &private_byte);
 		serverproto_clar_request( srcip, srctype, clar_id, private_byte, msg_wchar);
+	}
+	sqlite3_free_table(table);
+}
+
+
+/* database tool function below */
+/* sets contest state for clients */
+void serverdb_contest( int (*serverproto)(char *destip, short desttype), short desttype );
+{
+	char sqlquery[100], **table, *errMsg = NULL, destip[20];
+	int rows, cols, i;
+	
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", desttype);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	for(i=1;i<=rows;i++)
+	{
+		(*serverproto)( table[i * cols + 0], desttype );
 	}
 	sqlite3_free_table(table);
 }
@@ -608,7 +657,7 @@ void serverdb_problem_update(char *destip, short desttype)
 }
 
 /* notify all team clients about changes on a problem */
-void serverdb_problem_change_all( int (*serverproto)(char *destip, unsigned int problem_id), unsigned int problem_id)
+void serverdb_problem_change( int (*serverproto)(char *destip, unsigned int problem_id), unsigned int problem_id)
 {
 	char sqlquery[100], destip[20];
 	
@@ -616,16 +665,16 @@ void serverdb_problem_change_all( int (*serverproto)(char *destip, unsigned int 
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
-		sscanf(table[1 * cols + 0], "%s", destip);
+		sscanf(table[i * cols + 0], "%s", destip);
 		(*serverproto)(destip, problem_id);
 	}
 	sqlite3_free_table(table);
 }
 
 /* request clarification to admin and judge clients */
-void serverdb_clar_request_all( short desttype, unsigned int clar_id, int private_byte, wchar_t *clarmsg )
+void serverdb_clar_request( short desttype, unsigned int clar_id, int private_byte, wchar_t *clarmsg )
 {
-	char sqlquery[100], **table, *errMsg, destip[20];
+	char sqlquery[100], **table, *errMsg = NULL, destip[20];
 	int rows, cols, i;
 	
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", desttype);
