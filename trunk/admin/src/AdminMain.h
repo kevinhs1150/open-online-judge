@@ -12,6 +12,7 @@ class AdminFrame: public AdminGUI
         ~AdminFrame();
 		
 		bool isLogin;
+		unsigned int m_timeleft;
 		
     private:
 		bool isProblemInfoEnable;
