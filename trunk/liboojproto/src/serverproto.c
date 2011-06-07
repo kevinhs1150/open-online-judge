@@ -132,7 +132,7 @@ int serverproto_active( void )
 void *serverproto_reqhand_thread( void *args )
 {
 	int sockfd;
-	char recvbuf[BUFLEN];
+	char *recvbuf = NULL;
 	char *src_ipaddr;
 	short RQSR, RQID;  /* ReQuest SouRce & ReQuest ID */
 	char *msgptr = NULL;
@@ -147,7 +147,7 @@ void *serverproto_reqhand_thread( void *args )
 	src_ipaddr = tcp_getaddr( sockfd );
 
 	/* receive and interpret message */
-	recv( sockfd, recvbuf, BUFLEN, 0 );
+	recv_sp( sockfd, &recvbuf );
 	msgptr = proto_srid_split( recvbuf, &RQSR, &RQID );
 
 	/* request handling */
@@ -329,9 +329,9 @@ void *serverproto_reqhand_thread( void *args )
 				(*cb_problem_add)( src_ipaddr, problem_id, problem_name, time_limit, &path_description, &path_input, &path_answer );
 
 				/* download files */
-				filerecv( sockfd, path_description );
-				filerecv( sockfd, path_input );
-				filerecv( sockfd, path_answer );
+				filerecv( src_ipaddr, path_description );
+				filerecv( src_ipaddr, path_input );
+				filerecv( src_ipaddr, path_answer );
 
 				(*cb_problem_add_dlfin)( src_ipaddr, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
 
@@ -367,9 +367,9 @@ void *serverproto_reqhand_thread( void *args )
 				(*cb_problem_mod)( src_ipaddr, problem_id, problem_name, time_limit, &path_description, &path_input, &path_answer );
 
 				/* download files */
-				filerecv( sockfd, path_description );
-				filerecv( sockfd, path_input );
-				filerecv( sockfd, path_answer );
+				filerecv( src_ipaddr, path_description );
+				filerecv( src_ipaddr, path_input );
+				filerecv( src_ipaddr, path_answer );
 
 				(*cb_problem_mod_dlfin)( src_ipaddr, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
 
@@ -452,7 +452,7 @@ void *serverproto_reqhand_thread( void *args )
 			(*cb_submission_request)( src_ipaddr, account_id, problem_id, coding_language, &path_code );
 
 			/* download file */
-			filerecv( sockfd, path_code );
+			filerecv( src_ipaddr, path_code );
 
 			(*cb_submission_request_dlfin)( src_ipaddr, account_id, problem_id, coding_language, path_code );
 
@@ -517,6 +517,7 @@ void *serverproto_reqhand_thread( void *args )
 	}
 
 	free( src_ipaddr );
+	free( recvbuf );
 	shutdown_wr_sp( sockfd );
 	pthread_exit( NULL );
 }
@@ -997,7 +998,7 @@ int serverproto_problem_upload( char *destip, wchar_t *path_description )
 	send_sp( sockfd, sendbuf, BUFLEN );
 
 	/* upload files */
-	filesend( sockfd, path_description );
+	filesend( destip, path_description );
 
 	shutdown_wr_sp( sockfd );
 	return 0;
@@ -1028,7 +1029,7 @@ int serverproto_run_request( char *destip, unsigned int run_id, unsigned int pro
 	send_sp( sockfd, sendbuf, BUFLEN );
 
 	/* upload files */
-	filesend( sockfd, path_code );
+	filesend( destip, path_code );
 
 	shutdown_wr_sp( sockfd );
 	free( run_id_str );
@@ -1159,9 +1160,9 @@ int serverproto_problem_update( char *destip, short desttype, unsigned int probl
 	send_sp( sockfd, sendbuf, BUFLEN );
 
 	/* upload files */
-	filesend( sockfd, path_description );
-	filesend( sockfd, path_input );
-	filesend( sockfd, path_answer );
+	filesend( destip, path_description );
+	filesend( destip, path_input );
+	filesend( destip, path_answer );
 
 	shutdown_wr_sp( sockfd );
 	free( problem_id_str );

@@ -102,8 +102,8 @@ int adminproto_active( void )
 void *adminproto_reqhand_thread( void *args )
 {
 	int sockfd;
-	char recvbuf[BUFLEN];
-//	char *src_ipaddr;
+	char *recvbuf = NULL;
+	char *src_ipaddr;
 	short RQSR, RQID;
 	char *msgptr = NULL;
 
@@ -112,9 +112,11 @@ void *adminproto_reqhand_thread( void *args )
 	sockfd = *((int *)args);
 	pthread_cond_signal( &proto_sockfd_pass_cv );
 	pthread_mutex_unlock( &proto_sockfd_pass_mutex );
+	
+	src_ipaddr = tcp_getaddr( sockfd );
 
 	/* receive and interpret message */
-	recv( sockfd, recvbuf, BUFLEN, 0 );
+	recv_sp( sockfd, &recvbuf );
 	msgptr = proto_srid_split( recvbuf, &RQSR, &RQID );
 
 	/* request handling -- if not common, go special */
@@ -157,7 +159,7 @@ void *adminproto_reqhand_thread( void *args )
 		}
 		else if( RQID == OPID_PUPDATE )
 		{
-			proto_problem_update( sockfd, msgptr );
+			proto_problem_update( sockfd, src_ipaddr, msgptr );
 		}
 		else if( RQID == OPID_PREMOVE )
 		{
@@ -181,6 +183,8 @@ void *adminproto_reqhand_thread( void *args )
 #endif
 	}
 
+	free( src_ipaddr );
+	free( recvbuf );
 	shutdown_wr_sp( sockfd );
 	pthread_exit( NULL );
 }
@@ -344,9 +348,9 @@ int adminproto_problem_add( char *destip, unsigned int problem_id, wchar_t *prob
 	send_sp( sockfd, sendbuf, BUFLEN );
 
 	/* upload files */
-	filesend( sockfd, path_description );
-	filesend( sockfd, path_input );
-	filesend( sockfd, path_answer );
+	filesend( destip, path_description );
+	filesend( destip, path_input );
+	filesend( destip, path_answer );
 
 	shutdown_wr_sp( sockfd );
 	free( p_opid_str );
@@ -411,9 +415,9 @@ int adminproto_problem_mod( char *destip, unsigned int problem_id, wchar_t *prob
 	send_sp( sockfd, sendbuf, BUFLEN );
 
 	/* upload files */
-	filesend( sockfd, path_description );
-	filesend( sockfd, path_input );
-	filesend( sockfd, path_answer );
+	filesend( destip, path_description );
+	filesend( destip, path_input );
+	filesend( destip, path_answer );
 
 	shutdown_wr_sp( sockfd );
 	free( p_opid_str );

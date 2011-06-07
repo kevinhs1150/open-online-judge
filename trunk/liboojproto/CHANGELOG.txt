@@ -1,7 +1,19 @@
 >> Open Online Judge Protocol Implementation Change Log <<
 
-protocol 0 revision 5
+protocol 0 revision 6
 ongoing
+ + testsuite: Added several test programs used to debug protocol functions.
+ Added a Windows batch to conviently compile testsuite programs.
+     Usage:   compile.cmd <source file>
+	 Example: compile.cmd filesend.c
+
+ * common: Generally no affection.
+ * internal: Fixed various bug, serious or non-serious.
+
+
+
+protocol 0 revision 5
+released 2011.06.05   by Infinity
  NOTE: Because deadline is near, specification document will no longer be
  updated.
  + common: All update "request" functions are now unified to the naming scheme

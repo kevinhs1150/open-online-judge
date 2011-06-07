@@ -1,4 +1,4 @@
-#include "../protointernal.h"
+#include <protointernal.h>
 
 int main( void )
 {
