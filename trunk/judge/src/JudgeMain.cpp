@@ -15,6 +15,8 @@ typedef struct run_problem_id{
 
 typedef struct clar{
     unsigned int clar_id;
+	unsigned int account_id;
+	wchar_t *account; 
     int private_byte;
     wchar_t *clarmsg;
 	wchar_t *result_string;
@@ -23,6 +25,8 @@ typedef struct clar{
 
 typedef struct problem_list{
 	unsigned int problem_id;
+	wchar_t *problem_name;
+	unsigned int time_limit;
 	struct problem_list *next;
 } problem_all;
 
@@ -42,30 +46,26 @@ void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_
 void run_request_dlfin( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code );
 void contest_start( void );
 void contest_stop( void );
-//modify
-void problem_update( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
-void problem_update_dlfin(unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
-//modify end
+void problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
+void problem_update_dlfin(unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer);
 void problem_remove( unsigned int problem_id );
 void take_result( unsigned int run_id, int success );
-//modify
-void clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg );
-//modify end
+void clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg );
 void clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
 unsigned int unJudgeNumCount(void);
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language);
 void problem_insert(unsigned int problem_id);
-int problem_search(unsigned int problem_id);
+problem_all *problem_search(unsigned int problem_id);
 void problem_search_delete(unsigned int problem_id);
 void run_search_delete(unsigned int problem_id);
 run_request_id *search(unsigned int run_id);
 void id_delete(unsigned int run_id);
 void autoJudge_take(void);
-void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language);
+void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language, unsigned int time_limit);
 int compile(wchar_t [], wchar_t []);
 int complie_result(void);
 int judge(unsigned int problem_id);
-int time(void);
+int time(unsigned int time_limit);
 void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg);
 clar_request_id *clar_search(unsigned int clar_id);
 unsigned int clarNumCount(void);
@@ -225,14 +225,14 @@ void JudgeFrame::OnButtonClickLogout( wxCommandEvent& event )
 	}
 }
 
-void OnCheckBoxAutoJudge( wxCommandEvent& event )
+void JudgeFrame::OnCheckBoxAutoJudge( wxCommandEvent& event )
 {
 	if((m_checkBoxAutoJudge->IsChecked) == true && unJudgeNumCount() > 0){
 		autoJudge_take();
 	}
 }
 
-void OnListItemActivatedRuns( wxListEvent& event )
+void JudgeFrame::OnListItemActivatedRuns( wxListEvent& event )
 {
 	wxListItem item;
 	unsigned int run_id;
@@ -247,7 +247,7 @@ void OnListItemActivatedRuns( wxListEvent& event )
 	judgeproto_take_run(this->IP_get(),run_id);
 }
 
-void OnListItemActivatedClar( wxListEvent& event )
+void JudgeFrame::OnListItemActivatedClar( wxListEvent& event )
 {
 	wxListItem item0;
 	wxListItem item1;
@@ -336,7 +336,7 @@ void run_request_dlfin( unsigned int run_id, unsigned int problem_id, wchar_t *c
 	}
 }
 
-void problem_update( unsigned int problem_id, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
+void problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer)
 {
     /**TODO:improve mkdir**/
     system("mkdir problem");
@@ -355,9 +355,11 @@ void problem_update( unsigned int problem_id, wchar_t **path_description, wchar_
     wsprintf(*path_answer, L"%s_answer.txt", path );
 }
 
-void problem_update_dlfin(unsigned int problem_id, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
+void problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
     /**TODO:problem view**/
+	problem_insert(problem_id);
+	mainFrame->setPtoblemFilterChoice(unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit);
 }
 
 void problem_remove( unsigned int problem_id )
@@ -377,16 +379,17 @@ void problem_remove( unsigned int problem_id )
 
 void take_result( unsigned int run_id, int success )
 {
-    run_request_id *proptr = search(run_id);
+    run_request_id *rptr = search(run_id);
+	problem_all *proptr = problem_search(rptr->problem_id);
     id_delete(run_id);
 	
 	if(success == TAKE_SUCCESS){
 		if(mainFrame->m_checkBoxAutoJudge->IsChecked){
-			autoJudge(proptr->run_id,proptr->problem_id, proptr->coding_language);
+			autoJudge(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->time_limit);
 		}
 		else{
 			submissionFrame = new JudgeSubmissionFrame(0L);
-			submissionFrame->setRunProblemID(proptr->run_id,proptr->problem_id, proptr->coding_language);
+			submissionFrame->setRunProblemID(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->problem_name, proptr->time_limit);
 		}
 	}
 	else{
@@ -399,9 +402,9 @@ void take_result( unsigned int run_id, int success )
 	}
 }
 
-void clar_request( unsigned int clar_id, int private_byte, wchar_t *clarmsg )
+void clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg )
 {
-    clar_insert(clar_id,private_byte,clarmsg);
+    clar_insert(clar_id,account_id,account,private_byte,clarmsg);
 }
 
 void clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string )
@@ -457,11 +460,6 @@ void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_lan
 		currentPtr->next = temp_id;
 	}
 	
-	if(problem_search(problem_id) == 0){
-		problem_insert(problem_id);
-		mainFrame->setPtoblemFilterChoice(unsigned int problem_id);
-	}
-	
 	row = unJudgeNumCount() + 1 ;
 	insertString.Printf("%d",run_id);
 	tmp = mainFrame->m_listCtrlRuns->InsertItem(row,insertString);
@@ -471,12 +469,14 @@ void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_lan
 	mainFrame->m_listCtrlRuns->SetItem(tmp, 2, insertString);
 }
 
-void problem_insert(unsigned int problem_id)
+void problem_insert(unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit)
 {
     problem_all *currentPtr = problem_hptr;
 
     problem_all *temp_id = new problem_all;
     temp_id->problem_id = problem_id;
+	temp_id->problem_name = problem_name;
+	temp_id->time_limit = time_limit;
 	temp_id->next = NULL;
 
 	if( problem_hptr == NULL )
@@ -492,21 +492,21 @@ void problem_insert(unsigned int problem_id)
 	}
 }
 
-int problem_search(unsigned int problem_id)
+prolem_all *problem_search(unsigned int problem_id)
 {
 	problem_all *problem_all_hptr = problem_hptr;
 	
 	if(problem_all_hptr->problem_id == problem_id){
-		return 1;
+		return problem_all_hptr;
 	}
 	
 	while(problem_all_hptr->next != NULL){
 		if(problem_all_hptr->problem_id == problem_id){
-			return 1;
+			return problem_all_hptr;
+			break;
 		}
 		problem_all_hptr = problem_all_hptr->next; 
 	}
-	return 0;
 }
 
 void problem_search_delete(unsigned int problem_id)
@@ -609,7 +609,7 @@ void id_delete(unsigned int run_id)
 ////////////////////////////////////////////////////////////
 //clar_request_id linked list modify
 ////////////////////////////////////////////////////////////
-void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg)
+void clar_insert(unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg)
 {
     clar_request_id *currentPtr = clar_hptr;
 	unsigned int row;
@@ -618,6 +618,8 @@ void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg)
 
     clar_request_id *temp = new clar_request_id;
     temp->clar_id = clar_id;
+	temp->account_id = account_id;
+	temp->account = account;
     temp->private_byte = private_byte;
     temp->clarmsg = clarmsg;
 	temp->result_string = NULL;
@@ -710,7 +712,7 @@ void autoJudge_take(void)
 	judgeproto_take_run(mainFrame->IP_get(),pptr->run_id);
 }
 
-void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language)
+void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language, unsigned int time_limit)
 {
 	wchar_t file_name[50];
     int errtyp;
@@ -722,7 +724,7 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
     wcscpy(type, coding_language);
     errtyp = compile(file_name, type);
     if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
-        if(time() == 0){
+        if(time(time_limit) == 0){
             if(judge(problem_id) != 0){
                 errtyp = OUTPUT_ERROR;
 			}
@@ -844,7 +846,7 @@ int complie_result(){
     return(result);
 }
 
-int time(){
+int time(unsigned int time_limit){
     int i;
 
     PROCESS_INFORMATION pi;
@@ -857,7 +859,7 @@ int time(){
     CreateProcess( NULL, L"executive.exe", NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
     hProg = pi.hProcess;
 
-    for(i = 0;i < 5;i++){
+    for(i = 0;i < time_limit;i++){
         Sleep(1000);
         if(WaitForSingleObject(hProg,0) != WAIT_TIMEOUT){
             break;

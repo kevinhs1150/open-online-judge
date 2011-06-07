@@ -6,6 +6,7 @@ extern "C"
 
 JudgeCompareFrame *CompareFrame;
 JudgementConfirmFrame *ConfirmFrame;
+JudgeSubmissionFrame *submissionFrame;
 
 int compile(wchar_t file_name[], wchar_t type[]);
 int complie_result();
@@ -32,7 +33,7 @@ void JudgeSubmissionFrame::IP_set()
     fclose(fptr1);
 }
 
-void JudgeSubmissionFrame::setRunProblemID(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language)
+void JudgeSubmissionFrame::setRunProblemID(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language, wchar_t *problem_name, unsigned int time_limit)
 {
 	wxString submissionNO;
 	wxString problemNO;
@@ -40,12 +41,19 @@ void JudgeSubmissionFrame::setRunProblemID(unsigned int run_id,unsigned int prob
 	this->run_id = run_id;
 	this->problem_id = problem_id;
 	this->coding_language = coding_language;
+	this->problem_name = problem_name;
+	this->time_limit = time_limit;
 	
-	submissionNO.Printf(wxT("%u"), run_id);
-	problemNO.Printf(wxT("%u"), problem_id);
+	submissionNO.Printf(wxT("%u), run_id);
+	problemNO.Printf(wxT("%u %s"), problem_id, problem_name);
 	
 	m_staticTextSubmissionValue->SetLabel(submissionNO);
 	m_staticTextProblemNumberValue->SetLabel(problemNO);
+}
+
+unsigned int JudgeSubmissionFrame::getTimeLimit()
+{
+	return this->time_limit;
 }
 
 void JudgeSubmissionFrame::OnButtonClickShowInput( wxCommandEvent& event ) /**SKIP**/
@@ -302,7 +310,7 @@ int time(){
     CreateProcess( NULL, L"executive.exe", NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
     hProg = pi.hProcess;
 
-    for(i = 0;i < 5;i++){
+    for(i = 0; i < (submissionFrame->getTimeLimit()) ;i++){
         Sleep(1000);
         if(WaitForSingleObject(hProg,0) != WAIT_TIMEOUT){
             break;
