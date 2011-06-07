@@ -403,8 +403,6 @@ class JudgeGUI : public wxFrame
 		wxChoice* m_choiceFilter;
 		
 		wxStaticText* m_staticTextNewUnjudgeCount;
-		wxListCtrl* m_listCtrlRuns;
-		wxListCtrl* m_listCtrlClars;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnButtonClickChangePassword( wxCommandEvent& event ) { event.Skip(); }
@@ -415,7 +413,9 @@ class JudgeGUI : public wxFrame
 		
 	
 	public:
+		wxListCtrl* m_listCtrlRuns;
 		wxCheckBox* m_checkBoxAutoJudge;
+		wxListCtrl* m_listCtrlClars;
 		
 		JudgeGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Judge"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 643,468 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		~JudgeGUI();
