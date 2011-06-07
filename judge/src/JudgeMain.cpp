@@ -1,5 +1,8 @@
 #include "JudgeMain.h"
 #include "JudgeLogin.h"
+#include "JudgeChangePass.h"
+#include "JudgeShowClar.h"
+#include "JudgeSubmission.h"
 
 extern "C"
 {
@@ -113,7 +116,7 @@ void JudgeFrame::account_id_set(unsigned int account_id)
 	
 	this->account_id = account_id;
 	
-	id.Printf("%u",this->account_id);
+	id.Printf(_("%u"),this->account_id);
 	m_staticTextName->SetLabel(id);
 }
 
@@ -146,11 +149,11 @@ void JudgeFrame::setUnJudgeNum(unsigned int unJudgeNum)
 {
 	wxString unJudgeNumStr;
 	
-	unJudgeNumStr.Printf("%u",unJudgeNum);
+	unJudgeNumStr.Printf(_("%u"),unJudgeNum);
 	m_staticTextNewUnjudgeCount->SetLabel(unJudgeNumStr);
 }
 
-void setRunListColumn()
+void JudgeFrame::setRunListColumn()
 {
 	wxString columnString;
 	wxListItem columnListItem;
@@ -168,7 +171,7 @@ void setRunListColumn()
 	m_listCtrlRuns->SetColumn(2,columnListItem);
 }
 
-void setClarListColumn()
+void JudgeFrame::setClarListColumn()
 {
 	wxString columnString;
 	wxListItem columnListItem;
@@ -217,17 +220,12 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 
 void JudgeFrame::OnButtonClickLogout( wxCommandEvent& event )
 {
-    if((judgeproto_cbreg_logout_confirm( logout_confirm )) != 0){
-		wxMessageBox("Logont Error.\nPromble: Socket error.","Logout Error",wxOK|wxICON_EXCLAMATION);
-	}
-	else{
-		this->Destroy();
-	}
+    judgeproto_cbreg_logout_confirm( logout_confirm );
 }
 
 void JudgeFrame::OnCheckBoxAutoJudge( wxCommandEvent& event )
 {
-	if((m_checkBoxAutoJudge->IsChecked) == true && unJudgeNumCount() > 0){
+	if((m_checkBoxAutoJudge->IsChecked()) == true && unJudgeNumCount() > 0){
 		autoJudge_take();
 	}
 }
@@ -272,7 +270,6 @@ void JudgeFrame::OnListItemActivatedClar( wxListEvent& event )
 void login_confirm( int confirm_code, unsigned int account_id )
 {
     if( confirm_code == LOGIN_VALID )
-		loginframe->account_id_set(account_id);
         loginframe->EndModal(0);
     else{
         wxMessageBox( wxT("Login Error.\nPromble: account NOTEXIST or password WRONG."), wxT("Login Error"),wxOK|wxICON_EXCLAMATION);
@@ -319,7 +316,7 @@ void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_
     }
 
     /**TODO: new memory for *path_code**/
-    *path_code = (wchar_t *) molloc( (strlen(filename)) +1) * sizeof(wchar_t);
+    *path_code = (wchar_t *) malloc( (strlen(filename)) +1) * sizeof(wchar_t);
     wsprintf(*path_code, L"%s", filename );
 }
 
@@ -331,7 +328,7 @@ void run_request_dlfin( unsigned int run_id, unsigned int problem_id, wchar_t *c
 	unJudgeNum = unJudgeNumCount();
 	mainFrame->setUnJudgeNum(unJudgeNum);
 	
-	if(unJufgeNum == 1 && (mainFrame->m_checkBoxAutoJudge->IsChecked) == true){
+	if(unJudgeNum == 1 && (mainFrame->m_checkBoxAutoJudge->IsChecked()) == true){
 		autoJudge_take();
 	}
 }

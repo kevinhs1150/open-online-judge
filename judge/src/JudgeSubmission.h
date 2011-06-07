@@ -33,7 +33,7 @@ class JudgeSubmissionFrame: public JudgeSubmissionGUI
     private:
 		unsigned int run_id;
 		unsigned int problem_id;
-		wchar_t *coding_language
+		wchar_t *coding_language;
 		wchar_t *problem_name;
 		unsigned int time_limit;
 		int result;
