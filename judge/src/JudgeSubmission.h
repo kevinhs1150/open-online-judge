@@ -27,12 +27,15 @@ class JudgeSubmissionFrame: public JudgeSubmissionGUI
         ~JudgeSubmissionFrame();
 		
 		void IP_set();
-		void setRunProblemID(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language);
+		void setRunProblemID(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language, wchar_t *problem_name, unsigned int time_limit);
+		unsigned int getTimeLimit();
 
     private:
 		unsigned int run_id;
 		unsigned int problem_id;
 		wchar_t *coding_language
+		wchar_t *problem_name;
+		unsigned int time_limit;
 		int result;
 		char *IP;
 
