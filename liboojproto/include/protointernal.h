@@ -18,6 +18,7 @@
 #define LISTEN_PORT_ADMIN 27016
 #define LISTEN_PORT_JUDGE 27017
 #define LISTEN_PORT_TEAM 27018
+#define LISTEN_PORT_VSFTP 27020
 
 #ifdef _WIN32
 /* Win32 has no bzero implementation, but has an ZeroMemory which is identical to bzero in usage (implementation not sure). */
@@ -39,8 +40,10 @@ char *tcp_getaddr( int sockfd );
 
 /* file transfer -- given connected socket
  * note that file name should be Unicode string */
-int filesend( int sockfd, wchar_t *filepath );
-int filerecv( int sockfd, wchar_t *filepath );
+int filesend( char *ipaddr, wchar_t *filepath );
+int filerecv( char *ipaddr, wchar_t *filepath );
+//int filesend( int sockfd, wchar_t *filepath );
+//int filerecv( int sockfd, wchar_t *filepath );
 /* file open function with cross platform unicode support*/
 FILE *fopen_sp( wchar_t *filename, wchar_t *mode );
 /* send and recv function wrapper
@@ -100,7 +103,7 @@ void proto_clar_reply( char *msgptr );
 void proto_sb_update( char *msgptr );
 
 /* internal common problem update function -- common to admin and judge client */
-void proto_problem_update( int sockfd, char *msgptr );
+void proto_problem_update( int sockfd, char *src_ipaddr, char *msgptr );
 /* this one is for problem removal */
 void proto_problem_remove( char *msgptr );
 

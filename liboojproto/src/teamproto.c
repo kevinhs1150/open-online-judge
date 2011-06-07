@@ -103,8 +103,8 @@ int teamproto_active( void )
 void *teamproto_reqhand_thread( void *args )
 {
 	int sockfd;
-	char recvbuf[BUFLEN];
-//	char *src_ipaddr;
+	char *recvbuf = NULL;
+	char *src_ipaddr;
 	short RQSR, RQID;
 	char *msgptr = NULL;
 
@@ -113,9 +113,11 @@ void *teamproto_reqhand_thread( void *args )
 	sockfd = *((int *)args);
 	pthread_cond_signal( &proto_sockfd_pass_cv );
 	pthread_mutex_unlock( &proto_sockfd_pass_mutex );
+	
+	src_ipaddr = tcp_getaddr( sockfd );
 
 	/* receive and interpret message */
-	recv( sockfd, recvbuf, BUFLEN, 0 );
+	recv_sp( sockfd, &recvbuf );
 	msgptr = proto_srid_split( recvbuf, &RQSR, &RQID );
 
 	/* request handling -- if not common, go special */
@@ -153,7 +155,7 @@ void *teamproto_reqhand_thread( void *args )
 			(*cb_pu_request)( &path_description );
 
 			/* download file */
-			filerecv( sockfd, path_description );
+			filerecv( src_ipaddr, path_description );
 
 			(*cb_pu_request_dlfin)( path_description );
 
@@ -203,6 +205,8 @@ void *teamproto_reqhand_thread( void *args )
 #endif
 	}
 
+	free( src_ipaddr );
+	free( recvbuf );
 	shutdown_wr_sp( sockfd );
 	pthread_exit( NULL );
 }
@@ -247,7 +251,7 @@ int teamproto_submission( char *destip, unsigned int account_id, unsigned int pr
 	send_sp( sockfd, sendbuf, BUFLEN );
 
 	/* upload files */
-	filesend( sockfd, path_code );
+	filesend( destip, path_code );
 
 	shutdown_wr_sp( sockfd );
 	free( account_id_str );

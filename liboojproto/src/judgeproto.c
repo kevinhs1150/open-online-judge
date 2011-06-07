@@ -103,7 +103,7 @@ void *judgeproto_reqhand_thread( void *args )
 {
 	int sockfd;
 	char *recvbuf = NULL;
-//	char *src_ipaddr;
+	char *src_ipaddr;
 	short RQSR, RQID;
 	char *msgptr = NULL;
 
@@ -113,6 +113,8 @@ void *judgeproto_reqhand_thread( void *args )
 	pthread_cond_signal( &proto_sockfd_pass_cv );
 	pthread_mutex_unlock( &proto_sockfd_pass_mutex );
 
+	src_ipaddr = tcp_getaddr( sockfd );
+	
 	/* receive and interpret message */
 	recv_sp( sockfd, &recvbuf );
 	msgptr = proto_srid_split( recvbuf, &RQSR, &RQID );
@@ -134,7 +136,7 @@ void *judgeproto_reqhand_thread( void *args )
 			(*cb_run_request)( run_id, problem_id, coding_language, &path_code );
 
 			/* download file */
-			filerecv( sockfd, path_code );
+			filerecv( src_ipaddr, path_code );
 
 			(*cb_run_request_dlfin)( run_id, problem_id, coding_language, path_code );
 
@@ -146,7 +148,7 @@ void *judgeproto_reqhand_thread( void *args )
 		}
 		else if( RQID == OPID_PUPDATE )
 		{
-			proto_problem_update( sockfd, msgptr );
+			proto_problem_update( sockfd, src_ipaddr, msgptr );
 		}
 		else if( RQID == OPID_PREMOVE )
 		{
@@ -188,8 +190,8 @@ void *judgeproto_reqhand_thread( void *args )
 #endif
 	}
 
+	free( src_ipaddr );
 	free( recvbuf );
-
 	shutdown_wr_sp( sockfd );
 	pthread_exit( NULL );
 }

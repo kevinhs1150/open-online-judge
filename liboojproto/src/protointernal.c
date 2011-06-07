@@ -135,8 +135,9 @@ char *tcp_getaddr( int sockfd )
 	return addr_str;
 }
 
-int filesend( int sockfd, wchar_t *filepath )
+int filesend( char *ipaddr, wchar_t *filepath )
 {
+	int listenfd, sockfd;
 	char *recvbuf;
 	FILE *fptr;
 	char sendbuf[BUFLEN];
@@ -148,10 +149,30 @@ int filesend( int sockfd, wchar_t *filepath )
 	fseek( fptr, 0, SEEK_END );
 	filesize = ftell( fptr );
 	fseek( fptr, 0, SEEK_SET );
+	
+#ifdef _WIN32
+	if( win32_sock_init() != 0 )
+	{
+		printf("[filesend()] win32_sock_init() failed.\n");
+		return -1;
+	}
+#endif
+
+	if( ( listenfd = tcp_listen( ipaddr, LISTEN_PORT_VSFTP ) ) < 0 )
+	{
+		printf("[filesend()] tcp_listen() failed.\n");
+		return -1;
+	}
+
+	if( ( sockfd = accept( listenfd, NULL, NULL ) ) < 0 )
+	{
+		printf("[filesend()] accept() failed.\n");
+		return -1;
+	}
 
 	/* sync: wait for receiver to standby */
 	recv_sp( sockfd, NULL );
-
+	
 	/* send file spec */
 	sprintf( sendbuf, "%d", filesize );
 	send_sp( sockfd, sendbuf, BUFLEN );
@@ -166,12 +187,23 @@ int filesend( int sockfd, wchar_t *filepath )
 		fread( sendbuf, BUFLEN, 1, fptr );
 		send_sp( sockfd, sendbuf, BUFLEN );
 	}
+	
+	closesocket( sockfd );
+	
+#ifdef _WIN32
+	if( win32_sock_cleanup() != 0 )
+	{
+		printf("[APP] win32_sock_cleanup() failed.\n");
+		return -1;
+	}
+#endif
 
 	return 0;
 }
 
-int filerecv( int sockfd, wchar_t *filepath )
+int filerecv( char *ipaddr, wchar_t *filepath )
 {
+	int sockfd;
 	char *recvbuf;
 	size_t recvsize;
 	FILE *fptr;
@@ -180,14 +212,34 @@ int filerecv( int sockfd, wchar_t *filepath )
 	int a_recvbyte = 0, recvbyte;
 
 	fptr = fopen_sp( filepath, L"wb" );
+	
+#ifdef _WIN32
+	WSADATA wsaData;
+	
+	if( WSAStartup( MAKEWORD(2,2), &wsaData ) != 0 )
+	{
+		printf("[APP] WSAStartup() failed.\n");
+		return -1;
+	}
+#endif
+
+	if( ( sockfd = tcp_connect( ipaddr, LISTEN_PORT_VSFTP ) ) < 0 )
+	{
+		printf("[APP] tcp_connect() failed.\n");
+		return -1;
+	}
 
 	/* sync: standby ready, setup (wwwww */
 	sprintf( sendbuf, "VSFTPREADY" );
 	send_sp( sockfd, sendbuf, BUFLEN );
-
+	
 	/* receive file spec */
 	recvsize = recv_sp( sockfd, &recvbuf );
 	filesize = atoi( recvbuf );
+	free( recvbuf );
+	recvbuf = NULL;
+	
+	printf("filesize: %d\n", filesize );
 
 	/* enter file transfer loop */
 	while( a_recvbyte != filesize )
@@ -199,8 +251,19 @@ int filerecv( int sockfd, wchar_t *filepath )
 		recvbyte = recv_sp( sockfd, &recvbuf );
 		fwrite( recvbuf, BUFLEN, 1, fptr );
 		free( recvbuf );
+		recvbuf = NULL;
 		a_recvbyte = a_recvbyte + recvbyte;
 	}
+	
+	closesocket( sockfd );
+	
+#ifdef _WIN32
+	if( win32_sock_cleanup() != 0 )
+	{
+		printf("[APP] win32_sock_cleanup() failed.\n");
+		return -1;
+	}
+#endif
 
 	return 0;
 }
@@ -228,13 +291,31 @@ size_t send_sp( int sockfd, char *buffer, size_t length )
 
 size_t recv_sp( int sockfd, char **buffer )
 {
-	size_t a_recv = 0; /* received bytes cumulated */
-	size_t pa_recv = 0; /* received bytes cumulated, previous state */
-	size_t r_recv; /* received bytes each time */
+	size_t r_recv;
+	char buftmp[BUFLEN];
+	int count;
+	
+	r_recv = recv( sockfd, buftmp, BUFLEN, 0 );
+	
+	if( buffer != NULL )
+	{
+		*buffer = (char *)realloc( *buffer, r_recv * sizeof( char ) );
+		for( count = 0; count < r_recv; count++ )
+			(*buffer)[count] = buftmp[count];
+	}
+	
+	return r_recv;
+}
+
+/*
+size_t recv_sp( int sockfd, char **buffer )
+{
+	size_t a_recv = 0; //received bytes cumulated
+	size_t pa_recv = 0; //received bytes cumulated, previous state
+	size_t r_recv; //received bytes each time
 	char buftmp[BUFLEN];
 	int count;
 
-	/* receive until socket closed */
 	while( ( r_recv = recv( sockfd, buftmp, BUFLEN, 0 ) ) > 0 )
 	{
 		pa_recv = a_recv;
@@ -253,7 +334,7 @@ size_t recv_sp( int sockfd, char **buffer )
 		return r_recv;
 
 	return a_recv;
-}
+}*/
 
 int shutdown_wr_sp( int sockfd )
 {
@@ -492,7 +573,7 @@ void proto_sb_update( char *msgptr )
 	free( new_account );
 }
 
-void proto_problem_update( int sockfd, char *msgptr )
+void proto_problem_update( int sockfd, char *src_ipaddr, char *msgptr )
 {
 	char *problem_id_str = proto_str_split( msgptr, &msgptr );
 	char *problem_name_mb = proto_str_split( msgptr, &msgptr );
@@ -506,9 +587,9 @@ void proto_problem_update( int sockfd, char *msgptr )
 	(*cb_problem_update)( problem_id, problem_name, time_limit, &path_description, &path_input, &path_answer );
 
 	/* download file */
-	filerecv( sockfd, path_description );
-	filerecv( sockfd, path_input );
-	filerecv( sockfd, path_answer );
+	filerecv( src_ipaddr, path_description );
+	filerecv( src_ipaddr, path_input );
+	filerecv( src_ipaddr, path_answer );
 
 	(*cb_problem_update_dlfin)( problem_id, problem_name, time_limit, path_description, path_input, path_answer );
 
