@@ -1,9 +1,6 @@
 #include "ServerMain.h"
 
-#include "liboojproto.h"
-
 /* Server callback functions prototype. */
-//log OK
 void cb_login_request( char *srcip, short srctype, wchar_t *account, char *password );
 void cb_logout_request( char *srcip, short srctype, unsigned int account_id );
 void cb_password_change( char *srcip, unsigned int account_id, char *password );
@@ -14,7 +11,6 @@ void cb_admin_timer_set( char *srcip, unsigned int hours, unsigned int minutes, 
 void cb_admin_contest_start( char *srcip );
 void cb_admin_contest_stop( char *srcip );
 
-//submission OK
 void cb_submission_request( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code );
 void cb_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code );
 
@@ -24,19 +20,18 @@ void cb_run_sync( char *srcip, unsigned int account_id );
 void cb_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result );
 void cb_take_run( char *srcip, unsigned int run_id );
 
-//account OK
 void cb_account_add( char *srcip, unsigned int type, wchar_t *account, char *password );
 void cb_account_del( char *srcip, unsigned int account_id );
 void cb_account_mod( char *srcip, unsigned int account_id, wchar_t *new_account, char *new_password );
 void cb_account_sync( char *srcip );
-//problem OK
+
 void cb_problem_add( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
 void cb_problem_add_dlfin( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
 void cb_problem_del( char *srcip, unsigned int problem_id );
 void cb_problem_mod( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
 void cb_problem_mod_dlfin( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
-void cb_problem_sync( char *srcip, short srctype )
-//clar OK
+void cb_problem_sync( char *srcip, short srctype );
+
 void cb_clar_request( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg );
 void cb_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string );
 void cb_clar_sync( char *destip, short srctype );
@@ -45,12 +40,53 @@ void cb_clar_sync( char *destip, short srctype );
 void serverdb_contest( int (*serverproto)(char *destip, short desttype), short desttype );
 void serverdb_account_update( char *destip );
 void serverdb_problem_update( char *destip, short desttype );
-void serverdb_problem_change( int (*serverproto)(char *destip, unsigned int problem_id), unsigned int problem_id)
+void serverdb_problem_change( int (*serverproto)(char *destip, unsigned int problem_id), unsigned int problem_id);
 void serverdb_clar_request( short desttype, unsigned int clar_id, int private_byte, wchar_t *clarmsg );
 
 ServerFrame::ServerFrame(wxFrame *frame)
     : ServerGUI(frame)
 {
+	/* "CREATE TABLE" SQL */
+	char create_user[] = "CREATE TABLE user("
+		"account_id   INTEGER PRIMARY KEY,"
+		"account      VARCHAR(25),"
+		"password     VARCHAR(25),"
+		"account_type INTEGER,"
+		"ipaddress    VARCHAR(20),"
+		"logged_in    VARCHAR(5));";
+			
+	char create_problem[] = "CREATE TABLE problem("
+		"problem_id					INTEGER PRIMARY KEY,"
+		"path_description			VARCHAR(50),"
+		"correct_input_filename     VARCHAR(50),"
+		"correct_output_filename    VARCHAR(50),"
+		"time_limit					INTEGER);";
+	char create_submission[] = "CREATE TABLE submission("
+		"run_id      INTEGER PRIMARY KEY,"
+		"account_id  INTEGER,"
+		"problem_id  INTEGER,"
+		"lang        VARCHAR(10),"
+		"path_code	 VARCHAR(50),"
+		"judge_result VARCHAR(25),"
+		"FOREIGN KEY(account_id) REFERENCES user(account_id),"
+		"FOREIGN KEY(problem_id) REFERENCES problem(problem_id));";
+
+	char create_clarification[] = "CREATE TABLE clarification("
+		"clar_id       INTEGER PRIMARY KEY,"
+		"account_id    INTEGER,"
+		"msg           VARCHAR(100),"
+		"result        VAECHAR(100),"
+		"private_byte  INTEGER,"
+		"FOREIGN KEY(account_id) REFERENCES user(account_id));";
+
+	char create_scoreboard[] = "CREATE TABLE scoreboard("
+		"score_id		INTEGER PRIMARY KEY,"
+		"account_id		INTEGER,"
+		"time			INTEGER,"
+		"score			INTEGER,"
+		"FOREIGN KEY(score_id) REFERENCES user(score_id));";
+	char *errMsg = NULL;
+	
 	/* set contest_state */
 	is_contest_start = false;
 	is_contest_stop = false;
@@ -68,7 +104,6 @@ ServerFrame::ServerFrame(wxFrame *frame)
 	sqlite3_exec( db, create_submission, 0, 0, &errMsg );
 	sqlite3_exec( db, create_clarification, 0, 0, &errMsg );
 	sqlite3_exec( db, create_scoreboard, 0, 0, &errMsg );
-	sqlite3_exec( db, create_judge_type, 0, 0, &errMsg );
 	
 	/* register callback functions */
 	serverproto_cbreg_login_request( cb_login_request );
@@ -377,10 +412,14 @@ void cb_take_run( char *srcip, unsigned int run_id )
 void cb_account_add( char *srcip, unsigned int type, wchar_t *account, char *password )
 {
 	char sqlquery[100], account_char[25], *errMsg = NULL;
+	unsigned int account_id;
 	
 	/* record account information into db */
 	wcstombs(account_char, account, 25);
 	sprintf(sqlquery, "INSERT INTO user VALUES(NULL, '%s', '%s', '%u', NULL, 'no');", account_char, password, type);
+	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	account_id = sqlite3_last_insert_rowid(db);
+	sprintf(sqlquery, "INSERT INTO scoreboard VALUES(NULL, '%u', '0', '0');", account_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 	
 	/* updates account listing to administrator */
