@@ -1,11 +1,12 @@
 #include "JudgeMain.h"
+#include "JudgeShowClar.h"
 extern "C"
 {
     #include "judgeproto.h"
 }
 
 JudgeShowClarFrame::JudgeShowClarFrame(wxFrame *frame)
-    : JudgeShowClarGUI(frame)
+    : ShowClarGUI(frame)
 {
 }
 
@@ -15,11 +16,11 @@ JudgeShowClarFrame::~JudgeShowClarFrame()
 
 void JudgeShowClarFrame::setClarQA( wchar_t *clarmsg, wchar_t *result_string )
 {
-	wxSting showTextCtrl;
+	wxString showTextCtrl;
 	
-	showTextCtrl.Printf("%s",clarmsg);
+	showTextCtrl.Printf(wxT("%s"),clarmsg);
 	m_textCtrlQuestion->SetValue(showTextCtrl);
-	showTextCtrl.Printf("%s",result_string);
+	showTextCtrl.Printf(wxT("%s"),result_string);
 	m_textCtrlAnswer->SetValue(showTextCtrl);
 }
 

@@ -1,4 +1,5 @@
 #include "JudgeMain.h"
+#include "JudgeCompare.h"
 extern "C"
 {
     #include "judgeproto.h"
@@ -13,7 +14,7 @@ JudgeCompareFrame::~JudgeCompareFrame()
 {
 }
 
-void JudgeCompareFrame::OnButtonClickClose( wxCommandEvent& event );
+void JudgeCompareFrame::OnButtonClickClose( wxCommandEvent& event )
 {
 	Destroy();
 }
@@ -33,7 +34,7 @@ void JudgeCompareFrame::setProblemID(unsigned int problem_id)
     if(fptr1 != NULL){
         if(fptr2 != NULL)
         {
-			ch = get(fptr2);
+			ch = getc(fptr2);
 			userOutput = ch;
             while(ch = getc(fptr2)!=EOF){
 				userOutput << ch;
@@ -44,7 +45,7 @@ void JudgeCompareFrame::setProblemID(unsigned int problem_id)
 			userOutput.Printf(wxT("File opening failure."));
         }
 		
-		ch = get(fptr1);
+		ch = getc(fptr1);
 		officialOutput = ch;
         while(ch = getc(fptr1) != EOF){
 			officialOutput << ch;

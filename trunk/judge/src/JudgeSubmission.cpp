@@ -1,4 +1,5 @@
 #include "JudgeMain.h"
+#include "JudgeSubmission.h"
 #include "JudgeCompare.h"
 #include "JudgementConfirm.h"
 
@@ -47,7 +48,7 @@ void JudgeSubmissionFrame::setRunProblemID(unsigned int run_id,unsigned int prob
 	this->problem_name = problem_name;
 	this->time_limit = time_limit;
 	
-	submissionNO.Printf(wxT("%u), run_id);
+	submissionNO.Printf(wxT("%u"), run_id);
 	problemNO.Printf(wxT("%u %s"), problem_id, problem_name);
 	
 	m_staticTextSubmissionValue->SetLabel(submissionNO);
@@ -124,8 +125,8 @@ void JudgeSubmissionFrame::OnButtonClickStop( wxCommandEvent& event ) /**SKIP**/
 
 void JudgeSubmissionFrame::OnButtonClickShowOutput( wxCommandEvent& event )
 {
-	Compareframe = new JudgeCompareFrame(0L);
-	Compareframe->setProblemID(this->problem_id);
+	CompareFrame = new JudgeCompareFrame(0L);
+	CompareFrame->setProblemID(this->problem_id);
 }
 
 void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
@@ -139,17 +140,17 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 	else if(column == 1){
 		this->result = COMPLIE_ERROR;
 	}
-	else if(cloumn == 2){
+	else if(column == 2){
 		this->result = WRONG_ANSWER;
 	}
 	else if(column == 3){
 		this->result = TIME_LIMIT_EXCEED;
 	}
 	
-	Confirmframe = new JudgementConfirmFrame(0L);
-	Confirmframe->setJudgementVal(this->result);
-	if(Confirmframe->ShowModal() == 0){
-		if(this->reult == YES){
+	ConfirmFrame = new JudgementConfirmFrame(0L);
+	ConfirmFrame->setJudgementVal(this->result);
+	if(ConfirmFrame->ShowModal() == 0){
+		if(this->result == YES){
 			swprintf(result_string,L"yes");
 		}
 		else if(this->result == COMPLIE_ERROR){
@@ -162,7 +163,7 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 			swprintf(result_string,L"time-limit exceed");
 		}
 		if(judgeproto_judge_result(this->IP,this->run_id,result_string) != 0){
-			wxMessageBox("Judgement Submission Error.\nPromble: Socket error.","Judgement Submission Error",wxOK|wxICON_EXCLAMATION);
+			wxMessageBox(wxT("Judgement Submission Error.\nPromble: Socket error."),wxT("Judgement Submission Error"),wxOK|wxICON_EXCLAMATION);
 		}
 		else{
 			EndModal(0);
@@ -192,11 +193,11 @@ void JudgeSubmissionFrame::setResultChoice()
 void JudgeSubmissionFrame::showStatus()
 {
 	wxString status;
-	File *fptr1;
+	FILE *fptr1;
 	char filename[50];
 	
 	sprintf(filename,"problem/%u_input.txt",this->problem_id);
-	fptr1 = fopen(fileanme,"r");
+	fptr1 = fopen(filename,"r");
 	if(fptr1 != NULL){
 		m_staticTextInputStatusValue->SetLabel(wxT("OK"));
 	}
@@ -213,7 +214,7 @@ void JudgeSubmissionFrame::showStatus()
         sprintf(filename, "%u.cpp", run_id);
     }
 	
-	fptr1 = fopen(fileanme,"r");
+	fptr1 = fopen(filename,"r");
 	if(fptr1 != NULL){
 		m_staticTextSourceStatusValue->SetLabel(wxT("OK"));
 	}
