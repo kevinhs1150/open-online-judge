@@ -176,6 +176,8 @@ void cb_password_change_confirm( int confirm_code ){
 
 void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int seconds ){
 	AdminFrameGlobal->m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), hours, minutes, seconds));
+	AdminFrameGlobal->m_timeleft = hours * 60 * 60 + minutes * 60 + seconds;
+	
 	return;
 }
 
@@ -221,6 +223,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	AdminFrameGlobal = this;
 	InitAccountList();
 	InitProblemList();
+	m_timeleft = 0;
 	
 	loginDialog = new LoginDialog(NULL);
 	
@@ -335,7 +338,11 @@ void AdminFrame::ProblemInfoEnable(bool enable){
 }
 
 void AdminFrame::OnButtonClickChangePassword( wxCommandEvent& event ){
-	m_listCtrlAdmin->SetItemState(0, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	//m_listCtrlAdmin->SetItemState(0, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	cb_timer_set(10, 10, 10);
+	m_timer.Start(1000);
+	
+	return;
 }
 
 void AdminFrame::OnButtonClickLogout( wxCommandEvent& event ){
@@ -597,13 +604,12 @@ void AdminFrame::OnButtonClickProblemApply( wxCommandEvent& event ){
 }
 
 void AdminFrame::OnTimerEvent(wxTimerEvent &event){
-/*
-    m_usingTimeLeft--;
-    if(m_usingTimeLeft == 0)
-        Destroy();
-    //else if(m_usingTimeLeft > 10)
-    //    m_staticTextTimeLeftVal->SetLabel(_(""));
-    else
-        m_staticTextTimeLeftVal->SetLabel(wxString::Format(_("%d"), m_usingTimeLeft));
-*/
+	m_timeleft--;
+	m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), m_timeleft / 60 / 60, (m_timeleft / 60) % 60, m_timeleft % 60));
+	if(m_timeleft <= 0){
+		//contest end
+		m_timer.Stop();
+	}
+	
+	return;
 }
