@@ -6,7 +6,7 @@
 #include "gui.h"
 #include "judgeproto.h"
 
-class JudgeShowClarFrame: public JudgeShowClarGUI
+class JudgeShowClarFrame: public ShowClarGUI
 {
     public:
         JudgeShowClarFrame(wxFrame *frame);

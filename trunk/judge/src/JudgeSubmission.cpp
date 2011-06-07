@@ -1,4 +1,7 @@
 #include "JudgeMain.h"
+#include "JudgeCompare.h"
+#include "JudgementConfirm.h"
+
 extern "C"
 {
     #include "judgeproto.h"
