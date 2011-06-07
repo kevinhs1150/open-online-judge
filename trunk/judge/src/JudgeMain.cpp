@@ -69,7 +69,7 @@ int compile(wchar_t [], wchar_t []);
 int complie_result(void);
 int judge(unsigned int problem_id);
 int time(unsigned int time_limit);
-void clar_insert(unsigned int clar_id, int private_byte, wchar_t *clarmsg);
+void clar_insert(unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg);
 clar_request_id *clar_search(unsigned int clar_id);
 unsigned int clarNumCount(void);
 void clar_delete(unsigned int clar_id);
@@ -132,11 +132,11 @@ void JudgeFrame::timer(unsigned int hours, unsigned int minutes, unsigned int se
 	m_staticTextTime->SetLabel( time );
 }
 
-void JudgeFrame::setPtoblemFilterChoice(unsigned int problem_id)
+void JudgeFrame::setPtoblemFilterChoice(unsigned int problem_id, wchar_t *problem_name)
 {
 	wxString choice;
 	
-	choice.Printf(wxT("%u"), problem_id);
+	choice.Printf(wxT("%u %s"), problem_id, problem_name);
 	m_choiceFilter->Append(choice);
 }
 
@@ -343,9 +343,9 @@ void problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned in
     sprintf(path, "problem/%u", problem_id);
 
     /**TODO: new memory for *path_code**/
-    *path_description = (wchar_t *) molloc( (strlen(path))+1 ) * sizeof(wchar_t);
-    *path_input = (wchar_t *)molloc( strlen(path)+1 ) * sizeof(wchar_t);
-    *path_answer = (wchar_t *)molloc( strlen(path)+1 ) * sizeof(wchar_t);
+    *path_description = (wchar_t *) malloc( (strlen(path))+1 ) * sizeof(wchar_t);
+    *path_input = (wchar_t *)malloc( strlen(path)+1 ) * sizeof(wchar_t);
+    *path_answer = (wchar_t *)malloc( strlen(path)+1 ) * sizeof(wchar_t);
 
     wsprintf(*path_description, L"%s.pdf", path );
     wsprintf(*path_input, L"%s_input.txt", path );
@@ -356,18 +356,18 @@ void problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsig
 {
     /**TODO:problem view**/
 	problem_insert(problem_id);
-	mainFrame->setPtoblemFilterChoice(unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit);
+	mainFrame->setPtoblemFilterChoice(problem_id, problem_name);
 }
 
 void problem_remove( unsigned int problem_id )
 {
-	char file[20];
+	wchar_t file[20];
 	
-	sprintf(file,"problem/%u.pdf",problem_id);
+	swprintf(file,L"problem/%u.pdf",problem_id);
 	DeleteFile(file);
-	sprintf(file,"problem/%u_input.txt",problem_id);
+	swprintf(file,L"problem/%u_input.txt",problem_id);
 	DeleteFile(file);
-	sprintf(file,"problem/%u_answer.txt",problem_id);
+	swprintf(file,L"problem/%u_answer.txt",problem_id);
 	DeleteFile(file);
 	
 	run_search_delete(problem_id);
@@ -381,7 +381,7 @@ void take_result( unsigned int run_id, int success )
     id_delete(run_id);
 	
 	if(success == TAKE_SUCCESS){
-		if(mainFrame->m_checkBoxAutoJudge->IsChecked){
+		if(mainFrame->m_checkBoxAutoJudge->IsChecked()){
 			autoJudge(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->time_limit);
 		}
 		else{
@@ -390,7 +390,7 @@ void take_result( unsigned int run_id, int success )
 		}
 	}
 	else{
-		if(mainFrame->m_checkBoxAutoJudge->IsChecked){
+		if(mainFrame->m_checkBoxAutoJudge->IsChecked()){
 			autoJudge_take();
 		}
 		else{
@@ -458,11 +458,11 @@ void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_lan
 	}
 	
 	row = unJudgeNumCount() + 1 ;
-	insertString.Printf("%d",run_id);
+	insertString.Printf(wxT("%d"),run_id);
 	tmp = mainFrame->m_listCtrlRuns->InsertItem(row,insertString);
-	insertString.Printf("%d",problem_id);
+	insertString.Printf(wxT("%d"),problem_id);
 	mainFrame->m_listCtrlRuns->SetItem(tmp, 1, insertString);
-	insertString.Printf("%s",coding_language);
+	insertString.Printf(wxT("%s"),coding_language);
 	mainFrame->m_listCtrlRuns->SetItem(tmp, 2, insertString);
 }
 
