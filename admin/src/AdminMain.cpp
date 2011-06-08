@@ -28,6 +28,8 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 	int i;
 	bool found = false;
 	
+	wprintf(L"update %s\n", account);
+	
 	//find in the lists
 	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlAdmin->GetItemCount() ; i++)
 		if(AdminFrameGlobal->m_listCtrlAdmin->GetItemData(i) == account_id)
@@ -108,6 +110,7 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 	else{
 		// no definition, it must a mistake!
 	}
+	
 	return;
 }
 
@@ -148,6 +151,8 @@ void cb_account_remove( unsigned int account_id ){
 }
 
 void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ){
+
+	printf("DL\n");
 
 	FILE *file_d, *file_i, *file_o;
 	char path[20];
@@ -196,6 +201,7 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 }
 
 void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ){
+	printf("DLFIN\n");
 	
 	int i = 0;
 	for(i = 0 ; i < AdminFrameGlobal->list_problem.size() ; i++)
@@ -208,64 +214,51 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	p.problem_id = problem_id;
 	p.name = wxString(problem_name);
 	p.time_limit = time_limit;
-	p.path_description = wxString(path_description);
-	p.path_input = wxString(path_input);
-	p.path_answer = wxString(path_answer);
+	p.path_description = wxString::Format(_("data\\%d_d.dat"), problem_id);
+	p.path_input = wxString::Format(_("data\\%d_i.dat"), problem_id);
+	p.path_answer = wxString::Format(_("data\\%d_o.dat"), problem_id);
 	
 	char path[100];
 	FILE *inFile;
 	FILE *outFile;
 	
-	sprintf(path, "data\\%s_d.dat", problem_id);
-	inFile = fopen_sp(path_description, L"rb");
+	wchar_t mode[10] = L"rb";
+	sprintf(path, "data\\%d_d.dat", problem_id);
+	inFile = fopen_sp(path_description, mode);
 	outFile = fopen(path, "wb");
 	while( !feof( inFile ) ){
 		char buf;
 		fread( &buf, sizeof( char ), 1, inFile );
 		fwrite( &buf, sizeof( char ), 1, outFile );
 	}
+	fclose(outFile);
+	fclose(inFile);
 	
-	sprintf(path, "data\\%s_i.dat", problem_id);
-	inFile = fopen_sp(path_input, L"rb");
+	sprintf(path, "data\\%d_i.dat", problem_id);
+	inFile = fopen_sp(path_input, mode);
 	outFile = fopen(path, "wb");
 	while( !feof( inFile ) ){
 		char buf;
 		fread( &buf, sizeof( char ), 1, inFile );
 		fwrite( &buf, sizeof( char ), 1, outFile );
 	}
+	fclose(outFile);
+	fclose(inFile);
 	
-	sprintf(path, "data\\%s_o.dat", problem_id);
-	inFile = fopen_sp(path_answer, L"rb");
+	sprintf(path, "data\\%d_o.dat", problem_id);
+	inFile = fopen_sp(path_answer, mode);
 	outFile = fopen(path, "wb");
 	while( !feof( inFile ) ){
 		char buf;
 		fread( &buf, sizeof( char ), 1, inFile );
 		fwrite( &buf, sizeof( char ), 1, outFile );
 	}
+	fclose(outFile);
+	fclose(inFile);
 	
-	//AdminFrameGlobal->temp_problem.push_back(p);
-	
-	/*
-	unsigned int index;
-	int tmp, i;
-	bool found = false;
-	wxString name(problem_name);
-	
-	//find in the lists
-	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlProblems->GetItemCount() ; i++)
-		if(AdminFrameGlobal->m_listCtrlProblems->GetItemData(i) == problem_id)
-			break;
-	if(i < AdminFrameGlobal->m_listCtrlProblems->GetItemCount()){
-		index = i;
-		found = true;
-	}
-	
-	tmp = AdminFrameGlobal->m_listCtrlProblems->InsertItem(AdminFrameGlobal->m_listCtrlProblems->GetItemCount(), id);
-	AdminFrameGlobal->m_listCtrlProblems->SetItem(tmp, 1, name);
-	AdminFrameGlobal->m_listCtrlProblems->SetItemData(tmp, problem_id);
+	AdminFrameGlobal->list_problem.push_back(p);
 	
 	return;
-	*/
 }
 
 
@@ -334,6 +327,10 @@ void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsign
 
 }
 
+void cb_sb_remove( unsigned int rm_account_id ){
+
+}
+
 void cb_problem_remove( unsigned int problem_id ){
 	int i;
 	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlProblems->GetItemCount() ; i++){
@@ -374,6 +371,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	adminproto_cbreg_problem_update_dlfin( cb_problem_update_dlfin );
 	adminproto_cbreg_problem_remove( cb_problem_remove );
 	adminproto_cbreg_sb_update( cb_sb_update );
+	adminproto_cbreg_sb_remove( cb_sb_remove );
 	
 	sprintf(localaddr, "0.0.0.0");
 	ipFile = fopen("ip.txt", "r");
@@ -397,6 +395,16 @@ AdminFrame::AdminFrame(wxFrame *frame)
 			isLogin = true;
 	}
 	loginDialog->Destroy();
+	
+	if(isLogin){
+		adminproto_account_sync(server_ip);
+		adminproto_problem_sync(server_ip);
+		//adminproto_sb_sync(server_ip);
+		adminproto_timer_sync(server_ip);
+		adminproto_contest_state_sync(server_ip);
+		adminproto_clar_sync(server_ip);
+	}
+	
 }
 
 AdminFrame::~AdminFrame()
