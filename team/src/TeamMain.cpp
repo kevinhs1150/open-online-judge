@@ -103,7 +103,7 @@ void TeamFrame::OnButtonClickLogout( wxCommandEvent& event )
 
 void TeamFrame::OnButtonClickDownload( wxCommandEvent& event )
 {
-    teamproto_problem_download
+    teamproto_problem_download(server_ip, login_id, m_choiceProblem->GetCurrentSelection());
 }
 
 void TeamFrame::OnButtonClickTest( wxCommandEvent& event )
@@ -152,6 +152,11 @@ void ChangePassDialog::OnButtonClickOK( wxCommandEvent& event )
         teamproto_password_change(server_ip, login_id, op, np);
     else
         wxMessageBox(_("Confirm Password Error!"));
+
+    delete op;
+    delete np;
+    delete cp;
+    return;
 }
 
 void ChangePassDialog::OnButtonClickCancel( wxCommandEvent& event )
@@ -183,7 +188,15 @@ SubmitConfirmDialog::~SubmitConfirmDialog()
 
 void SubmitConfirmDialog::OnButtonClickYes( wxCommandEvent& event )
 {
-    teamproto_submission(server_ip, login_id, TeamFrameGlobal->m_choiceProblem->GetSelection(), m_staticTextLangVal->GetLabel().wchar_str(), m_staticTextFilePath->GetLabel().wchar_str());
+    wchar_t *lang = new wchar_t [wcslen(m_staticTextLangVal->GetLabel().c_str()) + 1];
+	wcscpy( lang, m_staticTextLangVal->GetLabel().c_str() );
+	wchar_t *path = new wchar_t [wcslen(m_staticTextFilePath->GetLabel().c_str()) + 1];
+	wcscpy( path, m_staticTextFilePath->GetLabel().c_str() );
+
+    teamproto_submission(server_ip, login_id, TeamFrameGlobal->m_choiceProblem->GetCurrentSelection(), lang, path);
+
+    delete lang;
+    delete path;
     EndModal(1);
 	return;
 }
@@ -239,7 +252,11 @@ ClarConfirmDialog::~ClarConfirmDialog()
 
 void ClarConfirmDialog::OnButtonClickYes( wxCommandEvent& event )
 {
-    teamproto_clar(server_ip, login_id, 0, m_textCtrlFileQuestion->GetValue.wchar_str());
+    wchar_t *temp = new wchar_t [wcslen(m_textCtrlFileQuestion->GetValue().c_str()) + 1];
+	wcscpy( temp, m_textCtrlFileQuestion->GetValue().c_str() );
+    teamproto_clar(server_ip, login_id, 0, temp);
+
+    delete temp;
     EndModal(1);
     return;
 }
@@ -337,27 +354,34 @@ void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsign
 
 void cb_pu_request( wchar_t **path_description )
 {
-
+    wxString temp;
+    do
+    {
+        temp = wxFileSelector(_("Download File"), _(""), _("problem"), _("pdf"));
+    }while( filename.empty() );
+    wchar_t *path = malloc( ( wcslen(temp.c_str()) + 1 ) * sizeof( wchar_t ) );
+	wcscpy( path, temp.c_str());
+	path_description = &path;
 }
 
 void cb_pu_request_dlfin( wchar_t *path_description )
 {
-
+    wxMessageBox(_("Download Completed!"));
 }
 
 void cb_problem_add( unsigned int problem_id, wchar_t *problem_name ) )
 {
-    wxString* temp = new wxString(problem_name);
-    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, temp);
+    for(;max_problem_id <= problem_id; max_problem_id++)
+        TeamFrameGlobal->m_choiceProblem.Append(_(""));
+    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString(problem_name, wxConvLibc));
 }
 
 void cb_problem_del( unsigned int problem_id ) )
 {
-    TeamFrameGlobal->m_choiceProblem.Delete(problem_id);
+    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, _(""));
 }
 
 void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name ) )
 {
-    wxString* temp = new wxString(problem_name);
-    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, temp);
+    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString(problem_name, wxConvLibc);
 }
