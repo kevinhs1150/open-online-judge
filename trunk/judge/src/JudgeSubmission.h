@@ -4,7 +4,6 @@
 #include <wx/wx.h>
 #include "JudgeApp.h"
 #include "gui.h"
-#include "judgeproto.h"
 
 #define SUCCESS 0
 #define SUCCESS_WITH_WARNING 1
