@@ -43,6 +43,7 @@ TeamFrame::TeamFrame(wxFrame *frame)
     TeamFrameGlobal = this;
     int ip1, ip2, ip3, ip4;
 	FILE *ipFile;
+	wxListItem itemCol;
 
     teamproto_cbreg_login_confirm( cb_login_confirm );
     teamproto_cbreg_logout_confirm( cb_logout_confirm );
@@ -82,6 +83,22 @@ TeamFrame::TeamFrame(wxFrame *frame)
 			Destroy();
 		}
     }
+
+    itemCol.SetText(_("ID"));
+	m_listCtrlRuns->InsertColumn(0, itemCol);
+	m_listCtrlClars->InsertColumn(0, itemCol);
+	m_listCtrlScore->InsertColumn(0, itemCol);
+
+	itemCol.SetText(_("Result"));
+    m_listCtrlRuns->InsertColumn(1, itemCol);
+	m_listCtrlClars->InsertColumn(1, itemCol);
+
+	itemCol.SetText(_("Team"));
+	m_listCtrlScore->InsertColumn(1, itemCol);
+	itemCol.SetText(_("Accept"));
+	m_listCtrlScore->InsertColumn(2, itemCol);
+	itemCol.SetText(_("Time"));
+	m_listCtrlScore->InsertColumn(3, itemCol);
 }
 
 TeamFrame::~TeamFrame()
