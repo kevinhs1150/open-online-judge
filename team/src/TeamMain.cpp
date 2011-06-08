@@ -24,6 +24,7 @@ void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name ) );
 //global variables
 char server_ip[20];
 unsigned int login_id;
+unsigned int max_problem_id = 0;
 TeamFrame* TeamFrameGlobal;
 LoginDialog* logindialog;
 ChangePassDialog* changepassdialog;
@@ -141,9 +142,12 @@ ChangePassDialog::~ChangePassDialog()
 
 void ChangePassDialog::OnButtonClickOK( wxCommandEvent& event )
 {
-    cahr* op = m_textCtrlOldPass->GetValue().char_str();
-    cahr* np = m_textCtrlNewPass->GetValue().char_str();
-    cahr* cp = m_textCtrlConfirmPass->GetValue().char_str();
+    cahr* op = new char [strlen(m_textCtrlOldPass->GetValue().mb_str()) + 1];
+    strcpy( op, m_textCtrlOldPass->GetValue().mb_str());
+    cahr* np = new char [strlen(m_textCtrlNewPass->GetValue().mb_str()) + 1];
+    strcpy( np, m_textCtrlNewPass->GetValue().mb_str();
+    cahr* cp = new char [strlen(m_textCtrlConfirmPass->GetValue().mb_str()) + 1];
+    strcpy( cp, m_textCtrlConfirmPass->GetValue().mb_str();
     if( strcmp(np, cp) == 0 )
         teamproto_password_change(server_ip, login_id, op, np);
     else
