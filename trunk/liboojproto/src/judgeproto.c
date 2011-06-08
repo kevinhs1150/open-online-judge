@@ -183,12 +183,6 @@ void *judgeproto_reqhand_thread( void *args )
 #endif
 		}
 	}
-	else
-	{
-#if PROTO_DBG > 0
-		printf("[judgeproto_reqhand_thread()] Invalid SRID bytes.\n");
-#endif
-	}
 
 	free( src_ipaddr );
 	free( recvbuf );
