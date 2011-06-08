@@ -33,8 +33,8 @@ typedef struct problem_list{
 	struct problem_list *next;
 } problem_all;
 
-BEGIN_EVENT_TABLE(AdminFrame, wxFrame)
-    EVT_TIMER(-1, AdminFrame::OnTimerEvent)
+BEGIN_EVENT_TABLE(JudgeFrame, wxFrame)
+    EVT_TIMER(-1, JudgeFrame::OnTimerEvent)
 END_EVENT_TABLE()
 
 JudgeLoginFrame *loginframe;

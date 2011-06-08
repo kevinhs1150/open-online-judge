@@ -391,7 +391,6 @@ class JudgeGUI : public wxFrame
 	private:
 	
 	protected:
-		wxStaticText* m_staticTextTime;
 		
 		wxStaticText* m_staticTextName;
 		wxButton* m_buttonChangePassword;
@@ -409,6 +408,7 @@ class JudgeGUI : public wxFrame
 		
 	
 	public:
+		wxStaticText* m_staticTextTime;
 		wxCheckBox* m_checkBoxAutoJudge;
 		wxListCtrl* m_listCtrlRuns;
 		wxListCtrl* m_listCtrlClars;
