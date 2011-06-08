@@ -39,9 +39,6 @@ class JudgeFrame: public JudgeGUI
 
     private:
 		unsigned int account_id;
-        //unsigned int timer_hours;
-        //unsigned int timer_minutes;
-        //unsigned int timer_seconds;
         unsigned int state;
         char IP[16];
 		wxTimer m_timer;

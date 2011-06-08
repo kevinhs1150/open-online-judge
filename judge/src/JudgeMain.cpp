@@ -133,18 +133,6 @@ void JudgeFrame::account_set(wxString account)
 	m_staticTextName->SetLabel(account);
 }
 
-/*void JudgeFrame::timer(unsigned int hours, unsigned int minutes, unsigned int seconds)
-{
-	wxString time;
-	
-    timer_hours = hours;
-    timer_minutes = minutes;
-    timer_seconds = seconds;
-	
-	time << hours << wxT(":") << minutes << wxT(":") << seconds;
-	m_staticTextTime->SetLabel( time );
-}*/
-
 void JudgeFrame::setPtoblemFilterChoice(unsigned int problem_id, wchar_t *problem_name)
 {
 	wxString choice;
