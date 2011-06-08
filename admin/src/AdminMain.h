@@ -9,7 +9,7 @@
 using namespace std;
 
 struct Problem{
-	unsigned int id;
+	unsigned int problem_id;
 	wxString name;
 	unsigned int time_limit;
 	wxString path_description;
@@ -25,13 +25,12 @@ class AdminFrame: public AdminGUI
 		
 		bool isLogin;
 		unsigned int m_timeleft;
+		vector<Problem> list_problem;
 		
     private:
 		bool isProblemInfoEnable;
 		int m_selectedProblem;
 		wxTimer m_timer;
-		vector<Problem> temp_problem;
-		vector<Problem> list_problem;
 	
 		//void OnClose( wxCloseEvent& event );
 		void InitAccountList();
