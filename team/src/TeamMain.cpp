@@ -6,6 +6,10 @@ extern "C"
 }
 #include <string.h>
 
+BEGIN_EVENT_TABLE(AdminFrame, wxFrame)
+    EVT_TIMER(-1, AdminFrame::OnTimerEvent)
+END_EVENT_TABLE()
+
 void cb_login_confirm( int confirm_code, unsigned int account_id );
 void cb_logout_confirm( int confirm_code );
 void cb_password_change_confirm( confirm_code );
@@ -38,7 +42,7 @@ ClarConfirmDialog* clarconfirmdialog;
 /// TeamFrame
 ///////////////////////////////////////////////////////////////////////////////
 TeamFrame::TeamFrame(wxFrame *frame)
-    : TeamGUI(frame)
+    : TeamGUI(frame), m_timer(this)
 {
     TeamFrameGlobal = this;
     int ip1, ip2, ip3, ip4;
@@ -141,7 +145,16 @@ void TeamFrame::OnButtonClickAsk( wxCommandEvent& event )
     clardialog->ShowModal();
     clardialog->Destroy();
 }
+void TeamFrame::OnTimerEvent(wxTimerEvent &event){
+	m_timeleft--;
+	m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), m_timeleft / 60 / 60, (m_timeleft / 60) % 60, m_timeleft % 60));
+	if(m_timeleft <= 0){
+		//contest end
+		m_timer.Stop();
+	}
 
+	return;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -341,22 +354,28 @@ void cb_password_change_confirm( confirm_code )
 
 void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int seconds )
 {
+    TeamFrameGlobal->m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), hours, minutes, seconds));
+	TeamFrameGlobal->m_timeleft = hours * 60 * 60 + minutes * 60 + seconds;
 
+	return;
 }
 
 void cb_contest_start( void )
 {
-
+    m_timer.Start();
 }
 
 void cb_contest_stop( void )
 {
-
+    m_timer.Stop();
 }
 
 void cb_run_reply( unsigned int run_id, wchar_t *result_string )
 {
+    long temp = TeamFrameGlobal->m_listCtrlRuns->FindItem(-1, wxString(result_string, wxConvLibc))
+    if(temp == wxNOT_FOUND){
 
+    }
 }
 
 void cb_clar_reply( unsigned int clar_id, wchar_t *result_string )
