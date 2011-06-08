@@ -81,7 +81,6 @@ TeamFrame::TeamFrame(wxFrame *frame)
 			Destroy();
 		}
     }
-    clardialog = new ClarDialog();
 }
 
 TeamFrame::~TeamFrame()
@@ -103,7 +102,7 @@ void TeamFrame::OnButtonClickLogout( wxCommandEvent& event )
 
 void TeamFrame::OnButtonClickDownload( wxCommandEvent& event )
 {
-
+    teamproto_problem_download
 }
 
 void TeamFrame::OnButtonClickTest( wxCommandEvent& event )
@@ -113,13 +112,16 @@ void TeamFrame::OnButtonClickTest( wxCommandEvent& event )
 
 void TeamFrame::OnButtonClickSubmit( wxCommandEvent& event )
 {
-
+    submitconfirmdialog = new SubmitConfirmDialog();
+    submitconfirmdialog->ShowModal();
+    submitconfirmdialog->Destroy();
 }
 
 void TeamFrame::OnButtonClickAsk( wxCommandEvent& event )
 {
-    clardialog->m_textCtrlFileQuestion->Clear();
+    clardialog = new ClarDialog();
     clardialog->ShowModal();
+    clardialog->Destroy();
 }
 
 
@@ -165,7 +167,9 @@ void ChangePassDialog::ChangeSuccess(){
 ///////////////////////////////////////////////////////////////////////////////
 SubmitConfirmDialog::SubmitConfirmDialog(wxFrame *frame)
 {
-
+    m_staticTextProblemVal->SetLabel(TeamFrameGlobal->m_choiceProblem->GetStringSelection());
+    m_staticTextLangVal->SetLabel(TeamFrameGlobal->m_choiceLang->GetStringSelection());
+    m_textCtrlFilePathVal->SetValue(TeamFrameGlobal->m_filePicker->GetPath());
 }
 
 SubmitConfirmDialog::~SubmitConfirmDialog()
@@ -175,12 +179,15 @@ SubmitConfirmDialog::~SubmitConfirmDialog()
 
 void SubmitConfirmDialog::OnButtonClickYes( wxCommandEvent& event )
 {
-
+    teamproto_submission(server_ip, login_id, TeamFrameGlobal->m_choiceProblem->GetSelection(), m_staticTextLangVal->GetLabel().wchar_str(), m_staticTextFilePath->GetLabel().wchar_str());
+    EndModal(1);
+	return;
 }
 
 void SubmitConfirmDialog::OnButtonClickNo( wxCommandEvent& event )
 {
-
+    EndModal(0);
+    return;
 }
 
 
@@ -218,7 +225,6 @@ void ClarDialog::OnButtonClickNo( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////////
 ClarConfirmDialog::ClarConfirmDialog(wxFrame *frame)
 {
-    m_staticTextProblemVal->SetValue(clardialog->m_choiceProblem->GetStringSelection());
     m_textCtrlFileQuestion->SetValue(clardialog->m_textCtrlFileQuestion->GetValue());
 }
 
@@ -229,8 +235,9 @@ ClarConfirmDialog::~ClarConfirmDialog()
 
 void ClarConfirmDialog::OnButtonClickYes( wxCommandEvent& event )
 {
-    teamproto_clar(server_ip, login_id, 0, m_textCtrlFileQuestion->GetValue..wchar_str())
-
+    teamproto_clar(server_ip, login_id, 0, m_textCtrlFileQuestion->GetValue.wchar_str());
+    EndModal(1);
+    return;
 }
 
 void ClarConfirmDialog::OnButtonClickNo( wxCommandEvent& event )
@@ -338,18 +345,15 @@ void cb_problem_add( unsigned int problem_id, wchar_t *problem_name ) )
 {
     wxString* temp = new wxString(problem_name);
     TeamFrameGlobal->m_choiceProblem.SetString(problem_id, temp);
-    clardialog->m_choiceProblem.SetString(problem_id, temp);
 }
 
 void cb_problem_del( unsigned int problem_id ) )
 {
     TeamFrameGlobal->m_choiceProblem.Delete(problem_id);
-    clardialog->m_choiceProblem.Delete(problem_id);
 }
 
 void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name ) )
 {
     wxString* temp = new wxString(problem_name);
     TeamFrameGlobal->m_choiceProblem.SetString(problem_id, temp);
-    clardialog->m_choiceProblem.SetString(problem_id, temp);
 }
