@@ -2,8 +2,20 @@
 #define _ADMINMAIN_H_
 
 #include <wx/wx.h>
+#include <vector>
 #include "AdminApp.h"
 #include "gui.h"
+
+using namespace std;
+
+struct Problem{
+	unsigned int id;
+	wxString name;
+	unsigned int time_limit;
+	wxString path_description;
+	wxString path_input;
+	wxString path_answer;
+};
 
 class AdminFrame: public AdminGUI
 {
@@ -18,6 +30,8 @@ class AdminFrame: public AdminGUI
 		bool isProblemInfoEnable;
 		int m_selectedProblem;
 		wxTimer m_timer;
+		vector<Problem> temp_problem;
+		vector<Problem> list_problem;
 	
 		//void OnClose( wxCloseEvent& event );
 		void InitAccountList();

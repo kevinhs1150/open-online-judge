@@ -71,6 +71,7 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 		}
 		tmp = AdminFrameGlobal->m_listCtrlAdmin->InsertItem(AdminFrameGlobal->m_listCtrlAdmin->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlAdmin->SetItem(tmp, 1, name);
+		AdminFrameGlobal->m_listCtrlAdmin->SetItemData(tmp, account_id);
 	}
 	else if(type == SRC_JUDGE){
 		if(found && type == old_type){ // type no change
@@ -85,6 +86,7 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 		}
 		tmp = AdminFrameGlobal->m_listCtrlJudge->InsertItem(AdminFrameGlobal->m_listCtrlJudge->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlJudge->SetItem(tmp, 1, name);
+		AdminFrameGlobal->m_listCtrlJudge->SetItemData(tmp, account_id);
 	}
 	else if(type == SRC_TEAM){
 		if(found && type == old_type){ // type no change
@@ -99,6 +101,7 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 		}
 		tmp = AdminFrameGlobal->m_listCtrlTeam->InsertItem(AdminFrameGlobal->m_listCtrlTeam->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlTeam->SetItem(tmp, 1, name);
+		AdminFrameGlobal->m_listCtrlTeam->SetItemData(tmp, account_id);
 	}
 	else{
 		// no definition, it must a mistake!
@@ -143,11 +146,55 @@ void cb_account_remove( unsigned int account_id ){
 }
 
 void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ){
-
+/*
+	FILE *file_d, *file_i, *file_o;
+	char path[20];
+	int i = 0;
+	
+	while(1){
+		FILE *temp;
+		sprintf(path, "temp\\%d.tmp", i);
+		temp = fopen(path, "r");
+		if(temp == NULL)
+			return;
+		fclose(temp);
+	}
+	
+	file_d = fopen("", "w");
+	Problem p;
+	p.id = problem_id;
+	p.name = wxString(problem_name);
+	p.time_limit = time_limit;
+	//p.path_description = wxString(path_description);
+	//p.path_input = wxString(path_input);
+	//p.path_answer = wxString(path_answer);
+	
+	return;
+*/
 }
 
 void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ){
-
+	/*
+	unsigned int index;
+	int tmp, i;
+	bool found = false;
+	wxString name(problem_name);
+	
+	//find in the lists
+	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlProblems->GetItemCount() ; i++)
+		if(AdminFrameGlobal->m_listCtrlProblems->GetItemData(i) == problem_id)
+			break;
+	if(i < AdminFrameGlobal->m_listCtrlProblems->GetItemCount()){
+		index = i;
+		found = true;
+	}
+	
+	tmp = AdminFrameGlobal->m_listCtrlProblems->InsertItem(AdminFrameGlobal->m_listCtrlProblems->GetItemCount(), id);
+	AdminFrameGlobal->m_listCtrlProblems->SetItem(tmp, 1, name);
+	AdminFrameGlobal->m_listCtrlProblems->SetItemData(tmp, problem_id);
+	
+	return;
+	*/
 }
 
 

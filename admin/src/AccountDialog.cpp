@@ -53,8 +53,11 @@ void AccountDialog::OnButtonClickOK( wxCommandEvent& event ){
 		wxMessageBox(_("Password cannot be empty!"));
 		return;
 	}
-	wchar_t *id = m_textCtrlID->GetValue().wchar_str();
-	char *pw = m_textCtrlPassword->GetValue().char_str();
+	wchar_t *id = new wchar_t [wcslen(m_textCtrlID->GetValue().c_str()) + 1];
+	wcscpy( id, m_textCtrlID->GetValue().c_str() );
+	char *pw = new char [strlen(m_textCtrlPassword->GetValue().mb_str()) + 1];
+	strcpy( pw, m_textCtrlPassword->GetValue().mb_str() );
+	
 	if(adminproto_account_add(server_ip, type, id, pw) < 0){
 		wxMessageBox(_("Error!"));
 		return;
