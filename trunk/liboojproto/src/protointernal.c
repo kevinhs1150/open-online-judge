@@ -357,7 +357,7 @@ char *proto_str_split( char *arr, char **next_msg )
 {
 	char *msg = (char *)malloc( ( strlen(arr) + 1 ) * sizeof( char ) );
 	strcpy( msg, arr );
-
+	
 	if( next_msg != NULL )
 		*next_msg = arr + strlen(arr) + 1;
 
@@ -374,7 +374,7 @@ char *proto_srid_comb( char *arr, short SR, short ID )
 char *proto_str_comb( char *arr, char *msg )
 {
 	strcpy( arr, msg );
-	return arr + strlen( msg ) + 2;
+	return arr + strlen( msg ) + 1;
 }
 
 #include <math.h>
