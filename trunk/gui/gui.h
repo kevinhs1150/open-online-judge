@@ -334,7 +334,6 @@ class ClarDialogGUI : public wxDialog
 	
 	protected:
 		wxStaticText* m_staticTextTitle;
-		wxStaticText* m_staticTextProblem;
 		wxStaticText* m_staticTextQuestion;
 		
 		wxButton* m_buttonYes;
@@ -347,7 +346,6 @@ class ClarDialogGUI : public wxDialog
 		
 	
 	public:
-		wxChoice* m_choiceProblem;
 		wxTextCtrl* m_textCtrlFileQuestion;
 		
 		ClarDialogGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 350,300 ), long style = wxDEFAULT_DIALOG_STYLE );
@@ -365,8 +363,6 @@ class ClarConfirmGUI : public wxDialog
 	protected:
 		wxStaticText* m_staticTextTitle;
 		wxStaticLine* m_staticlineUp;
-		wxStaticText* m_staticTextProblem;
-		wxStaticText* m_staticTextProblemVal;
 		wxStaticText* m_staticTextQuestion;
 		wxTextCtrl* m_textCtrlFileQuestion;
 		wxStaticLine* m_staticlineDown;

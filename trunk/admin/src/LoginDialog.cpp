@@ -6,6 +6,7 @@ extern "C"
 }
 
 extern char server_ip[20];
+extern wxString m_loginName;
 
 LoginDialog::LoginDialog(wxWindow *parent) : LoginGUI(parent){
 }
@@ -20,6 +21,7 @@ void LoginDialog::OnClose( wxCloseEvent& event ){
 
 void LoginDialog::OnButtonClickLogin( wxCommandEvent& event ){
 	wchar_t *id = m_textCtrlID->GetValue().wchar_str();
+	m_loginName = m_textCtrlID->GetValue();
 	char *pw = m_textCtrlPassword->GetValue().char_str();
 	
 	if(adminproto_login(server_ip, id, pw) < 0)

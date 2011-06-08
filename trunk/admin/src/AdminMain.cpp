@@ -12,6 +12,7 @@ END_EVENT_TABLE()
 AdminFrame* AdminFrameGlobal;
 
 char server_ip[20];
+wxString m_loginName;
 unsigned int login_id;
 LoginDialog* loginDialog;
 
@@ -225,7 +226,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	InitProblemList();
 	m_timeleft = 0;
 	
-	loginDialog = new LoginDialog(NULL);
+	loginDialog = new LoginDialog(this);
 	
 	adminproto_cbreg_login_confirm( cb_login_confirm );
 	adminproto_cbreg_logout_confirm( cb_logout_confirm );
@@ -339,8 +340,11 @@ void AdminFrame::ProblemInfoEnable(bool enable){
 
 void AdminFrame::OnButtonClickChangePassword( wxCommandEvent& event ){
 	//m_listCtrlAdmin->SetItemState(0, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	cb_timer_set(10, 10, 10);
-	m_timer.Start(1000);
+	
+	//cb_timer_set(10, 10, 10);
+	//m_timer.Start(1000);
+	//wchar_t name
+	//cb_problem_update( 123, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
 	
 	return;
 }

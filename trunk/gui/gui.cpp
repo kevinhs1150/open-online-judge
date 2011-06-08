@@ -375,7 +375,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelContestInfo->SetSizer( bSizerContestInfoPage );
 	m_panelContestInfo->Layout();
 	bSizerContestInfoPage->Fit( m_panelContestInfo );
-	m_notebook->AddPage( m_panelContestInfo, wxT("Contest Info"), true );
+	m_notebook->AddPage( m_panelContestInfo, wxT("Contest Info"), false );
 	m_panelProblems = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerProblemsPage;
 	bSizerProblemsPage = new wxBoxSizer( wxHORIZONTAL );
@@ -629,7 +629,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelClar->SetSizer( bSizerClarPage );
 	m_panelClar->Layout();
 	bSizerClarPage->Fit( m_panelClar );
-	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), false );
+	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), true );
 	
 	bSizerNotebook->Add( m_notebook, 1, wxEXPAND|wxALL, 5 );
 	
@@ -1096,22 +1096,6 @@ ClarDialogGUI::ClarDialogGUI( wxWindow* parent, wxWindowID id, const wxString& t
 	
 	bSizerMain->Add( bSizerTitle, 0, wxEXPAND, 5 );
 	
-	wxBoxSizer* bSizerProblem;
-	bSizerProblem = new wxBoxSizer( wxHORIZONTAL );
-	
-	m_staticTextProblem = new wxStaticText( this, wxID_ANY, wxT("Problem:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticTextProblem->Wrap( -1 );
-	m_staticTextProblem->SetFont( wxFont( 14, 74, 90, 90, false, wxT("Arial") ) );
-	
-	bSizerProblem->Add( m_staticTextProblem, 0, wxALL, 5 );
-	
-	wxArrayString m_choiceProblemChoices;
-	m_choiceProblem = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceProblemChoices, 0 );
-	m_choiceProblem->SetSelection( 0 );
-	bSizerProblem->Add( m_choiceProblem, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	bSizerMain->Add( bSizerProblem, 0, wxEXPAND, 5 );
-	
 	wxBoxSizer* bSizerQuestion;
 	bSizerQuestion = new wxBoxSizer( wxVERTICAL );
 	
@@ -1178,23 +1162,6 @@ ClarConfirmGUI::ClarConfirmGUI( wxWindow* parent, wxWindowID id, const wxString&
 	
 	m_staticlineUp = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
 	bSizerMain->Add( m_staticlineUp, 0, wxEXPAND|wxALL, 5 );
-	
-	wxBoxSizer* bSizerProblem;
-	bSizerProblem = new wxBoxSizer( wxHORIZONTAL );
-	
-	m_staticTextProblem = new wxStaticText( this, wxID_ANY, wxT("Problem:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticTextProblem->Wrap( -1 );
-	m_staticTextProblem->SetFont( wxFont( 14, 74, 90, 90, false, wxT("Arial") ) );
-	
-	bSizerProblem->Add( m_staticTextProblem, 0, wxALL, 5 );
-	
-	m_staticTextProblemVal = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticTextProblemVal->Wrap( -1 );
-	m_staticTextProblemVal->SetFont( wxFont( 14, 74, 90, 90, false, wxT("Arial") ) );
-	
-	bSizerProblem->Add( m_staticTextProblemVal, 0, wxALL, 5 );
-	
-	bSizerMain->Add( bSizerProblem, 0, wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizerQuestion;
 	bSizerQuestion = new wxBoxSizer( wxHORIZONTAL );
