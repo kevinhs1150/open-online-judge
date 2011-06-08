@@ -259,21 +259,13 @@ class TeamGUI : public wxFrame
 	private:
 	
 	protected:
-		wxStaticText* m_staticTextTime;
 		
-		wxStaticText* m_staticTextTeamName;
 		wxButton* m_buttonChangePassword;
 		wxButton* m_buttonLogout;
-		wxChoice* m_choiceProblem;
 		wxButton* m_buttonDownload;
-		wxFilePickerCtrl* m_filePicker;
-		wxChoice* m_choiceLang;
 		wxButton* m_buttonTest;
 		wxButton* m_buttonSubmit;
-		wxListCtrl* m_listCtrlRuns;
 		wxButton* m_buttonAsk;
-		wxListCtrl* m_listCtrlClars;
-		wxListCtrl* m_listCtrlScore;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnButtonClickChangePassword( wxCommandEvent& event ) { event.Skip(); }
@@ -285,6 +277,14 @@ class TeamGUI : public wxFrame
 		
 	
 	public:
+		wxStaticText* m_staticTextTime;
+		wxStaticText* m_staticTextTeamName;
+		wxChoice* m_choiceProblem;
+		wxFilePickerCtrl* m_filePicker;
+		wxChoice* m_choiceLang;
+		wxListCtrl* m_listCtrlRuns;
+		wxListCtrl* m_listCtrlClars;
+		wxListCtrl* m_listCtrlScore;
 		
 		TeamGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("OOJ Team"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 641,480 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		~TeamGUI();
@@ -413,8 +413,8 @@ class JudgeGUI : public wxFrame
 		
 	
 	public:
-		wxListCtrl* m_listCtrlRuns;
 		wxCheckBox* m_checkBoxAutoJudge;
+		wxListCtrl* m_listCtrlRuns;
 		wxListCtrl* m_listCtrlClars;
 		
 		JudgeGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Judge"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 643,468 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );

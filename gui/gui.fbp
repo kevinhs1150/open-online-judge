@@ -6787,7 +6787,7 @@
                                 <property name="maximum_size"></property>
                                 <property name="minimum_size"></property>
                                 <property name="name">m_staticTextTime</property>
-                                <property name="permission">protected</property>
+                                <property name="permission">public</property>
                                 <property name="pos"></property>
                                 <property name="size"></property>
                                 <property name="style"></property>
@@ -6853,7 +6853,7 @@
                                 <property name="maximum_size"></property>
                                 <property name="minimum_size"></property>
                                 <property name="name">m_staticTextTeamName</property>
-                                <property name="permission">protected</property>
+                                <property name="permission">public</property>
                                 <property name="pos"></property>
                                 <property name="size"></property>
                                 <property name="style"></property>
@@ -7046,7 +7046,7 @@
                                         <property name="maximum_size"></property>
                                         <property name="minimum_size"></property>
                                         <property name="name">m_choiceProblem</property>
-                                        <property name="permission">protected</property>
+                                        <property name="permission">public</property>
                                         <property name="pos"></property>
                                         <property name="selection">0</property>
                                         <property name="size"></property>
@@ -7170,7 +7170,7 @@
                                         <property name="message">Select your source code file</property>
                                         <property name="minimum_size"></property>
                                         <property name="name">m_filePicker</property>
-                                        <property name="permission">protected</property>
+                                        <property name="permission">public</property>
                                         <property name="pos"></property>
                                         <property name="size"></property>
                                         <property name="style">wxFLP_DEFAULT_STYLE</property>
@@ -7237,7 +7237,7 @@
                                                 <property name="maximum_size"></property>
                                                 <property name="minimum_size"></property>
                                                 <property name="name">m_choiceLang</property>
-                                                <property name="permission">protected</property>
+                                                <property name="permission">public</property>
                                                 <property name="pos"></property>
                                                 <property name="selection">0</property>
                                                 <property name="size"></property>
@@ -7433,7 +7433,7 @@
                                         <property name="maximum_size"></property>
                                         <property name="minimum_size"></property>
                                         <property name="name">m_listCtrlRuns</property>
-                                        <property name="permission">protected</property>
+                                        <property name="permission">public</property>
                                         <property name="pos"></property>
                                         <property name="size"></property>
                                         <property name="style">wxLC_REPORT</property>
@@ -7578,7 +7578,7 @@
                                         <property name="maximum_size"></property>
                                         <property name="minimum_size"></property>
                                         <property name="name">m_listCtrlClars</property>
-                                        <property name="permission">protected</property>
+                                        <property name="permission">public</property>
                                         <property name="pos"></property>
                                         <property name="size"></property>
                                         <property name="style">wxLC_REPORT</property>
@@ -7666,7 +7666,7 @@
                                         <property name="maximum_size"></property>
                                         <property name="minimum_size"></property>
                                         <property name="name">m_listCtrlScore</property>
-                                        <property name="permission">protected</property>
+                                        <property name="permission">public</property>
                                         <property name="pos"></property>
                                         <property name="size"></property>
                                         <property name="style">wxLC_REPORT</property>
