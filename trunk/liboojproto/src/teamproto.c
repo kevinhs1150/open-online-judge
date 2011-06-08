@@ -23,6 +23,7 @@ extern void (*cb_contest_start)( void );
 extern void (*cb_contest_stop)( void );
 extern void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
 extern void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
+extern void (*cb_sb_remove)( unsigned int rm_account_id );
 
 /* callback registration functions */
 void teamproto_cbreg_login_confirm( void (*cbfunc)( int, unsigned int ) ) { cb_login_confirm = cbfunc; }
@@ -34,6 +35,7 @@ void teamproto_cbreg_contest_stop( void (*cbfunc)( void ) )   { cb_contest_stop 
 void teamproto_cbreg_run_reply( void (*cbfunc)( unsigned int, unsigned int, wchar_t* ) )  { cb_run_reply = cbfunc; }
 void teamproto_cbreg_clar_reply( void (*cbfunc)( unsigned int, wchar_t*, wchar_t* ) ) { cb_clar_reply = cbfunc; }
 void teamproto_cbreg_sb_update( void (*cbfunc)( unsigned int, wchar_t*, unsigned int, unsigned int ) ) { cb_sb_update = cbfunc; }
+void teamproto_cbreg_sb_remove( void (*cbfunc)( unsigned int rm_account_id ) ) { cb_sb_remove = cbfunc; }
 void teamproto_cbreg_pu_request( void (*cbfunc)( wchar_t** ) )     { cb_pu_request = cbfunc; }
 void teamproto_cbreg_pu_request_dlfin( void (*cbfunc)( wchar_t*) ) { cb_pu_request_dlfin = cbfunc; }
 void teamproto_cbreg_problem_add( void (*cbfunc)( unsigned int, wchar_t* ) ) { cb_pch_add = cbfunc; }
@@ -147,6 +149,10 @@ void *teamproto_reqhand_thread( void *args )
 		else if( RQID == OPID_SB_UPDATE )
 		{
 			proto_sb_update( msgptr );
+		}
+		else if( RQID == OPID_SB_REMOVE )
+		{
+			proto_sb_remove( msgptr );
 		}
 		else if( RQID == OPID_PUPLOAD )
 		{

@@ -52,8 +52,9 @@
 #define OPID_RUN_REPLY		10	/* run result reply */
 #define OPID_CLAR_REPLY		11	/* clarification reply */
 #define OPID_SB_UPDATE		12	/* scoreboard update */
-#define OPID_PUPLOAD		13	/* problem upload */
-#define OPID_P_CHANGE		14	/* problem change */
+#define OPID_SB_REMOVE		13	/* scoreboard record removal */
+#define OPID_PUPLOAD		14	/* problem upload */
+#define OPID_P_CHANGE		15	/* problem change */
 	#define PCH_OPID_ADD		0	/* problem added */
 	#define PCH_OPID_DEL		1	/* problem deleted */
 	#define PCH_OPID_MOD		2	/* problem modified */
@@ -67,11 +68,11 @@
 #define OPID_CLAR_SYNC		102	/* clarification update */
 /* server -> judge */
 #define OPID_CLAR_REPLY		11	/* clarification reply */
-#define OPID_RUN_REQUEST	15	/* run request */
-#define OPID_CLAR_REQUEST	16	/* clarification request */
-#define OPID_PUPDATE		17	/* problem update */
-#define OPID_PREMOVE		18	/* problem removal */
-#define OPID_TAKE_RESULT	19	/* take result */
+#define OPID_RUN_REQUEST	16	/* run request */
+#define OPID_CLAR_REQUEST	17	/* clarification request */
+#define OPID_PUPDATE		18	/* problem update */
+#define OPID_PREMOVE		19	/* problem removal */
+#define OPID_TAKE_RESULT	20	/* take result */
 
 /* admin -> server */
 #define OPID_ACC_MANAGE		10	/* account management */
@@ -90,11 +91,12 @@
 /* server -> admin */
 #define OPID_CLAR_REPLY		11	/* clarification reply */
 #define OPID_SB_UPDATE		12	/* scoreboard update */
-#define OPID_CLAR_REQUEST	16	/* clarification request */
-#define OPID_PUPDATE		17	/* problem update */
-#define OPID_PREMOVE		18	/* problem removal */
-#define OPID_ACCUPDATE		20	/* account update */
-#define OPID_ACCREMOVE		21	/* account removal */
+#define OPID_SB_REMOVE		13	/* scoreboard record removal */
+#define OPID_CLAR_REQUEST	17	/* clarification request */
+#define OPID_PUPDATE		18	/* problem update */
+#define OPID_PREMOVE		19	/* problem removal */
+#define OPID_ACCUPDATE		21	/* account update */
+#define OPID_ACCREMOVE		22	/* account removal */
 
 
 /* login/logout confirmation code */

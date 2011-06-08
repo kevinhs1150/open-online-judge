@@ -20,6 +20,7 @@ extern void (*cb_contest_stop)( void );
 extern void (*cb_clar_request)( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg );
 extern void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
 extern void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
+extern void (*cb_sb_remove)( unsigned int rm_account_id );
 extern void (*cb_problem_update)( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
 extern void (*cb_problem_update_dlfin)( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
 extern void (*cb_problem_remove)( unsigned int problem_id );
@@ -39,6 +40,7 @@ void adminproto_cbreg_problem_update( void (*cbfunc)( unsigned int, wchar_t*, un
 void adminproto_cbreg_problem_update_dlfin( void (*cbfunc)( unsigned int, wchar_t*, unsigned int, wchar_t*, wchar_t*, wchar_t* ) ) { cb_problem_update_dlfin = cbfunc; }
 void adminproto_cbreg_problem_remove( void (*cbfunc)( unsigned int ) ) { cb_problem_remove = cbfunc; }
 void adminproto_cbreg_sb_update( void (*cbfunc)( unsigned int, wchar_t*, unsigned int, unsigned int ) )  { cb_sb_update = cbfunc; }
+void adminproto_cbreg_sb_remove( void (*cbfunc)( unsigned int ) ) { cb_sb_remove = cbfunc; }
 
 /* thread function */
 void *adminproto_reqhand_thread( void *args );
@@ -51,9 +53,9 @@ extern pthread_cond_t proto_sockfd_pass_cv;
 static int adminproto_cbcheck( void )
 {
 	if( cb_login_confirm == NULL || cb_logout_confirm == NULL || cb_password_change_confirm == NULL ||
-		cb_timer_set == NULL || cb_contest_start == NULL || cb_contest_stop == NULL ||
-		cb_clar_request == NULL || cb_clar_reply == NULL || cb_account_update == NULL || cb_account_remove == NULL ||
-		cb_problem_update == NULL || cb_problem_update_dlfin == NULL || cb_problem_remove == NULL || cb_sb_update == NULL )
+		cb_timer_set == NULL || cb_contest_start == NULL || cb_contest_stop == NULL || cb_clar_request == NULL ||
+		cb_clar_reply == NULL || cb_account_update == NULL || cb_account_remove == NULL || cb_problem_update == NULL ||
+		cb_problem_update_dlfin == NULL || cb_problem_remove == NULL || cb_sb_update == NULL || cb_sb_remove == NULL )
 		return 0;
 	else
 		return 1;
@@ -168,6 +170,10 @@ void *adminproto_reqhand_thread( void *args )
 		else if( RQID == OPID_SB_UPDATE )
 		{
 			proto_sb_update( msgptr );
+		}
+		else if( RQID == OPID_SB_REMOVE )
+		{
+			proto_sb_remove( msgptr );
 		}
 		else
 		{

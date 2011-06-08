@@ -979,6 +979,44 @@ int serverproto_sb_update( char *destip, short desttype, unsigned int upd_acc_id
 	return 0;
 }
 
+int serverproto_sb_remove( char *destip, short desttype, unsigned int rm_account_id )
+{
+	int sockfd;
+	unsigned short listen_port;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL;
+	char *rm_account_id_str = uint2str( rm_account_id );
+	
+	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_SB_REMOVE );
+	msgptr = proto_str_comb( msgptr, rm_account_id_str );
+	
+	if( desttype == OPSR_TEAM )
+		listen_port = LISTEN_PORT_TEAM;
+	else if( desttype == OPSR_ADMIN )
+		listen_port = LISTEN_PORT_ADMIN;
+	else
+	{
+#if PROTO_DBG > 0
+		printf("[serverproto_sb_remove()] Wrong destination specified.\n");
+#endif
+		return -1;
+	}
+
+	if( ( sockfd = tcp_connect( destip, listen_port ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[serverproto_sb_remove()] tcp_connect() call failed.\n");
+#endif
+		return -1;
+	}
+
+	send_sp( sockfd, sendbuf, BUFLEN );
+	
+	shutdown_wr_sp( sockfd );
+	free( rm_account_id_str );
+	return 0;
+}
+
 int serverproto_problem_upload( char *destip, wchar_t *path_description )
 {
 	int sockfd;
