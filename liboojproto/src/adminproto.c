@@ -118,7 +118,6 @@ void *adminproto_reqhand_thread( void *args )
 	/* receive and interpret message */
 	recv_sp( sockfd, &recvbuf );
 	msgptr = proto_srid_split( recvbuf, &RQSR, &RQID );
-	printf("SR %d, ID %d\n", RQSR, RQID);
 
 	/* request handling -- if not common, go special */
 	if( proto_commonreq( RQSR, RQID, msgptr ) == 0 && RQSR == OPSR_SERVER )
