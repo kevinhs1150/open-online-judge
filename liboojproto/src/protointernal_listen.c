@@ -77,12 +77,19 @@ int proto_active( void )
 int proto_stop_listen( void )
 {
 	int sockfd;
+	char connaddr[16];
 
 	/* raise listening socket close flag */
 	proto_stop = 1;
+	
+	/* connect to localhost if binded to all interfaces */
+	if( strcmp( proto_bind_address, "0.0.0.0" ) == 0 )
+		strcpy( connaddr, "127.0.0.1" );
+	else
+		strcpy( connaddr, proto_bind_address );
 
 	/* local connection to unblock accept() */
-	if( ( sockfd = tcp_connect( proto_bind_address, proto_bind_port ) ) < 0 )
+	if( ( sockfd = tcp_connect( connaddr, proto_bind_port ) ) < 0 )
 	{
 #if PROTO_DBG > 0
 		printf("[proto_stop_listen()] tcp_connect() call failed.  Unblocking failed.\n");
