@@ -170,6 +170,9 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 		wxMessageBox( wxT("Server start failed.\nStage: start listen socket."), wxT("Fatal Error"), wxOK|wxICON_ERROR, this );
 	}
 	
+	/* set wxStaticText label */
+	StaticTextStatus->SetLabel( wxT("NOW Running") );
+	
 	/* add an admin account */
 	sprintf(sqlquery, "INSERT INTO user VALUES(NULL, 'admin01', 'admin01', '%d', NULL, 'no');", OPSR_ADMIN);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
