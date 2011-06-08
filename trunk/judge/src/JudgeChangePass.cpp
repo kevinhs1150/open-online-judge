@@ -5,7 +5,7 @@ extern "C"
     #include "judgeproto.h"
 }
 
-JudgeChangePassFrame *changePassFrame = NULL;
+extern JudgeChangePassFrame *changePassFrame;
 
 void password_change_confirm( int confirm_code );
 
@@ -13,7 +13,6 @@ JudgeChangePassFrame::JudgeChangePassFrame(wxFrame *frame)
     : ChangePassGUI(frame)
 {
 	judgeproto_cbreg_password_change_confirm( password_change_confirm );
-	changePassFrame = this;
 }
 
 JudgeChangePassFrame::~JudgeChangePassFrame()

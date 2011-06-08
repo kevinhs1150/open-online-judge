@@ -65,10 +65,10 @@ run_request_id *search(unsigned int run_id);
 void id_delete(unsigned int run_id);
 void autoJudge_take(void);
 void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language, unsigned int time_limit);
-int compile(wchar_t [], wchar_t []);
-int complie_result(void);
-int judge(unsigned int problem_id);
-int time(unsigned int time_limit);
+int compile_auto(wchar_t [], wchar_t []);
+int complie_result_auto(void);
+int judge_auto(unsigned int problem_id);
+int time_auto(unsigned int time_limit);
 void clar_insert(unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg);
 clar_request_id *clar_search(unsigned int clar_id);
 unsigned int clarNumCount(void);
@@ -719,10 +719,10 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 
     swprintf(file_name, L"%u", run_id);
     wcscpy(type, coding_language);
-    errtyp = compile(file_name, type);
+    errtyp = compile_auto(file_name, type);
     if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
-        if(time(time_limit) == 0){
-            if(judge(problem_id) != 0){
+        if(time_auto(time_limit) == 0){
+            if(judge_auto(problem_id) != 0){
                 errtyp = OUTPUT_ERROR;
 			}
         }
@@ -758,7 +758,7 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 	}
 }
 
-int compile(wchar_t file_name[], wchar_t type[])
+int compile_auto(wchar_t file_name[], wchar_t type[])
 {
     FILE *fptr1;
     wchar_t call[100];
@@ -783,7 +783,7 @@ int compile(wchar_t file_name[], wchar_t type[])
             wcstombs( call_mb, call, call_mbsize );
 
             system(call_mb);
-            return(complie_result());
+            return(complie_result_auto());
 
         }
         else if(!(wcscmp(type, L"c++"))){
@@ -795,7 +795,7 @@ int compile(wchar_t file_name[], wchar_t type[])
             wcstombs( call_mb, call, call_mbsize );
 
             system(call_mb);
-            return(complie_result());
+            return(complie_result_auto());
         }
         else{
             return TYPE_ERROR;
@@ -807,7 +807,7 @@ int compile(wchar_t file_name[], wchar_t type[])
     }
 }
 
-int complie_result(){
+int complie_result_auto(){
     FILE *fptr1,*fptr2;
     char ch;
     int result = SUCCESS;
@@ -843,7 +843,7 @@ int complie_result(){
     return(result);
 }
 
-int time(unsigned int time_limit){
+int time_auto(unsigned int time_limit){
     int i;
 
     PROCESS_INFORMATION pi;
@@ -871,7 +871,7 @@ int time(unsigned int time_limit){
     return 0;
 }
 
-int judge(unsigned int problem_id){
+int judge_auto(unsigned int problem_id){
     FILE *fptr1,*fptr2;
     char a;
     char o;

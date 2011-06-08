@@ -8,9 +8,9 @@ extern "C"
     #include "judgeproto.h"
 }
 
-JudgeCompareFrame *CompareFrame;
-JudgementConfirmFrame *ConfirmFrame;
-JudgeSubmissionFrame *submissionFrame;
+JudgeCompareFrame *compareFrame;
+JudgementConfirmFrame *confirmFrame;
+extern JudgeSubmissionFrame *submissionFrame;
 
 int compile(wchar_t file_name[], wchar_t type[]);
 int complie_result();
@@ -125,8 +125,8 @@ void JudgeSubmissionFrame::OnButtonClickStop( wxCommandEvent& event ) /**SKIP**/
 
 void JudgeSubmissionFrame::OnButtonClickShowOutput( wxCommandEvent& event )
 {
-	CompareFrame = new JudgeCompareFrame(0L);
-	CompareFrame->setProblemID(this->problem_id);
+	compareFrame = new JudgeCompareFrame(0L);
+	compareFrame->setProblemID(this->problem_id);
 }
 
 void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
@@ -147,9 +147,9 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 		this->result = TIME_LIMIT_EXCEED;
 	}
 	
-	ConfirmFrame = new JudgementConfirmFrame(0L);
-	ConfirmFrame->setJudgementVal(this->result);
-	if(ConfirmFrame->ShowModal() == 0){
+	confirmFrame = new JudgementConfirmFrame(0L);
+	confirmFrame->setJudgementVal(this->result);
+	if(confirmFrame->ShowModal() == 0){
 		if(this->result == YES){
 			swprintf(result_string,L"yes");
 		}
