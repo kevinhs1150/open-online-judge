@@ -21,6 +21,7 @@ class JudgeFrame: public JudgeGUI
 {
     public:
 		unsigned int m_timeleft;
+		wxTimer m_timer;
 		
         JudgeFrame(wxFrame *frame);
         ~JudgeFrame();
@@ -40,7 +41,6 @@ class JudgeFrame: public JudgeGUI
 		unsigned int account_id;
         unsigned int state;
         char IP[16];
-		wxTimer m_timer;
 		
 		void OnButtonClickChangePassword( wxCommandEvent& event );
 		void OnButtonClickLogout( wxCommandEvent& event );

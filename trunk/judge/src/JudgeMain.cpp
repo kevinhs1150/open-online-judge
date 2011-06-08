@@ -113,6 +113,11 @@ JudgeFrame::JudgeFrame(wxFrame *frame)
     IP_set();
     mainFrame = this;
 	mainFrame->setUnJudgeNum(0);
+	
+	judgeproto_run_sync( IP );
+	judgeproto_timer_sync( IP );
+	judgeproto_clar_sync( IP );
+	judgeproto_problem_sync( IP );
 }
 
 JudgeFrame::~JudgeFrame()
@@ -156,34 +161,24 @@ void JudgeFrame::setUnJudgeNum(unsigned int unJudgeNum)
 
 void JudgeFrame::setRunListColumn()
 {
-	wxString columnString;
 	wxListItem columnListItem;
 	
-	columnString.Printf(wxT("run_id"));
-	columnListItem.SetText(columnString);
-	m_listCtrlRuns->SetColumn(0,columnListItem);
-	
-	columnString.Printf(wxT("problem_id"));
-	columnListItem.SetText(columnString);
-	m_listCtrlRuns->SetColumn(1,columnListItem);
-	
-	columnString.Printf(wxT("coding language"));
-	columnListItem.SetText(columnString);
-	m_listCtrlRuns->SetColumn(2,columnListItem);
+	columnListItem.SetText(wxT("run_id"));
+	m_listCtrlRuns->InsertColumn(0,columnListItem);
+	columnListItem.SetText(wxT("problem_id"));
+	m_listCtrlRuns->InsertColumn(1,columnListItem);
+	columnListItem.SetText(wxT("coding language"));
+	m_listCtrlRuns->InsertColumn(2,columnListItem);
 }
 
 void JudgeFrame::setClarListColumn()
 {
-	wxString columnString;
-	wxListItem columnListItem;
+	wxListItem columnListItem;	
 	
-	columnString.Printf(wxT("clar_id"));
-	columnListItem.SetText(columnString);
-	m_listCtrlRuns->SetColumn(0,columnListItem);
-	
-	columnString.Printf(wxT("clarmsg"));
-	columnListItem.SetText(columnString);
-	m_listCtrlRuns->SetColumn(1,columnListItem);
+	columnListItem.SetText(wxT("clar_id"));
+	m_listCtrlClars->InsertColumn(0,columnListItem);
+	columnListItem.SetText(wxT("clarmsg"));
+	m_listCtrlClars->InsertColumn(1,columnListItem);
 }
 
 void JudgeFrame::start()
@@ -216,8 +211,20 @@ char *JudgeFrame::IP_get()
 void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 {
 	changePassFrame = new JudgeChangePassFrame(0L);
-	changePassFrame->set_account_id(this->account_id);
 	changePassFrame->Show();
+	changePassFrame->set_account_id(this->account_id);
+	//=====================================================================================
+	 problem_update_dlfin( 1, L"one", 3, L"problem/1.pdf", L"problem/1_input.txt", L"problem/1_ans.txt" );
+	 problem_update_dlfin( 2, L"two", 3, L"problem/2.pdf", L"problem/2_input.txt", L"problem/2_ans.txt" );
+	
+	run_request_dlfin( 0, 1, L"c", L"0.c" );
+	run_request_dlfin( 1, 1, L"c", L"1.c" );
+	run_request_dlfin( 2, 1, L"c", L"2.c" );
+	run_request_dlfin( 3, 1, L"c", L"3.c" );
+	run_request_dlfin( 4, 1, L"c", L"4.c" );
+	
+	take_result(0,TAKE_SUCCESS);
+	//======================================================================================
 }
 
 void JudgeFrame::OnButtonClickLogout( wxCommandEvent& event )
@@ -251,6 +258,7 @@ void JudgeFrame::OnListItemActivatedClar( wxListEvent& event )
 {
 	wxListItem item0;
 	wxListItem item1;
+	clar_request_id *cptr;
 	
 	item0.SetId(event.GetIndex());
 	item0.SetColumn(0);
@@ -258,13 +266,13 @@ void JudgeFrame::OnListItemActivatedClar( wxListEvent& event )
 	m_listCtrlClars->GetItem(item0);
 	
 	item1.SetId(event.GetIndex());
-	item1.SetColumn(0);
 	item1.SetMask(wxLIST_MASK_TEXT);
 	m_listCtrlClars->GetItem(item1);
 	
+	cptr = clar_search(wxAtoi(item0.GetText()));
 	showClarFrame = new JudgeShowClarFrame(0L);
-	showClarFrame->setClarQA( item0.GetText().wchar_str(), item1.GetText().wchar_str());
 	showClarFrame->Show();
+	showClarFrame->setClarQA(cptr->clarmsg ,cptr->result_string);
 }
 
 void JudgeFrame::OnTimerEvent(wxTimerEvent &event){
@@ -306,6 +314,7 @@ void timer_set(unsigned int hours, unsigned int minutes, unsigned int seconds)
 {
 	mainFrame->m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), hours, minutes, seconds));
 	mainFrame->m_timeleft = hours * 60 * 60 + minutes * 60 + seconds;
+	mainFrame->m_timer.Start(1000);
 }
 
 void contest_start( void )
@@ -319,7 +328,7 @@ void contest_stop( void )
 }
 
 void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )
-{
+{/***HERE***/
     char filename[50];
 
     if( !wcscmp(coding_language, L"c") )
@@ -353,7 +362,7 @@ void run_request_dlfin( unsigned int run_id, unsigned int problem_id, wchar_t *c
 }
 
 void problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer)
-{
+{/***HERE***/
     /**TODO:improve mkdir**/
     system("mkdir problem");
 
@@ -394,22 +403,31 @@ void problem_remove( unsigned int problem_id )
 }
 
 void take_result( unsigned int run_id, int success )
-{
+{/***HERE***/
     run_request_id *rptr = search(run_id);
 	problem_all *proptr = problem_search(rptr->problem_id);
-    id_delete(run_id);
+	unsigned int unJudgeNum;
 	
 	if(success == TAKE_SUCCESS){
+	printf("1\n");
 		if(mainFrame->m_checkBoxAutoJudge->IsChecked()){
 			autoJudge(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->time_limit);
 		}
 		else{
+	printf("2\n");
 			submissionFrame = new JudgeSubmissionFrame(0L);
+			printf("%d",submissionFrame);
+	printf("3\n");
 			submissionFrame->setRunProblemID(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->problem_name, proptr->time_limit);
+	printf("4\n");
 			if(submissionFrame->ShowModal() == 0){
+	printf("5\n");
 				id_delete(rptr->run_id);
+				unJudgeNum = unJudgeNumCount();
+				mainFrame->setUnJudgeNum(unJudgeNum);
 			}
 			submissionFrame->Destroy();
+	printf("6\n");
 		}
 	}
 	else{
@@ -418,8 +436,12 @@ void take_result( unsigned int run_id, int success )
 		}
 		else{
 			wxMessageBox( wxT("Take run Error.\nPromble: This problem has been judged."), wxT("Take run Error"),wxOK|wxICON_EXCLAMATION);
+			id_delete(run_id);
+			unJudgeNum = unJudgeNumCount();
+			mainFrame->setUnJudgeNum(unJudgeNum);
 		}
 	}
+	printf("7\n");
 }
 
 void clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg )
@@ -516,14 +538,9 @@ problem_all *problem_search(unsigned int problem_id)
 {
 	problem_all *problem_all_hptr = problem_hptr;
 	
-	if(problem_all_hptr->problem_id == problem_id){
-		return problem_all_hptr;
-	}
-	
-	while(problem_all_hptr->next != NULL){
+	while(1){
 		if(problem_all_hptr->problem_id == problem_id){
 			return problem_all_hptr;
-			break;
 		}
 		problem_all_hptr = problem_all_hptr->next; 
 	}
@@ -537,25 +554,27 @@ void problem_search_delete(unsigned int problem_id)
     problem_all *dptr = problem_hptr;
     problem_all *nptr = problem_hptr;
 
-    if(dptr->problem_id == problem_id){
-        problem_hptr = problem_hptr->next;
-        delete(dptr);
-		mainFrame->deleteProblemFilterChoice(problem_count);
-        return;
-    }
-
-    while( dptr->next != NULL ){
-		problem_count++;
-        cptr = dptr;
-        dptr = dptr->next;
-        if(dptr->problem_id == problem_id){
-            nptr = dptr->next;
-            delete(dptr);
-            cptr->next = nptr;
+	if(dptr != NULL){
+		if(dptr->problem_id == problem_id){
+			problem_hptr = problem_hptr->next;
+			delete(dptr);
 			mainFrame->deleteProblemFilterChoice(problem_count);
-            break;
-        }
-    }
+			return;
+		}
+
+		while( dptr->next != NULL ){
+			problem_count++;
+			cptr = dptr;
+			dptr = dptr->next;
+			if(dptr->problem_id == problem_id){
+				nptr = dptr->next;
+				delete(dptr);
+				cptr->next = nptr;
+				mainFrame->deleteProblemFilterChoice(problem_count);
+				break;
+			}
+		}
+	}
 }
 void run_search_delete(unsigned int problem_id)
 {
@@ -563,21 +582,23 @@ void run_search_delete(unsigned int problem_id)
     run_request_id *dptr = pptr;
     run_request_id *nptr = pptr;
 
-    if(dptr->problem_id == problem_id){
-        pptr = pptr->next;
-        delete(dptr);
-    }
+	if(dptr != NULL){
+		if(dptr->problem_id == problem_id){
+			pptr = pptr->next;
+			delete(dptr);
+		}
 
-    while( dptr->next != NULL ){
-        cptr = dptr;
-        dptr = dptr->next;
-        if(dptr->problem_id == problem_id){
-            nptr = dptr->next;
-            delete(dptr);
-            cptr->next = nptr;
-			dptr = cptr;
-        }
-    }
+		while( dptr->next != NULL ){
+			cptr = dptr;
+			dptr = dptr->next;
+			if(dptr->problem_id == problem_id){
+				nptr = dptr->next;
+				delete(dptr);
+				cptr->next = nptr;
+				dptr = cptr;
+			}
+		}
+	}
 }
 
 run_request_id *search(unsigned int run_id)
@@ -644,7 +665,7 @@ void clar_insert(unsigned int clar_id, unsigned int account_id, wchar_t *account
     temp->clarmsg = clarmsg;
 	temp->result_string = NULL;
 	temp->next = NULL;
-
+	
 	if( clar_hptr == NULL )
 	{
 		clar_hptr = temp;
@@ -668,17 +689,12 @@ clar_request_id *clar_search(unsigned int clar_id)
 {
     clar_request_id *tptr = clar_hptr;
 
-    if(tptr->clar_id == clar_id){
-        return tptr;
-    }
-
-    while( tptr->next != NULL ){
-        if(tptr->clar_id == clar_id){
-            return tptr;
-            break;
-        }
-        tptr = tptr->next;
-    }
+	while(1){
+		if(tptr->clar_id == clar_id){
+			return tptr;
+		}
+		tptr = tptr->next;
+	}
 }
 
 unsigned int clarNumCount(void)
