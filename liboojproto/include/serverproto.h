@@ -66,7 +66,7 @@ void serverproto_cbreg_submission_request_dlfin( void (*cbfunc)( char *srcip, un
  *   forward function: serverproto_clar_request()
  * Server should also reply the team with "queued" result string.
  *   reply function: serverproto_run_reply() */
-void serverproto_cbreg_clar_request( void (*cbfunc)( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg ) );
+void serverproto_cbreg_tsclar_request( void (*cbfunc)( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg ) );
 
 /* Callback for problem download request. (from team)
  * Pass the "requester's team account", "requested problem id" to server program.

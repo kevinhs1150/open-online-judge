@@ -17,7 +17,7 @@ void (*cb_admin_contest_start)( char *srcip ) = NULL;
 void (*cb_admin_contest_stop)( char *srcip )  = NULL;
 void (*cb_submission_request)( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )      = NULL;
 void (*cb_submission_request_dlfin)( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code ) = NULL;
-void (*cb_clar_request)( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg ) = NULL;
+void (*cb_tsclar_request)( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg ) = NULL;
 void (*cb_clar_sync)( char *srcip, short srctype ) = NULL;
 void (*cb_pd_request)( char *srcip, unsigned int account_id, unsigned int problem_id )              = NULL;
 void (*cb_sb_sync)( char *srcip )             = NULL;
@@ -48,7 +48,7 @@ void serverproto_cbreg_admin_contest_start( void (*cbfunc)( char* ) ) { cb_admin
 void serverproto_cbreg_admin_contest_stop( void (*cbfunc)( char* ) )  { cb_admin_contest_stop = cbfunc; }
 void serverproto_cbreg_submission_request( void (*cbfunc)( char*, unsigned int, unsigned int, wchar_t*, wchar_t** ) )      { cb_submission_request = cbfunc; }
 void serverproto_cbreg_submission_request_dlfin( void (*cbfunc)( char*, unsigned int, unsigned int, wchar_t*, wchar_t* ) ) { cb_submission_request_dlfin = cbfunc; }
-void serverproto_cbreg_clar_request( void (*cbfunc)( char*, unsigned int, int, wchar_t* ) )  { cb_clar_request = cbfunc; }
+void serverproto_cbreg_tsclar_request( void (*cbfunc)( char*, unsigned int, int, wchar_t* ) )  { cb_tsclar_request = cbfunc; }
 void serverproto_cbreg_clar_sync( void (*cbfunc)( char*, short ) ) { cb_clar_sync = cbfunc; }
 void serverproto_cbreg_pd_request( void (*cbfunc)( char*, unsigned int, unsigned int ) )     { cb_pd_request = cbfunc; }
 void serverproto_cbreg_sb_sync( void (*cbfunc)( char* ) ) { cb_sb_sync = cbfunc; }
@@ -81,7 +81,7 @@ static int serverproto_cbcheck( void )
 	if( cb_login_request == NULL || cb_logout_request == NULL || cb_password_change == NULL || cb_timer_sync == NULL ||
 		cb_contest_state_sync == NULL || cb_admin_timer_set == NULL || cb_admin_contest_start == NULL ||
 		cb_admin_contest_stop == NULL || cb_submission_request == NULL || cb_submission_request_dlfin == NULL ||
-		cb_clar_request == NULL || cb_clar_sync == NULL || cb_pd_request == NULL || cb_sb_sync == NULL ||
+		cb_tsclar_request == NULL || cb_clar_sync == NULL || cb_pd_request == NULL || cb_sb_sync == NULL ||
 		cb_trun_sync == NULL || cb_run_result_notify == NULL || cb_run_sync == NULL || cb_take_run == NULL ||
 		cb_account_add == NULL || cb_account_del == NULL || cb_account_mod == NULL || cb_account_sync == NULL ||
 		cb_problem_add == NULL || cb_problem_add_dlfin == NULL || cb_problem_del == NULL || cb_problem_mod == NULL ||
@@ -472,7 +472,7 @@ void *serverproto_reqhand_thread( void *args )
 			int private_byte = atoi( private_byte_str );
 			wchar_t *clarmsg = proto_str_postrecv( clarmsg_mb );
 
-			(*cb_clar_request)( src_ipaddr, account_id, private_byte, clarmsg );
+			(*cb_tsclar_request)( src_ipaddr, account_id, private_byte, clarmsg );
 
 			free( account_id_str );
 			free( private_byte_str );
