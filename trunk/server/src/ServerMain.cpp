@@ -20,9 +20,7 @@ void callback_run_sync( char *srcip );
 void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result );
 void callback_trun_sync( char *srcip, unsigned int account_id );
 
-
 void callback_take_run( char *srcip, unsigned int run_id );
-
 void callback_account_add( char *srcip, unsigned int type, wchar_t *account, char *password );
 void callback_account_del( char *srcip, unsigned int account_id );
 void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_account, char *new_password );
@@ -42,6 +40,7 @@ void callback_clar_sync( char *destip, short srctype );
 /* database tool function */
 void serverdb_contest( int (*serverproto)(char *destip, short desttype), short desttype );
 void serverdb_account_update( char *destip );
+void serverdb_acctype_problem_update( short desttype );
 void serverdb_problem_update( char *destip, short desttype );
 void serverdb_problem_change( unsigned int FUNC, unsigned int problem_id, wchar_t *problem_name );
 void serverdb_clar_request( short desttype, unsigned int clar_id, int private_byte, wchar_t *clarmsg );
@@ -95,7 +94,7 @@ ServerFrame::ServerFrame(wxFrame *frame)
 		"score_id		INTEGER PRIMARY KEY,"
 		"account_id		INTEGER,"
 		"time			INTEGER,"
-		"score			INTEGER,"
+		"accept_count	INTEGER,"
 		"FOREIGN KEY(score_id) REFERENCES user(score_id));";
 	char *errMsg = NULL;
 	
@@ -581,6 +580,7 @@ void callback_problem_del( char *srcip, unsigned int problem_id )
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 	
 	/* reply function */
+	
 	serverdb_problem_update(srcip, OPSR_ADMIN);
 	serverdb_problem_change(PROBLEM_CHANGE_DEL, problem_id, NULL);
 }
@@ -624,7 +624,7 @@ void callback_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 void callback_problem_sync( char *srcip, short srctype )
 {
 	/* reply function */
-	//serverdb_problem_update(srcip, srctype);
+	serverdb_problem_update(srcip, srctype);
 }
 
 void callback_clar_request( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg )
@@ -745,6 +745,15 @@ void serverdb_account_update(char *destip)
 		serverproto_account_update(destip, account_id, account_type, acc_wchar);
 	}
 	sqlite3_free_table(table);
+}
+
+void serverdb_acctype_problem_update( short desttype )
+{
+	/*char sqlquery[100], **table, *errMsg;
+	int rows, cols, i;
+	
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", desttype);
+	*/
 }
 
 /* update problems listing to destip */
