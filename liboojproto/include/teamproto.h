@@ -48,6 +48,8 @@ void teamproto_cbreg_clar_reply( void (*cbfunc)( unsigned int clar_id, wchar_t *
  * Pass the "account id whose account is going to be updated", the new account name, the new accept count and the new time.
  * Team client should update its scoreboard immediately. */
 void teamproto_cbreg_sb_update( void (*cbfunc)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ) );
+/* This one notifies about removal of record on scoreboard. */
+void teamproto_cbreg_sb_remove( void (*cbfunc)( unsigned int rm_account_id ) );
 
 /* Callback for problem upload request. (from server, due to a previous problem download request)
  * Team client should fill the string with the path where problem description will be stored. */

@@ -101,6 +101,8 @@ void proto_clar_reply( char *msgptr );
 
 /* internal common scoreboard update request function -- common to team and admin client */
 void proto_sb_update( char *msgptr );
+/* this one removes record from scoreboard */
+void proto_sb_remove( char *msgptr );
 
 /* internal common problem update function -- common to admin and judge client */
 void proto_problem_update( int sockfd, char *src_ipaddr, char *msgptr );

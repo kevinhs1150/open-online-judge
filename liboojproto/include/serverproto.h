@@ -213,6 +213,8 @@ int serverproto_problem_change_mod( char *destip, unsigned int problem_id, wchar
 /* scoreboard update (to team and admin)
  * notify team and admin client about scoreboard updates */
 int serverproto_sb_update( char *destip, short desttype, unsigned int upd_acc_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
+/* this one notifies about the removal of record on scoreboard (possibly triggered by a removal of account) */
+int serverproto_sb_remove( char *destip, short desttype, unsigned int rm_account_id );
 
 /* problem upload (to team)
  * upload problem description to team client (due to a previous problem download request) */

@@ -64,6 +64,8 @@ void adminproto_cbreg_problem_remove( void (*cbfunc)( unsigned int problem_id ) 
  * Pass the "account id whose record is going to be updated", the new account name, the new accept count and the new time.
  * Administrator client should notify the user about the result. */
 void adminproto_cbreg_sb_update( void (*cbfunc)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ) );
+/* This one notifies about removal of record on scoreboard. */
+void adminproto_cbreg_sb_remove( void (*cbfunc)( unsigned int rm_account_id ) );
 
 
 /*----------------------------- tool functions -----------------------------*/

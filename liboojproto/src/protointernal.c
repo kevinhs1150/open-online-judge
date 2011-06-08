@@ -10,10 +10,13 @@ void (*cb_contest_stop)( void ) = NULL;
 
 /* callback common to admin and judge */
 void (*cb_clar_request)( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg ) = NULL;
-void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ) = NULL;
 void (*cb_problem_update)( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ) = NULL;
 void (*cb_problem_update_dlfin)( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ) = NULL;
 void (*cb_problem_remove)( unsigned int problem_id ) = NULL;
+
+/* callback common to admin and team */
+void (*cb_sb_update)( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ) = NULL;
+void (*cb_sb_remove)( unsigned int rm_account_id ) = NULL;
 
 /* callback common to all clients */
 void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string ) = NULL;
@@ -347,8 +350,8 @@ int shutdown_wr_sp( int sockfd )
 
 char *proto_srid_split( char *arr, short *SRptr, short *IDptr )
 {
-	*SRptr = arr[0];
-	*IDptr = arr[1];
+	*SRptr = (unsigned char)arr[0];
+	*IDptr = (unsigned char)arr[1];
 	return arr + 2;
 }
 
@@ -569,6 +572,17 @@ void proto_sb_update( char *msgptr )
 	free( new_accept_count_str );
 	free( new_time_str );
 	free( new_account );
+}
+
+void proto_sb_remove( char *msgptr )
+{
+	char *rm_account_id_str = proto_str_split( msgptr, NULL );
+	
+	unsigned int rm_account_id = atoi( rm_account_id_str );
+	
+	(*cb_sb_remove)( rm_account_id );
+	
+	free( rm_account_id_str );
 }
 
 void proto_problem_update( int sockfd, char *src_ipaddr, char *msgptr )
