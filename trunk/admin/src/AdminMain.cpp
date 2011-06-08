@@ -1,5 +1,6 @@
 #include "AdminMain.h"
 #include "AccountDialog.h"
+#include "ChangePassDialog.h"
 extern "C"
 {
 #include "adminproto.h"
@@ -14,7 +15,8 @@ AdminFrame* AdminFrameGlobal;
 char server_ip[20];
 wxString m_loginName;
 unsigned int login_id;
-LoginDialog* loginDialog;
+LoginDialog *loginDialog = NULL;
+ChangePassDialog *changePassDialog = NULL;
 
 /* callback functions */
 void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *account ){
@@ -146,34 +148,103 @@ void cb_account_remove( unsigned int account_id ){
 }
 
 void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer ){
-/*
+
 	FILE *file_d, *file_i, *file_o;
 	char path[20];
 	int i = 0;
 	
 	while(1){
 		FILE *temp;
-		sprintf(path, "temp\\%d.tmp", i);
+		sprintf(path, "temp\\%d_d.tmp", i);
 		temp = fopen(path, "r");
 		if(temp == NULL)
 			return;
 		fclose(temp);
+		i++;
 	}
 	
-	file_d = fopen("", "w");
+	file_d = fopen("temp\\%d_d.tmp", "w");
+	file_i = fopen("temp\\%d_i.tmp", "w");
+	file_o = fopen("temp\\%d_o.tmp", "w");
+	fclose(file_o);
+	fclose(file_i);
+	fclose(file_d);
+	
+	
 	Problem p;
-	p.id = problem_id;
-	p.name = wxString(problem_name);
-	p.time_limit = time_limit;
-	//p.path_description = wxString(path_description);
-	//p.path_input = wxString(path_input);
-	//p.path_answer = wxString(path_answer);
+	//p.problem_id = problem_id;
+	//p.name = wxString(problem_name);
+	//p.time_limit = time_limit;
+	p.path_description = _("temp\\%d_d.tmp");
+	p.path_input = _("temp\\%d_i.tmp");
+	p.path_answer = _("temp\\%d_o.tmp");
+	//AdminFrameGlobal->temp_problem.push_back(p);
+	
+	wchar_t *p_d = new wchar_t [wcslen(p.path_description.c_str()) + 1];
+	wcscpy(p_d, p.path_description.c_str());
+	wchar_t *p_i = new wchar_t [wcslen(p.path_input.c_str()) + 1];
+	wcscpy(p_i, p.path_input.c_str());
+	wchar_t *p_a = new wchar_t [wcslen(p.path_answer.c_str()) + 1];
+	wcscpy(p_a, p.path_answer.c_str());
+	
+	*path_description = p_d;
+	*path_input = p_i;
+	*path_answer = p_a;
 	
 	return;
-*/
+
 }
 
 void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ){
+	
+	int i = 0;
+	for(i = 0 ; i < AdminFrameGlobal->list_problem.size() ; i++)
+		if(AdminFrameGlobal->list_problem[i].problem_id == problem_id)
+			break;
+	if(i < AdminFrameGlobal->list_problem.size())
+		AdminFrameGlobal->list_problem.erase(AdminFrameGlobal->list_problem.begin() + i);
+	
+	Problem p;
+	p.problem_id = problem_id;
+	p.name = wxString(problem_name);
+	p.time_limit = time_limit;
+	p.path_description = wxString(path_description);
+	p.path_input = wxString(path_input);
+	p.path_answer = wxString(path_answer);
+	
+	char path[100];
+	FILE *inFile;
+	FILE *outFile;
+	
+	sprintf(path, "data\\%s_d.dat", problem_id);
+	inFile = fopen_sp(path_description, L"rb");
+	outFile = fopen(path, "wb");
+	while( !feof( inFile ) ){
+		char buf;
+		fread( &buf, sizeof( char ), 1, inFile );
+		fwrite( &buf, sizeof( char ), 1, outFile );
+	}
+	
+	sprintf(path, "data\\%s_i.dat", problem_id);
+	inFile = fopen_sp(path_input, L"rb");
+	outFile = fopen(path, "wb");
+	while( !feof( inFile ) ){
+		char buf;
+		fread( &buf, sizeof( char ), 1, inFile );
+		fwrite( &buf, sizeof( char ), 1, outFile );
+	}
+	
+	sprintf(path, "data\\%s_o.dat", problem_id);
+	inFile = fopen_sp(path_answer, L"rb");
+	outFile = fopen(path, "wb");
+	while( !feof( inFile ) ){
+		char buf;
+		fread( &buf, sizeof( char ), 1, inFile );
+		fwrite( &buf, sizeof( char ), 1, outFile );
+	}
+	
+	//AdminFrameGlobal->temp_problem.push_back(p);
+	
 	/*
 	unsigned int index;
 	int tmp, i;
@@ -219,7 +290,21 @@ void cb_logout_confirm( int confirm_code ){
 }
 
 void cb_password_change_confirm( int confirm_code ){
+	if(confirm_code == PASSWD_SUCCESS){
+		if(changePassDialog != NULL){
+			changePassDialog->ChangeSuccess();
+			changePassDialog->Destroy();
+			changePassDialog = NULL;
+		}
+	}
+	else if(confirm_code == PASSWD_MISMATCH){
+		wxMessageBox(_("Wrong password!"));
+	}
+	else{
+		wxMessageBox(_("You cannot change your password..."));
+	}
 
+	return;
 }
 
 void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int seconds ){
@@ -386,12 +471,8 @@ void AdminFrame::ProblemInfoEnable(bool enable){
 }
 
 void AdminFrame::OnButtonClickChangePassword( wxCommandEvent& event ){
-	//m_listCtrlAdmin->SetItemState(0, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	
-	//cb_timer_set(10, 10, 10);
-	//m_timer.Start(1000);
-	//wchar_t name
-	//cb_problem_update( 123, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
+	changePassDialog = new ChangePassDialog(this);
+	changePassDialog->ShowModal();
 	
 	return;
 }
@@ -498,7 +579,6 @@ void AdminFrame::OnButtonClickNewAccount( wxCommandEvent& event ){
 	AccountDialog *accountDialog = new AccountDialog(this);
 	accountDialog->ShowModal();
 	accountDialog->Destroy();
-	// update listctrl ???
 	return;
 }
 
