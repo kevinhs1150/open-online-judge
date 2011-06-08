@@ -544,7 +544,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelProblems->SetSizer( bSizerProblemsPage );
 	m_panelProblems->Layout();
 	bSizerProblemsPage->Fit( m_panelProblems );
-	m_notebook->AddPage( m_panelProblems, wxT("Problems"), false );
+	m_notebook->AddPage( m_panelProblems, wxT("Problems"), true );
 	m_panelClar = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerClarPage;
 	bSizerClarPage = new wxBoxSizer( wxHORIZONTAL );
@@ -629,7 +629,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelClar->SetSizer( bSizerClarPage );
 	m_panelClar->Layout();
 	bSizerClarPage->Fit( m_panelClar );
-	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), true );
+	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), false );
 	
 	bSizerNotebook->Add( m_notebook, 1, wxEXPAND|wxALL, 5 );
 	
@@ -1678,7 +1678,7 @@ ServerGUI::ServerGUI( wxWindow* parent, wxWindowID id, const wxString& title, co
 	wxBoxSizer* bSizer34;
 	bSizer34 = new wxBoxSizer( wxVERTICAL );
 	
-	StaticTextStatus = new wxStaticText( this, wxID_ANY, wxT("Not Running"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
+	StaticTextStatus = new wxStaticText( this, wxID_ANY, wxT("Not Running"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE|wxST_NO_AUTORESIZE );
 	StaticTextStatus->Wrap( -1 );
 	StaticTextStatus->SetFont( wxFont( 36, 74, 90, 90, false, wxT("Arial") ) );
 	
