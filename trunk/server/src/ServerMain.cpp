@@ -1,44 +1,43 @@
 #include "ServerMain.h"
 
 /* Server callback functions prototype. */
-void cb_login_request( char *srcip, short srctype, wchar_t *account, char *password );
-void cb_logout_request( char *srcip, short srctype, unsigned int account_id );
-void cb_password_change( char *srcip, short srctype, unsigned int account_id, char *old_password, char *new_password );
+void callback_login_request( char *srcip, short srctype, wchar_t *account, char *password );
+void callback_logout_request( char *srcip, short srctype, unsigned int account_id );
+void callback_password_change( char *srcip, short srctype, unsigned int account_id, char *old_password, char *new_password );
 
+void callback_timer_sync( char *srcip, short srctype );
+void callback_contest_state_sync( char *srcip, short srctype );
+void callback_admin_timer_set( char *srcip, unsigned int hours, unsigned int minutes, unsigned int seconds );
+void callback_admin_contest_start( char *srcip );
+void callback_admin_contest_stop( char *srcip );
 
-void cb_timer_sync( char *srcip, short srctype );
-void cb_contest_state_sync( char *srcip, short srctype );
-void cb_admin_timer_set( char *srcip, unsigned int hours, unsigned int minutes, unsigned int seconds );
-void cb_admin_contest_start( char *srcip );
-void cb_admin_contest_stop( char *srcip );
+void callback_submission_request( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code );
+void callback_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code );
 
-void cb_submission_request( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code );
-void cb_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code );
+void callback_pd_request( char *srcip, unsigned int account_id, unsigned int problem_id );
+void callback_sb_sync( char *srcip );
+void callback_run_sync( char *srcip, unsigned int account_id );
+void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result );
+void callback_take_run( char *srcip, unsigned int run_id );
 
-void cb_pd_request( char *srcip, unsigned int account_id, unsigned int problem_id );
-void cb_sb_sync( char *srcip );
-void cb_run_sync( char *srcip, unsigned int account_id );
-void cb_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result );
-void cb_take_run( char *srcip, unsigned int run_id );
-
-void cb_account_add( char *srcip, unsigned int type, wchar_t *account, char *password );
-void cb_account_del( char *srcip, unsigned int account_id );
-void cb_account_mod( char *srcip, unsigned int account_id, wchar_t *new_account, char *new_password );
-void cb_account_sync( char *srcip );
+void callback_account_add( char *srcip, unsigned int type, wchar_t *account, char *password );
+void callback_account_del( char *srcip, unsigned int account_id );
+void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_account, char *new_password );
+void callback_account_sync( char *srcip );
 
 //need fix problem_name
-void cb_problem_add( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
-void cb_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
-void cb_problem_del( char *srcip, unsigned int problem_id );
-void cb_problem_mod( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
-void cb_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+void callback_problem_add( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
+void callback_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+void callback_problem_del( char *srcip, unsigned int problem_id );
+void callback_problem_mod( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
+void callback_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
 
-void cb_problem_mod_dlfin( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
-void cb_problem_sync( char *srcip, short srctype );
+void callback_problem_mod_dlfin( char *srcip, unsigned int problem_id, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+void callback_problem_sync( char *srcip, short srctype );
 
-void cb_clar_request( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg );
-void cb_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string );
-void cb_clar_sync( char *destip, short srctype );
+void callback_clar_request( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg );
+void callback_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string );
+void callback_clar_sync( char *destip, short srctype );
 
 /* database tool function */
 void serverdb_contest( int (*serverproto)(char *destip, short desttype), short desttype );
@@ -46,6 +45,13 @@ void serverdb_account_update( char *destip );
 void serverdb_problem_update( char *destip, short desttype );
 void serverdb_problem_change( unsigned int FUNC, unsigned int problem_id, wchar_t *problem_name );
 void serverdb_clar_request( short desttype, unsigned int clar_id, int private_byte, wchar_t *clarmsg );
+
+//extern!!
+/* contest_state */
+bool is_contest_start, is_contest_stop;
+/* Sqlite variable */
+sqlite3 *db;
+enum FUNC_NAME{PROBLEM_CHANGE_ADD, PROBLEM_CHANGE_DEL, PROBLEM_CHANGE_MOD};	/* database tool function parameter */
 
 ServerFrame::ServerFrame(wxFrame *frame)
     : ServerGUI(frame)
@@ -111,34 +117,34 @@ ServerFrame::ServerFrame(wxFrame *frame)
 	sqlite3_exec( db, create_scoreboard, 0, 0, &errMsg );
 	
 	/* register callback functions */
-	serverproto_cbreg_login_request( cb_login_request );
-	serverproto_cbreg_logout_request( cb_logout_request );
-	serverproto_cbreg_password_change( cb_password_change );
-	serverproto_cbreg_timer_sync( cb_timer_sync );
-	serverproto_cbreg_contest_state_sync( cb_contest_state_sync );
-	serverproto_cbreg_admin_timer_set( cb_admin_timer_set );
-	serverproto_cbreg_admin_contest_start( cb_admin_contest_start );
-	serverproto_cbreg_admin_contest_stop( cb_admin_contest_stop );
-	serverproto_cbreg_submission_request( cb_submission_request );
-	serverproto_cbreg_submission_request_dlfin( cb_submission_request_dlfin );
-	serverproto_cbreg_pd_request( cb_pd_request );
-	serverproto_cbreg_sb_sync( cb_sb_sync );
-	serverproto_cbreg_run_result_notify( cb_run_result_notify );
-	serverproto_cbreg_trun_sync( cb_run_sync );
-	serverproto_cbreg_take_run( cb_take_run );
-	serverproto_cbreg_account_add( cb_account_add );
-	serverproto_cbreg_account_del( cb_account_del );
-	serverproto_cbreg_account_mod( cb_account_mod );
-	serverproto_cbreg_account_sync( cb_account_sync );
-	serverproto_cbreg_problem_add( cb_problem_add );
-	serverproto_cbreg_problem_add_dlfin( cb_problem_add_dlfin );
-	serverproto_cbreg_problem_del( cb_problem_del );
-	serverproto_cbreg_problem_mod( cb_problem_mod );
-	serverproto_cbreg_problem_mod_dlfin( cb_problem_mod_dlfin );
-	serverproto_cbreg_problem_sync( cb_problem_sync );
-	serverproto_cbreg_clar_request( cb_clar_request );
-	serverproto_cbreg_clar_result( cb_clar_result );
-	serverproto_cbreg_clar_sync( cb_clar_sync );
+	serverproto_cbreg_login_request( callback_login_request );
+	serverproto_cbreg_logout_request( callback_logout_request );
+	serverproto_cbreg_password_change( callback_password_change );
+	serverproto_cbreg_timer_sync( callback_timer_sync );
+	serverproto_cbreg_contest_state_sync( callback_contest_state_sync );
+	serverproto_cbreg_admin_timer_set( callback_admin_timer_set );
+	serverproto_cbreg_admin_contest_start( callback_admin_contest_start );
+	serverproto_cbreg_admin_contest_stop( callback_admin_contest_stop );
+	serverproto_cbreg_submission_request( callback_submission_request );
+	serverproto_cbreg_submission_request_dlfin( callback_submission_request_dlfin );
+	serverproto_cbreg_pd_request( callback_pd_request );
+	serverproto_cbreg_sb_sync( callback_sb_sync );
+	serverproto_cbreg_run_result_notify( callback_run_result_notify );
+	serverproto_cbreg_trun_sync( callback_run_sync );
+	serverproto_cbreg_take_run( callback_take_run );
+	serverproto_cbreg_account_add( callback_account_add );
+	serverproto_cbreg_account_del( callback_account_del );
+	serverproto_cbreg_account_mod( callback_account_mod );
+	serverproto_cbreg_account_sync( callback_account_sync );
+	serverproto_cbreg_problem_add( callback_problem_add );
+	serverproto_cbreg_problem_add_dlfin( callback_problem_add_dlfin );
+	serverproto_cbreg_problem_del( callback_problem_del );
+	serverproto_cbreg_problem_mod( callback_problem_mod );
+	serverproto_cbreg_problem_mod_dlfin( callback_problem_mod_dlfin );
+	serverproto_cbreg_problem_sync( callback_problem_sync );
+	serverproto_cbreg_tsclar_request( callback_clar_request );
+	serverproto_cbreg_clar_result( callback_clar_result );
+	serverproto_cbreg_clar_sync( callback_clar_sync );
 }
 
 
@@ -171,7 +177,7 @@ void ServerFrame::OnButtonClickStop( wxCommandEvent& event )
 
 
 /* Server callback function definition. */
-void cb_login_request( char *srcip, short srctype, wchar_t *account, char *password )
+void callback_login_request( char *srcip, short srctype, wchar_t *account, char *password )
 {
 	char sqlquery[100], account_char[28], **table, *errMsg = NULL;
 	int rows, cols;
@@ -210,7 +216,7 @@ void cb_login_request( char *srcip, short srctype, wchar_t *account, char *passw
 	}
 }
 
-void cb_logout_request( char *srcip, short srctype, unsigned int account_id )
+void callback_logout_request( char *srcip, short srctype, unsigned int account_id )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols;
@@ -232,7 +238,7 @@ void cb_logout_request( char *srcip, short srctype, unsigned int account_id )
 	sqlite3_free_table(table);
 }
 
-void cb_password_change( char *srcip, short srctype, unsigned int account_id, char *old_password, char *new_password )
+void callback_password_change( char *srcip, short srctype, unsigned int account_id, char *old_password, char *new_password )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols;
@@ -241,7 +247,7 @@ void cb_password_change( char *srcip, short srctype, unsigned int account_id, ch
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	if(rows >= 1)	/* PASSWD_SUCCESS */
 	{
-		if(strncmp(table[1 * cols + 0], old_password) == 0)	/* PASSWD_SUCCESS */
+		if(strcmp(table[1 * cols + 0], old_password) == 0)	/* PASSWD_SUCCESS */
 		{
 			/* store the changed password into database and give the client a reply */
 			sprintf(sqlquery, "UPDATE user SET password = '%s' WHERE account_id = '%u';", new_password, account_id);
@@ -256,17 +262,17 @@ void cb_password_change( char *srcip, short srctype, unsigned int account_id, ch
 	else	/* PASSWD_FAIL */
 	{
 		/* account not exist */
-		serverproto_password_change_reply( srcip, srctype, PASSWD_FAIL );
+		serverproto_password_change_reply( srcip, srctype, PASSWD_INVALID );
 	}
 	sqlite3_free_table(table);
 }
 
-void cb_timer_sync( char *srcip, short srctype )
+void callback_timer_sync( char *srcip, short srctype )
 {
 	
 }
 
-void cb_contest_state_sync( char *srcip, short srctype )
+void callback_contest_state_sync( char *srcip, short srctype )
 {
 	if(is_contest_stop)
 	{
@@ -279,25 +285,25 @@ void cb_contest_state_sync( char *srcip, short srctype )
 	}
 }
 
-void cb_admin_timer_set( char *srcip, unsigned int hours, unsigned int minutes, unsigned int seconds )
+void callback_admin_timer_set( char *srcip, unsigned int hours, unsigned int minutes, unsigned int seconds )
 {
 
 }
 
-void cb_admin_contest_start( char *srcip )
+void callback_admin_contest_start( char *srcip )
 {
 	serverdb_contest( serverproto_contest_start, OPSR_JUDGE );
 	serverdb_contest( serverproto_contest_start, OPSR_TEAM );
 }
 
-void cb_admin_contest_stop( char *srcip )
+void callback_admin_contest_stop( char *srcip )
 {
 	serverdb_contest( serverproto_contest_stop, OPSR_JUDGE );
 	serverdb_contest( serverproto_contest_stop, OPSR_TEAM );
 }
 
 /* the function needs a subdirectory "submits/" */
-void cb_submission_request( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )
+void callback_submission_request( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )
 {
 	char sqlquery[100], coding_language_char[10], path_code_char[30], **table, *errMsg = NULL;
 	int rows, cols;
@@ -311,7 +317,7 @@ void cb_submission_request( char *srcip, unsigned int account_id, unsigned int p
 	sqlite3_free_table(table);
 }
 
-void cb_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
+void callback_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
 {
 	char sqlquery[100], path_code_char[30], coding_language_char[10];
 	char **table, *errMsg = NULL;
@@ -337,9 +343,10 @@ void cb_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned
 	sqlite3_free_table(table);
 }
 
-void cb_pd_request( char *srcip, unsigned int account_id, unsigned int problem_id )
+void callback_pd_request( char *srcip, unsigned int account_id, unsigned int problem_id )
 {
-	char sqlquery[100], path_description_char[50], char path_description_wchar[50], **table, *errMsg = NULL;
+	char sqlquery[100], path_description_char[50], **table, *errMsg = NULL;
+	wchar_t path_description_wchar[50];
 	int rows, cols;
 	
 	/* upload the corresponding problem pack to user  */
@@ -354,12 +361,12 @@ void cb_pd_request( char *srcip, unsigned int account_id, unsigned int problem_i
 	sqlite3_free_table(table);
 }
 
-void cb_sb_sync( char *srcip )
+void callback_sb_sync( char *srcip )
 {
 	
 }
 
-void cb_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result )
+void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result )
 {
 	char sqlquery[100], result_char[25], destip[20], **table, *errMsg = NULL;
 	int rows, cols;
@@ -389,7 +396,7 @@ void cb_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result )
 	serverproto_run_reply( destip, run_id, problem_id, result );
 }
 
-void cb_run_sync( char *srcip, unsigned int account_id )
+void callback_run_sync( char *srcip, unsigned int account_id )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
@@ -397,7 +404,7 @@ void cb_run_sync( char *srcip, unsigned int account_id )
 	wchar_t lang_wchar[10], path_code_wchar[50];
 	
 	/* update all runs belong to that team to the reqesting client */
-	sprintf(sqlquery, "SELECT run_id, problem_id, lang, path_code FROM submission WHERE account_id = '%u';", account_id)
+	sprintf(sqlquery, "SELECT run_id, problem_id, lang, path_code FROM submission WHERE account_id = '%u';", account_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
@@ -411,12 +418,12 @@ void cb_run_sync( char *srcip, unsigned int account_id )
 	
 }
 
-void cb_take_run( char *srcip, unsigned int run_id )
+void callback_take_run( char *srcip, unsigned int run_id )
 {
 
 }
 
-void cb_account_add( char *srcip, unsigned int type, wchar_t *account, char *password )
+void callback_account_add( char *srcip, unsigned int type, wchar_t *account, char *password )
 {
 	char sqlquery[100], account_char[25], *errMsg = NULL;
 	unsigned int account_id;
@@ -434,7 +441,7 @@ void cb_account_add( char *srcip, unsigned int type, wchar_t *account, char *pas
 	//serverproto_sb_update( char *destip, short desttype, unsigned int upd_acc_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
 }
 
-void cb_account_del( char *srcip, unsigned int account_id )
+void callback_account_del( char *srcip, unsigned int account_id )
 {
 	char sqlquery[100], *errMsg = NULL;
 	
@@ -447,14 +454,14 @@ void cb_account_del( char *srcip, unsigned int account_id )
 	//serverproto_sb_update( char *destip, short desttype, unsigned int upd_acc_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
 }
 
-void cb_account_mod( char *srcip, unsigned int account_id, wchar_t *new_account, char *new_password )
+void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_account, char *new_password )
 {
 	char sqlquery[100], *errMsg = NULL;
 	char new_account_char[25];
 	
 	/* modify the record in db */
 	wcstombs(new_account_char, new_account, 25);
-	if(password == NULL)	/* update only account */
+	if(new_password == NULL)	/* update only account */
 	{
 		sprintf(sqlquery, "UPDATE user SET account = '%s' WHERE account_id = '%u';", new_account_char, new_password, account_id);
 	}
@@ -469,14 +476,14 @@ void cb_account_mod( char *srcip, unsigned int account_id, wchar_t *new_account,
 	//serverproto_sb_update( char *destip, short desttype, unsigned int upd_acc_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
 }
 
-void cb_account_sync( char *srcip )
+void callback_account_sync( char *srcip )
 {
 	/* updates account listing to administrator */
 	serverdb_account_update(srcip);
 }
 
 /* the function needs a subdirectory "problems/" */
-void cb_problem_add( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
+void callback_problem_add( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
 {
 	char sqlquery[100];
 	char path_description_char[50], path_input_char[50], path_answer_char[50];
@@ -492,7 +499,7 @@ void cb_problem_add( char *srcip, unsigned int problem_id, wchar_t *problem_name
 	mbstowcs(*path_answer, path_answer_char, 50);
 }
 
-void cb_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
+void callback_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
 	char sqlquery[100], *errMsg = NULL;
 	char problem_name_char[20], path_description_char[50], path_input_char[50], path_answer_char[50];
@@ -510,9 +517,9 @@ void cb_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *proble
 	serverdb_problem_change(PROBLEM_CHANGE_ADD, problem_id, problem_name);
 }
 
-void cb_problem_del( char *srcip, unsigned int problem_id )
+void callback_problem_del( char *srcip, unsigned int problem_id )
 {
-	char sqlquery[100];
+	char sqlquery[100], *errMsg;
 	/* remove the problem from db and delete correspond data on disk */
 	sprintf(sqlquery, "DELETE FROM problem WHERE problem_id = '%u';", problem_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
@@ -522,9 +529,9 @@ void cb_problem_del( char *srcip, unsigned int problem_id )
 	serverdb_problem_change(PROBLEM_CHANGE_DEL, problem_id, NULL);
 }
 
-void cb_problem_mod( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
+void callback_problem_mod( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer )
 {
-	/* do the same thing as cb_problem_add(), just copy and paste */
+	/* do the same thing as callback_problem_add(), just copy and paste */
 	char sqlquery[100];
 	char path_description_char[50], path_input_char[50], path_answer_char[50];
 	
@@ -539,9 +546,9 @@ void cb_problem_mod( char *srcip, unsigned int problem_id, wchar_t *problem_name
 	mbstowcs(*path_answer, path_answer_char, 50);
 }
 
-void cb_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
+void callback_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
-	/* do the same thing as cb_problem_add_dlfin(), except for serverdb_problem_change parameter */
+	/* do the same thing as callback_problem_add_dlfin(), except for serverdb_problem_change parameter */
 	char sqlquery[100], *errMsg = NULL;
 	char problem_name_char[20], path_description_char[50], path_input_char[50], path_answer_char[50];
 	
@@ -558,13 +565,13 @@ void cb_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *proble
 	serverdb_problem_change(PROBLEM_CHANGE_MOD, problem_id, problem_name);
 }
 
-void cb_problem_sync( char *srcip, short srctype )
+void callback_problem_sync( char *srcip, short srctype )
 {
 	/* reply function */
 	//serverdb_problem_update(srcip, srctype);
 }
 
-void cb_clar_request( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg )
+void callback_clar_request( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg )
 {
 	char sqlquery[100], *errMsg = NULL, **table, clarmsg_char[100];
 	unsigned int clar_id;
@@ -584,9 +591,9 @@ void cb_clar_request( char *srcip, unsigned int account_id, int private_byte, wc
 	serverdb_clar_request(OPSR_JUDGE, clar_id, private_byte, clarmsg);
 }
 
-void cb_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string )
+void callback_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string )
 {
-	char sqlquery[100], **table, *errMsg = NULL, char result_string_char[100];
+	char sqlquery[100], **table, *errMsg = NULL, result_string_char[100];
 	int rows, cols, i;
 	unsigned int account_id;
 	wchar_t msg_wchar[100];
@@ -601,7 +608,7 @@ void cb_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);\
 	if(rows >= 1)
 	{
-		sccanf(table[1 * cols + 0], "%u", &account_id);
+		sscanf(table[1 * cols + 0], "%u", &account_id);
 		mbstowcs(msg_wchar, table[1 * cols + 1], 100);
 	}
 	sqlite3_free_table(table);
@@ -626,11 +633,12 @@ void cb_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_
 	}
 }
 
-void cb_clar_sync( char *srcip, short srctype )
+void callback_clar_sync( char *srcip, short srctype )
 {
-	char sqlquery[100], **table, *errMsg = NULL, msg_wchar[100];
+	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i, private_byte;
 	unsigned int clar_id;
+	wchar_t msg_wchar[100];
 	
 	sprintf(sqlquery, "SELECT clar_id, msg, private_byte FROM clarification;");
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
@@ -647,7 +655,7 @@ void cb_clar_sync( char *srcip, short srctype )
 
 /* database tool function below */
 /* sets contest state for clients */
-void serverdb_contest( int (*serverproto)(char *destip, short desttype), short desttype );
+void serverdb_contest( int (*serverproto)(char *destip, short desttype), short desttype )
 {
 	char sqlquery[100], **table, *errMsg = NULL, destip[20];
 	int rows, cols, i;
@@ -664,9 +672,10 @@ void serverdb_contest( int (*serverproto)(char *destip, short desttype), short d
 /* update accounts listing to destip */
 void serverdb_account_update(char *destip)
 {
-	char sqlquery[100], acc_char[25], acc_wchar[25], **table, *errMsg;
+	char sqlquery[100], acc_char[25], **table, *errMsg;
 	int rows, cols, i;
 	unsigned int account_id, account_type;
+	wchar_t acc_wchar[25];
 	
 	
 	sprintf(sqlquery, "SELECT account_id, account, account_type FROM user;");
@@ -685,7 +694,8 @@ void serverdb_account_update(char *destip)
 /* update problems listing to destip */
 void serverdb_problem_update(char *destip, short desttype)
 {
-	char sqlquery[100];
+	char sqlquery[100], **table, *errMsg;
+	int rows, cols, i;
 	char problem_name_char[20], path_description_char[50], correct_input_filename_char[50], correct_output_filename_char[50];
 	wchar_t problem_name_wchar[20], path_description_wchar[50], correct_input_filename_wchar[50], correct_output_filename_wchar[50];
 	unsigned int problem_id, time_limit;
@@ -718,7 +728,7 @@ void serverdb_problem_change( unsigned int FUNC, unsigned int problem_id, wchar_
 	char sqlquery[100], **table, *errMsg;
 	int rows, cols, i;
 	
-	sprintf("SELECT ipaddress FROM user WHERE account_type = '%d';", OPSR_TEAM);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%d';", OPSR_TEAM);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
