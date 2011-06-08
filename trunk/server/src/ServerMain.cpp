@@ -1,5 +1,9 @@
 #include "ServerMain.h"
 
+//BEGIN_EVENT_TABLE(ServerFrame, wxFrame)
+//    EVT_TIMER(-1, ServerFrame::OnTimerEvent)
+//END_EVENT_TABLE()
+
 /* server callback functions prototype. */
 void callback_login_request( char *srcip, short srctype, wchar_t *account, char *password );
 void callback_logout_request( char *srcip, short srctype, unsigned int account_id );
@@ -50,6 +54,7 @@ sqlite3 *db;	/* sqlite variable */
 enum FUNC_NAME{PROBLEM_CHANGE_ADD, PROBLEM_CHANGE_DEL, PROBLEM_CHANGE_MOD};	/* Database tool function parameter */
 
 /* timer */
+wxTimer m_timer;
 unsigned int timer_hr = 0;
 unsigned int timer_min = 0;
 unsigned int timer_sec = 0;
@@ -186,6 +191,8 @@ void ServerFrame::OnButtonClickStop( wxCommandEvent& event )
 	{
 		serverproto_stop_listen();
 	}
+	
+	StaticTextStatus->SetLabel( wxT("Not Running") );
 }
 
 

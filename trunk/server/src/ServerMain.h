@@ -22,6 +22,7 @@ class ServerFrame: public ServerGUI
         ~ServerFrame();
 
     private:
+		wxTimer m_timer;
 		void OnButtonClickStart( wxCommandEvent& event );
 		void OnButtonClickStop( wxCommandEvent& event );
 };
