@@ -158,7 +158,7 @@ void *serverproto_reqhand_thread( void *args )
 		{
 			char *account_mb = proto_str_split( msgptr, &msgptr );
 			char *password = proto_str_split( msgptr, NULL );
-
+			
 			wchar_t *account = proto_str_postrecv( account_mb );
 
 			(*cb_login_request)( src_ipaddr, RQSR, account, password );
@@ -534,7 +534,7 @@ int serverproto_login_reply( char *destip, short srctype, int confirmation, unsi
 	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_LOGIN_REPLY );
 	msgptr = proto_str_comb( msgptr, confirmation_str );
 	msgptr = proto_str_comb( msgptr, account_id_str );
-
+	
 	if( srctype == OPSR_TEAM )
 		listen_port = LISTEN_PORT_TEAM;
 	else if( srctype == OPSR_ADMIN )

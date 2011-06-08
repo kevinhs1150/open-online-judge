@@ -349,7 +349,6 @@ char *proto_srid_split( char *arr, short *SRptr, short *IDptr )
 {
 	*SRptr = arr[0];
 	*IDptr = arr[1];
-
 	return arr + 2;
 }
 
@@ -369,7 +368,6 @@ char *proto_srid_comb( char *arr, short SR, short ID )
 {
 	arr[0] = SR;
 	arr[1] = ID;
-
 	return arr + 2;
 }
 
@@ -447,7 +445,7 @@ int proto_commonreq( int RQSR, int RQID, char *msgptr )
 
 			int confirm_code = atoi( confirm_code_str );
 			unsigned int account_id = atoi( account_id_str );
-
+			
 			(*cb_login_confirm)( confirm_code, account_id );
 
 			free( confirm_code_str );

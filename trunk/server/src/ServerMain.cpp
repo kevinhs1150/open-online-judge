@@ -195,6 +195,9 @@ void callback_login_request( char *srcip, short srctype, wchar_t *account, char 
 	int rows, cols;
 	unsigned int account_id;
 	
+	wprintf(L"Acc: %s\n", account );
+	printf("Pas: %s\n", password );
+	
 	/* determine the validity of account */
 	wcstombs(account_char, account, 25);
 	sprintf(sqlquery, "SELECT account_id FROM user WHERE account = '%s';", account_char);
