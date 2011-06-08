@@ -23,6 +23,7 @@ class JudgeFrame: public JudgeGUI
         JudgeFrame(wxFrame *frame);
         ~JudgeFrame();
 		void account_id_set(unsigned int account_id);
+		void account_set(wxString account);
         void timer(unsigned int hours, unsigned int minutes, unsigned int seconds);
 		void setPtoblemFilterChoice(unsigned int problem_id, wchar_t *problem_name);
 		void deleteProblemFilterChoice(unsigned int problem_count);
@@ -45,7 +46,7 @@ class JudgeFrame: public JudgeGUI
         unsigned int timer_minutes;
         unsigned int timer_seconds;
         unsigned int state;
-        char *IP;
+        char IP[16];
 };
 
 

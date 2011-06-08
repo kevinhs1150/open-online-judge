@@ -12,6 +12,7 @@ class JudgeLoginFrame: public LoginGUI
         ~JudgeLoginFrame();
 
         void cleanPassword();
+		wxString getAccount();
 
     private:
 		void OnClose( wxCloseEvent& event );
@@ -20,6 +21,7 @@ class JudgeLoginFrame: public LoginGUI
 		void OnButtonClickExit( wxCommandEvent& event );
 
 		void login();
+		wxString account;
 };
 
 

@@ -17,7 +17,7 @@ class JudgeChangePassFrame: public ChangePassGUI
 
     private:
 		unsigned int account_id;
-		char *IP;
+		char IP[20];
 		
 		void OnButtonClickOK( wxCommandEvent& event );
 		void OnButtonClickCancel( wxCommandEvent& event );

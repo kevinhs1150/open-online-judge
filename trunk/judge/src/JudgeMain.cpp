@@ -105,12 +105,10 @@ JudgeFrame::JudgeFrame(wxFrame *frame)
         Destroy();
 		return;
     }
-		printf("10\n");
-	loginframe->Destroy();
 	
     IP_set();
-
     mainFrame = this;
+	mainFrame->setUnJudgeNum(0);
 }
 
 JudgeFrame::~JudgeFrame()
@@ -124,7 +122,11 @@ void JudgeFrame::account_id_set(unsigned int account_id)
 	this->account_id = account_id;
 	
 	id.Printf(_("%u"),this->account_id);
-	m_staticTextName->SetLabel(id);
+}
+
+void JudgeFrame::account_set(wxString account)
+{
+	m_staticTextName->SetLabel(account);
 }
 
 void JudgeFrame::timer(unsigned int hours, unsigned int minutes, unsigned int seconds)
@@ -206,7 +208,7 @@ void JudgeFrame::IP_set()
 {
     FILE *fptr1;
 
-    fptr1=fopen("config.txt","r");
+    fptr1=fopen("ip.txt","r");
     fscanf (fptr1, "%s", IP);
     fclose(fptr1);
 }
@@ -228,7 +230,7 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 
 void JudgeFrame::OnButtonClickLogout( wxCommandEvent& event )
 {
-    judgeproto_cbreg_logout_confirm( logout_confirm );
+	judgeproto_logout(IP,account_id);
 }
 
 void JudgeFrame::OnCheckBoxAutoJudge( wxCommandEvent& event )
@@ -278,8 +280,12 @@ void JudgeFrame::OnListItemActivatedClar( wxListEvent& event )
 /////////////////////////////////////////////////////////////
 void login_confirm( int confirm_code, unsigned int account_id )
 {
-    if( confirm_code == LOGIN_VALID )
+    if( confirm_code == LOGIN_VALID ){
         loginframe->EndModal(0);
+		mainFrame->account_set(loginframe->getAccount());
+		loginframe->Destroy();
+		mainFrame->account_id_set(account_id);
+	}
     else{
         wxMessageBox( wxT("Login Error.\nPromble: account NOTEXIST or password WRONG."), wxT("Login Error"),wxOK|wxICON_EXCLAMATION);
         loginframe->cleanPassword();
