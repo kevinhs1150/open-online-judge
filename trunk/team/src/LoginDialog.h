@@ -2,10 +2,6 @@
 #define _LOGINDIALOG_H_
 
 #include "gui.h"
-extern "C"
-{
-    #include "teamproto.h"
-}
 
 class LoginDialog: public LoginGUI{
 	private:
@@ -16,6 +12,8 @@ class LoginDialog: public LoginGUI{
 	public:
 		LoginDialog(wxWindow *parent);
 		~LoginDialog();
+
+		void LoginSuccess();
 };
 
 #endif

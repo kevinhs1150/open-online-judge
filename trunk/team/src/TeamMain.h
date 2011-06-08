@@ -4,28 +4,72 @@
 #include <wx/wx.h>
 #include "TeamApp.h"
 #include "gui.h"
-#include "LoginDialog.h"
-extern "C"
-{
-    #include "teamproto.h"
-}
-
 
 class TeamFrame: public TeamGUI
 {
-    public:
-        TeamFrame(wxFrame *frame);
-        ~TeamFrame();
+    private:
+        void OnButtonClickChangePassword( wxCommandEvent& event );
         void OnButtonClickLogout( wxCommandEvent& event );
 		void OnButtonClickDownload( wxCommandEvent& event );
-		void OnButtonClickBrowse( wxCommandEvent& event );
 		void OnButtonClickTest( wxCommandEvent& event );
 		void OnButtonClickSubmit( wxCommandEvent& event );
 		void OnButtonClickAsk( wxCommandEvent& event );
 
-    private:
+	public:
+        TeamFrame(wxFrame *frame);
+        ~TeamFrame();
 
 };
 
+class ChangePassDialog : public ChangePassGUI
+{
+	private:
+		virtual void OnButtonClickOK( wxCommandEvent& event );
+		virtual void OnButtonClickCancel( wxCommandEvent& event );
+
+	public:
+		ChangePassDialog(wxFrame *frame);
+		~ChangePassDialog();
+
+		void ChangeSuccess();
+};
+
+class SubmitConfirmDialog : public SubmitConfirmGUI
+{
+	private:
+		void OnButtonClickYes( wxCommandEvent& event );
+		void OnButtonClickNo( wxCommandEvent& event );
+
+
+	public:
+		SubmitConfirmDialog(wxFrame *frame);
+		~SubmitConfirmDialog();
+
+};
+
+class ClarDialog : public ClarDialogGUI
+{
+	private:
+		void OnButtonClickYes( wxCommandEvent& event );
+		void OnButtonClickNo( wxCommandEvent& event );
+
+
+	public:
+		ClarDialog(wxFrame *frame);
+		~ClarDialog();
+
+};
+
+class ClarConfirmDialog : public ClarConfirmGUI
+{
+	private:
+		void OnButtonClickYes( wxCommandEvent& event );
+		void OnButtonClickNo( wxCommandEvent& event );
+
+	public:
+		ClarConfirmDialog(wxFrame *frame);
+		~ClarConfirmDialog();
+
+};
 
 #endif // _TEAMMAIN_H_
