@@ -4,7 +4,6 @@
 #include <wx/wx.h>
 #include "JudgeApp.h"
 #include "gui.h"
-#include "judgeproto.h"
 
 #define YES 0
 #define COMPLIE_ERROR -1
