@@ -33,6 +33,10 @@ typedef struct problem_list{
 	struct problem_list *next;
 } problem_all;
 
+BEGIN_EVENT_TABLE(AdminFrame, wxFrame)
+    EVT_TIMER(-1, AdminFrame::OnTimerEvent)
+END_EVENT_TABLE()
+
 JudgeLoginFrame *loginframe;
 JudgeChangePassFrame *changePassFrame;
 JudgeShowClarFrame *showClarFrame;
@@ -79,7 +83,7 @@ void clar_delete(unsigned int clar_id);
 //class public function
 ///////////////////////////////////////////////////
 JudgeFrame::JudgeFrame(wxFrame *frame)
-    : JudgeGUI(frame)
+    : JudgeGUI(frame), m_timer(this)
 {
     judgeproto_cbreg_login_confirm( login_confirm );
     judgeproto_cbreg_logout_confirm( logout_confirm );
@@ -129,7 +133,7 @@ void JudgeFrame::account_set(wxString account)
 	m_staticTextName->SetLabel(account);
 }
 
-void JudgeFrame::timer(unsigned int hours, unsigned int minutes, unsigned int seconds)
+/*void JudgeFrame::timer(unsigned int hours, unsigned int minutes, unsigned int seconds)
 {
 	wxString time;
 	
@@ -139,7 +143,7 @@ void JudgeFrame::timer(unsigned int hours, unsigned int minutes, unsigned int se
 	
 	time << hours << wxT(":") << minutes << wxT(":") << seconds;
 	m_staticTextTime->SetLabel( time );
-}
+}*/
 
 void JudgeFrame::setPtoblemFilterChoice(unsigned int problem_id, wchar_t *problem_name)
 {
@@ -275,6 +279,17 @@ void JudgeFrame::OnListItemActivatedClar( wxListEvent& event )
 	showClarFrame->Show();
 }
 
+void JudgeFrame::OnTimerEvent(wxTimerEvent &event){
+	m_timeleft--;
+	m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), m_timeleft / 60 / 60, (m_timeleft / 60) % 60, m_timeleft % 60));
+	if(m_timeleft <= 0){
+		//contest end
+		m_timer.Stop();
+	}
+	
+	return;
+}
+
 /////////////////////////////////////////////////////////////
 //call back function use
 /////////////////////////////////////////////////////////////
@@ -301,7 +316,8 @@ void logout_confirm( int confirm_code )
 
 void timer_set(unsigned int hours, unsigned int minutes, unsigned int seconds)
 {
-	mainFrame->timer( hours, minutes, seconds );
+	mainFrame->m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), hours, minutes, seconds));
+	mainFrame->m_timeleft = hours * 60 * 60 + minutes * 60 + seconds;
 }
 
 void contest_start( void )

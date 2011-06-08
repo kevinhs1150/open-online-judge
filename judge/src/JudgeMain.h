@@ -20,6 +20,8 @@
 class JudgeFrame: public JudgeGUI
 {
     public:
+		unsigned int m_timeleft;
+		
         JudgeFrame(wxFrame *frame);
         ~JudgeFrame();
 		void account_id_set(unsigned int account_id);
@@ -36,17 +38,22 @@ class JudgeFrame: public JudgeGUI
         char *IP_get();
 
     private:
+		unsigned int account_id;
+        //unsigned int timer_hours;
+        //unsigned int timer_minutes;
+        //unsigned int timer_seconds;
+        unsigned int state;
+        char IP[16];
+		wxTimer m_timer;
+		
 		void OnButtonClickChangePassword( wxCommandEvent& event );
 		void OnButtonClickLogout( wxCommandEvent& event );
 		void OnCheckBoxAutoJudge( wxCommandEvent& event );
 		void OnListItemActivatedRuns( wxListEvent& event );
 		void OnListItemActivatedClar( wxListEvent& event );
-		unsigned int account_id;
-        unsigned int timer_hours;
-        unsigned int timer_minutes;
-        unsigned int timer_seconds;
-        unsigned int state;
-        char IP[16];
+		
+		void OnTimerEvent(wxTimerEvent &event);
+		DECLARE_EVENT_TABLE()
 };
 
 
