@@ -159,6 +159,8 @@ ServerFrame::~ServerFrame()
 
 void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 {
+	char sqlquery[100], *errMsg;
+	
 	/* start listen socket */
 	if( serverproto_listen("0.0.0.0") < 0 )
 	{
@@ -167,6 +169,11 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 #endif
 		wxMessageBox( wxT("Server start failed.\nStage: start listen socket."), wxT("Fatal Error"), wxOK|wxICON_ERROR, this );
 	}
+	
+	/* add an admin account */
+	sprintf(sqlquery, "INSERT INTO user VALUES(NULL, 'admin01', 'admin01', '%d', NULL, 'no');", OPSR_ADMIN);
+	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+
 }
 
 void ServerFrame::OnButtonClickStop( wxCommandEvent& event )
