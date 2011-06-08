@@ -44,6 +44,7 @@ problem_all *problem_hptr = NULL;
 
 void login_confirm( int confirm_code, unsigned int account_id );
 void logout_confirm( int confirm_code );
+void password_change_confirm( int confirm_code );
 void timer_set(unsigned int hours, unsigned int minutes, unsigned int seconds);
 void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code );
 void run_request_dlfin( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code );
@@ -57,7 +58,7 @@ void clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *accou
 void clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
 unsigned int unJudgeNumCount(void);
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language);
-void problem_insert(unsigned int problem_id);
+void problem_insert(unsigned int problem_id,wchar_t *problem_name, unsigned int time_limit);
 problem_all *problem_search(unsigned int problem_id);
 void problem_search_delete(unsigned int problem_id);
 void run_search_delete(unsigned int problem_id);
@@ -82,6 +83,7 @@ JudgeFrame::JudgeFrame(wxFrame *frame)
 {
     judgeproto_cbreg_login_confirm( login_confirm );
     judgeproto_cbreg_logout_confirm( logout_confirm );
+	judgeproto_cbreg_password_change_confirm( password_change_confirm );
     judgeproto_cbreg_timer_set(timer_set);
     judgeproto_cbreg_run_request(run_request);
     judgeproto_cbreg_contest_start(contest_start);
@@ -99,8 +101,13 @@ JudgeFrame::JudgeFrame(wxFrame *frame)
 
     loginframe = new JudgeLoginFrame(0L);
     if(loginframe->ShowModal() == -1){
+		loginframe->Destroy();
         Destroy();
+		return;
     }
+		printf("10\n");
+	loginframe->Destroy();
+	
     IP_set();
 
     mainFrame = this;
@@ -216,6 +223,7 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 {
 	changePassFrame = new JudgeChangePassFrame(0L);
 	changePassFrame->set_account_id(this->account_id);
+	changePassFrame->Show();
 }
 
 void JudgeFrame::OnButtonClickLogout( wxCommandEvent& event )
@@ -262,6 +270,7 @@ void JudgeFrame::OnListItemActivatedClar( wxListEvent& event )
 	
 	showClarFrame = new JudgeShowClarFrame(0L);
 	showClarFrame->setClarQA( item0.GetText().wchar_str(), item1.GetText().wchar_str());
+	showClarFrame->Show();
 }
 
 /////////////////////////////////////////////////////////////
@@ -355,7 +364,7 @@ void problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned in
 void problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
     /**TODO:problem view**/
-	problem_insert(problem_id);
+	problem_insert(problem_id, problem_name, time_limit);
 	mainFrame->setPtoblemFilterChoice(problem_id, problem_name);
 }
 
@@ -387,6 +396,10 @@ void take_result( unsigned int run_id, int success )
 		else{
 			submissionFrame = new JudgeSubmissionFrame(0L);
 			submissionFrame->setRunProblemID(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->problem_name, proptr->time_limit);
+			if(submissionFrame->ShowModal() == 0){
+				id_delete(rptr->run_id);
+			}
+			submissionFrame->Destroy();
 		}
 	}
 	else{

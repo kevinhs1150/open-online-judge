@@ -127,6 +127,7 @@ void JudgeSubmissionFrame::OnButtonClickShowOutput( wxCommandEvent& event )
 {
 	compareFrame = new JudgeCompareFrame(0L);
 	compareFrame->setProblemID(this->problem_id);
+	compareFrame->Show();
 }
 
 void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
@@ -162,6 +163,7 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 		else{
 			swprintf(result_string,L"time-limit exceed");
 		}
+		
 		if(judgeproto_judge_result(this->IP,this->run_id,result_string) != 0){
 			wxMessageBox(wxT("Judgement Submission Error.\nPromble: Socket error."),wxT("Judgement Submission Error"),wxOK|wxICON_EXCLAMATION);
 		}
@@ -169,6 +171,7 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 			EndModal(0);
 		}
     }
+	confirmFrame->Destroy();
 }
 
 void JudgeSubmissionFrame::OnButtonClickCancel( wxCommandEvent& event )
