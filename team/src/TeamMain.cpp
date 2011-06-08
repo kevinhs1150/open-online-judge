@@ -17,6 +17,9 @@ void cb_clar_reply( unsigned int clar_id, wchar_t *result_string );
 void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
 void cb_pu_request( wchar_t **path_description );
 void cb_pu_request_dlfin( wchar_t *path_description );
+void cb_problem_add( unsigned int problem_id, wchar_t *problem_name ) );
+void cb_problem_del( unsigned int problem_id ) );
+void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name ) );
 
 //global variables
 char server_ip[20];
@@ -51,8 +54,9 @@ TeamFrame::TeamFrame(wxFrame *frame)
     teamproto_cbreg_sb_update( cb_sb_update );
     teamproto_cbreg_pu_request( cb_pu_request );
     teamproto_cbreg_pu_request_dlfin( cb_pu_request_dlfin );
-
-
+    teamproto_cbreg_problem_add(cb_problem_add);
+    teamproto_cbreg_problem_del(cb_problem_del);
+    teamproto_cbreg_problem_mod(cb_problem_mod);
 
     //Load IP setting
 	ipFile = fopen("ip.txt", "r");
@@ -75,9 +79,9 @@ TeamFrame::TeamFrame(wxFrame *frame)
 		if(logindialog->ShowModal() == 0){
 			logindialog->Destroy();
 			Destroy();
-
 		}
     }
+    clardialog = new ClarDialog();
 }
 
 TeamFrame::~TeamFrame()
@@ -114,9 +118,8 @@ void TeamFrame::OnButtonClickSubmit( wxCommandEvent& event )
 
 void TeamFrame::OnButtonClickAsk( wxCommandEvent& event )
 {
-    clardialog = new ClarDialog;
+    clardialog->m_textCtrlFileQuestion->Clear();
     clardialog->ShowModal();
-    clardialog->Destroy();
 }
 
 
@@ -183,26 +186,29 @@ void SubmitConfirmDialog::OnButtonClickNo( wxCommandEvent& event )
 
 
 ///////////////////////////////////////////////////////////////////////////////
-/// ClarDialogDialog
+/// ClarDialog
 ///////////////////////////////////////////////////////////////////////////////
-ClarDialogDialog::ClarDialogDialog(wxFrame *frame)
+ClarDialog::ClarDialog(wxFrame *frame)
 {
 
 }
 
-ClarDialogDialog::~ClarDialogDialog()
+ClarDialog::~ClarDialog()
 {
 
 }
 
-void ClarDialogDialog::OnButtonClickYes( wxCommandEvent& event )
+void ClarDialog::OnButtonClickYes( wxCommandEvent& event )
 {
-
+    clarconfirmdialog = new ClarConfirmDialog;
+    clarconfirmdialog->ShowModal();
+    clarconfirmdialog->Destroy();
 }
 
-void ClarDialogDialog::OnButtonClickNo( wxCommandEvent& event )
+void ClarDialog::OnButtonClickNo( wxCommandEvent& event )
 {
-
+    EndModal(0);
+    return;
 }
 
 
@@ -212,7 +218,8 @@ void ClarDialogDialog::OnButtonClickNo( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////////
 ClarConfirmDialog::ClarConfirmDialog(wxFrame *frame)
 {
-
+    m_staticTextProblemVal->SetValue(clardialog->m_choiceProblem->GetStringSelection());
+    m_textCtrlFileQuestion->SetValue(clardialog->m_textCtrlFileQuestion->GetValue());
 }
 
 ClarConfirmDialog::~ClarConfirmDialog()
@@ -222,12 +229,14 @@ ClarConfirmDialog::~ClarConfirmDialog()
 
 void ClarConfirmDialog::OnButtonClickYes( wxCommandEvent& event )
 {
+    teamproto_clar(server_ip, login_id, 0, m_textCtrlFileQuestion->GetValue..wchar_str())
 
 }
 
 void ClarConfirmDialog::OnButtonClickNo( wxCommandEvent& event )
 {
-
+    EndModal(0);
+    return;
 }
 
 
@@ -323,4 +332,24 @@ void cb_pu_request( wchar_t **path_description )
 void cb_pu_request_dlfin( wchar_t *path_description )
 {
 
+}
+
+void cb_problem_add( unsigned int problem_id, wchar_t *problem_name ) )
+{
+    wxString* temp = new wxString(problem_name);
+    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, temp);
+    clardialog->m_choiceProblem.SetString(problem_id, temp);
+}
+
+void cb_problem_del( unsigned int problem_id ) )
+{
+    TeamFrameGlobal->m_choiceProblem.Delete(problem_id);
+    clardialog->m_choiceProblem.Delete(problem_id);
+}
+
+void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name ) )
+{
+    wxString* temp = new wxString(problem_name);
+    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, temp);
+    clardialog->m_choiceProblem.SetString(problem_id, temp);
 }
