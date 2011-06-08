@@ -36,7 +36,7 @@ class JudgeSubmissionFrame: public JudgeSubmissionGUI
 		wchar_t *problem_name;
 		unsigned int time_limit;
 		int result;
-		char *IP;
+		char IP[20];
 
 		void OnButtonClickShowInput( wxCommandEvent& event );
 		void OnButtonClickShowSource( wxCommandEvent& event );

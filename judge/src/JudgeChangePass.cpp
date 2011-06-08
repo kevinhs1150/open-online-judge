@@ -12,6 +12,7 @@ void password_change_confirm( int confirm_code );
 JudgeChangePassFrame::JudgeChangePassFrame(wxFrame *frame)
     : ChangePassGUI(frame)
 {
+	IP_set();
 }
 
 JudgeChangePassFrame::~JudgeChangePassFrame()
@@ -27,8 +28,8 @@ void JudgeChangePassFrame::IP_set()
 {
     FILE *fptr1;
 
-    fptr1=fopen("config.txt","r");
-    fscanf (fptr1, "%s", IP);
+    fptr1=fopen("ip.txt","r");
+    fscanf (fptr1, "%s", this->IP);
     fclose(fptr1);
 }
 

@@ -23,6 +23,12 @@ void JudgeLoginFrame::OnTextEnterPassword( wxCommandEvent& event )
 {
     login();
 }
+
+wxString JudgeLoginFrame::getAccount()
+{
+	return this->account;
+}
+
 void JudgeLoginFrame::OnButtonClickLogin( wxCommandEvent& event )
 {
     login();
@@ -47,10 +53,12 @@ void JudgeLoginFrame::login()
         wxString getID = m_textCtrlID->GetValue();
         wxString getPassword = m_textCtrlPassword->GetValue();
 
+		this->account = getID;
+		
         wcscpy(ID, getID.wc_str());
         strcpy(password, getPassword.mb_str());
 
-        fptr1=fopen("config.txt","r");
+        fptr1=fopen("ip.txt","r");
         fscanf (fptr1, "%s", IP);
 
         judgeproto_login(IP, ID, password );

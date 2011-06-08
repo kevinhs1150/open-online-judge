@@ -32,7 +32,7 @@ void JudgeSubmissionFrame::IP_set()
 {
     FILE *fptr1;
 
-    fptr1=fopen("config.txt","r");
+    fptr1=fopen("ip.txt","r");
     fscanf (fptr1, "%s", IP);
     fclose(fptr1);
 }
