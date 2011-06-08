@@ -119,7 +119,7 @@ int tcp_connect( char *conn_address, unsigned short conn_port )
 char *tcp_getaddr( int sockfd )
 {
 	struct sockaddr_in addr;
-	unsigned int len;
+	size_t len = sizeof( struct sockaddr_in );
 	char *addr_str = malloc( 16 * sizeof( char ) );
 
 	if( getpeername( sockfd, (struct sockaddr *)&addr, &len ) < 0 )

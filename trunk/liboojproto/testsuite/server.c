@@ -30,6 +30,7 @@ int main( void )
 	}
 	
 	close( listenfd );
+	printf("There's a connection coming from %s.\n", tcp_getaddr( sockfd ) );
 	
 	while( recv( sockfd, recvbuf, 1024, 0 ) != 0 )
 	{

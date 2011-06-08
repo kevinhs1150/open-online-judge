@@ -10,6 +10,10 @@ ongoing
  * common: Generally no affection.
  * internal: Fixed various bug, serious or non-serious.
 
+2011.06.08 quick fix
+ * testsuite: Changed server test program.
+ * internal: tcp_getaddr() was not working.  Fixed.
+
 
 
 protocol 0 revision 5
