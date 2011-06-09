@@ -3,6 +3,8 @@
 #include "JudgeChangePass.h"
 #include "JudgeShowClar.h"
 #include "JudgeSubmission.h"
+#include <wx/process.h>
+#include <wx/filefn.h>
 
 extern "C"
 {
@@ -215,7 +217,7 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 	changePassFrame->Show();
 	changePassFrame->set_account_id(this->account_id);
 	//=====================================================================================
-	problem_update_dlfin( 1, L"one", 3, L"problem/1.pdf", L"problem/1_input.txt", L"problem/1_ans.txt" );
+	/*problem_update_dlfin( 1, L"one", 3, L"problem/1.pdf", L"problem/1_input.txt", L"problem/1_ans.txt" );
 	problem_update_dlfin( 2, L"two", 3, L"problem/2.pdf", L"problem/2_input.txt", L"problem/2_ans.txt" );
 	
 	run_request_dlfin( 0, 1, L"c", L"0.c" );
@@ -224,7 +226,8 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 	run_request_dlfin( 3, 1, L"c", L"3.c" );
 	run_request_dlfin( 4, 1, L"c", L"4.c" );
 	
-	take_result(0,TAKE_SUCCESS);
+	take_result(0,TAKE_SUCCESS);*/
+	//autoJudge(0,1, L"c", 3);
 	//======================================================================================
 }
 
@@ -251,8 +254,16 @@ void JudgeFrame::OnChoiceFilter( wxCommandEvent& event )
 void JudgeFrame::OnCheckBoxAutoJudge( wxCommandEvent& event )
 {
 	if((m_checkBoxAutoJudge->IsChecked()) == true && unJudgeNumCount() > 0){
-		autoJudge_take();
+	//	autoJudge_take();
 	}
+	//==========================================================
+	/*autoJudge(1,1, L"c", 3);
+	mainFrame->m_mutexRunRequest.Lock();
+	id_delete(1);
+	unsigned int unJudgeNum = unJudgeNumCount();
+	mainFrame->setUnJudgeNum(unJudgeNum);
+	mainFrame->m_mutexRunRequest.Unlock();*/
+	//==========================================================
 }
 
 void JudgeFrame::OnListItemActivatedRuns( wxListEvent& event )
@@ -803,11 +814,19 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 	wchar_t result_string[20];
 	unsigned int unJudgeNum;
 
-    swprintf(file_name, L"%u", run_id);
     wcscpy(type, coding_language);
+	if(!(wcscmp(type, L"c"))){
+		wsprintf(file_name,L"%u.c",run_id);
+	}
+	else if(!(wcscmp(type, L"c++"))){
+		wsprintf(file_name,L"%u.cpp",run_id);
+	}
+	else{
+		errtyp = TYPE_ERROR;
+	}
     errtyp = compile_auto(file_name, type);
     if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
-        if(time_auto(time_limit) == 0){
+		if(time_auto(time_limit) == 0){
             if(judge_auto(problem_id) != 0){
                 errtyp = OUTPUT_ERROR;
 			}
@@ -854,7 +873,13 @@ int compile_auto(wchar_t file_name[], wchar_t type[])
     fptr1=fopen("out.exe","r");
     if(fptr1 != NULL){
         fclose(fptr1);
-        DeleteFile(L"out.exe");
+        wxRemoveFile(wxT("out.exe"));
+    }
+	
+	fptr1=fopen("ans.txt","r");
+    if(fptr1 != NULL){
+        fclose(fptr1);
+        wxRemoveFile(wxT("ans.txt"));
     }
 
     fptr1=fopen_sp(file_name,L"r");
@@ -931,29 +956,23 @@ int complie_result_auto(){
 
 int time_auto(unsigned int time_limit){
     int i;
+	long pid;
+	wxProcess *wxP = NULL;
 
-    PROCESS_INFORMATION pi;
-    STARTUPINFO si;
-    HANDLE hProg;
-
-    memset(&si,0,sizeof(si));
-    si.cb= sizeof(si);
-
-    CreateProcess( NULL, L"executive.exe", NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
-    hProg = pi.hProcess;
+   pid = wxExecute(wxT("executive.exe"),wxEXEC_NOHIDE,wxP);
 
     for(i = 0;i < time_limit;i++){
         Sleep(1000);
-        if(WaitForSingleObject(hProg,0) != WAIT_TIMEOUT){
+        if(wxProcess::Exists(pid) == true){
             break;
         }
     }
 
-    if(WaitForSingleObject(hProg,0) == WAIT_TIMEOUT){
+    if(wxProcess::Exists(pid) == false){
         system("taskkill /F /IM out.exe");
         return -1;
     }
-
+	
     return 0;
 }
 
@@ -963,7 +982,7 @@ int judge_auto(unsigned int problem_id){
     char o;
 	char problem_ans[50];
 
-    sprintf(problem_ans, "problem/%s_answer.txt", problem_id);
+    sprintf(problem_ans, "problem/%u_answer.txt", problem_id);
 
     fptr1 = fopen(problem_ans,"r");
     fptr2 = fopen("ans.txt","r");
@@ -995,7 +1014,7 @@ int judge_auto(unsigned int problem_id){
     else{
         return -1;
     }
-
+	
     return 0;
 }
 
