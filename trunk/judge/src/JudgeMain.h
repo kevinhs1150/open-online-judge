@@ -47,6 +47,7 @@ class JudgeFrame: public JudgeGUI
 		
 		void OnButtonClickChangePassword( wxCommandEvent& event );
 		void OnButtonClickLogout( wxCommandEvent& event );
+		void OnChoiceFilter( wxCommandEvent& event );
 		void OnCheckBoxAutoJudge( wxCommandEvent& event );
 		void OnListItemActivatedRuns( wxListEvent& event );
 		void OnListItemActivatedClar( wxListEvent& event );
