@@ -202,7 +202,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelAccounts->SetSizer( bSizerAccountPage );
 	m_panelAccounts->Layout();
 	bSizerAccountPage->Fit( m_panelAccounts );
-	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), false );
+	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), true );
 	m_panelContestInfo = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerContestInfoPage;
 	bSizerContestInfoPage = new wxBoxSizer( wxVERTICAL );
@@ -622,7 +622,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelClar->SetSizer( bSizerClarPage );
 	m_panelClar->Layout();
 	bSizerClarPage->Fit( m_panelClar );
-	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), true );
+	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), false );
 	m_panelSB = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerSBMain;
 	bSizerSBMain = new wxBoxSizer( wxVERTICAL );
@@ -1508,7 +1508,7 @@ JudgeSubmissionGUI::JudgeSubmissionGUI( wxWindow* parent, wxWindowID id, const w
 	wxBoxSizer* bSizerRunStatus;
 	bSizerRunStatus = new wxBoxSizer( wxVERTICAL );
 	
-	m_staticTextRunStatus = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
+	m_staticTextRunStatus = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE|wxST_NO_AUTORESIZE );
 	m_staticTextRunStatus->Wrap( -1 );
 	m_staticTextRunStatus->SetFont( wxFont( 12, 74, 90, 90, false, wxEmptyString ) );
 	
