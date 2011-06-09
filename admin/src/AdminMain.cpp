@@ -18,6 +18,16 @@ unsigned int login_id;
 LoginDialog *loginDialog = NULL;
 ChangePassDialog *changePassDialog = NULL;
 
+int wxCALLBACK ListCompareFunction(long item1, long item2, long WXUNUSED(sortData)){
+    // inverse the order
+    if (item1 < item2)
+        return -1;
+    if (item1 > item2)
+        return 1;
+
+    return 0;
+}
+
 /* callback functions */
 void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *account ){
 	wxString name(account);
@@ -52,16 +62,22 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 		tmp = AdminFrameGlobal->m_listCtrlAdmin->InsertItem(AdminFrameGlobal->m_listCtrlAdmin->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlAdmin->SetItem(tmp, 1, name);
 		AdminFrameGlobal->m_listCtrlAdmin->SetItemData(tmp, account_id);
+		
+		AdminFrameGlobal->m_listCtrlAdmin->SortItems(ListCompareFunction, 0);
 	}
 	else if(type == SRC_JUDGE){
 		tmp = AdminFrameGlobal->m_listCtrlJudge->InsertItem(AdminFrameGlobal->m_listCtrlJudge->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlJudge->SetItem(tmp, 1, name);
 		AdminFrameGlobal->m_listCtrlJudge->SetItemData(tmp, account_id);
+		
+		AdminFrameGlobal->m_listCtrlJudge->SortItems(ListCompareFunction, 0);
 	}
 	else if(type == SRC_TEAM){
 		tmp = AdminFrameGlobal->m_listCtrlTeam->InsertItem(AdminFrameGlobal->m_listCtrlTeam->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlTeam->SetItem(tmp, 1, name);
 		AdminFrameGlobal->m_listCtrlTeam->SetItemData(tmp, account_id);
+		
+		AdminFrameGlobal->m_listCtrlTeam->SortItems(ListCompareFunction, 0);
 	}
 	else{
 		// no definition, it must a mistake!
