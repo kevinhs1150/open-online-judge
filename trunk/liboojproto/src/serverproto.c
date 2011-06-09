@@ -20,7 +20,7 @@ void (*cb_submission_request_dlfin)( char *srcip, unsigned int account_id, unsig
 void (*cb_tsclar_request)( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg ) = NULL;
 void (*cb_clar_sync)( char *srcip, short srctype ) = NULL;
 void (*cb_pd_request)( char *srcip, unsigned int account_id, unsigned int problem_id )              = NULL;
-void (*cb_sb_sync)( char *srcip )             = NULL;
+void (*cb_sb_sync)( char *srcip, short srctype )             = NULL;
 void (*cb_trun_sync)( char *srcip, unsigned int account_id )   = NULL;
 void (*cb_run_result_notify)( char *srcip, unsigned int run_id, wchar_t *result )                   = NULL;
 void (*cb_run_sync)( char *srcip )  = NULL;
@@ -51,7 +51,7 @@ void serverproto_cbreg_submission_request_dlfin( void (*cbfunc)( char*, unsigned
 void serverproto_cbreg_tsclar_request( void (*cbfunc)( char*, unsigned int, int, wchar_t* ) )  { cb_tsclar_request = cbfunc; }
 void serverproto_cbreg_clar_sync( void (*cbfunc)( char*, short ) ) { cb_clar_sync = cbfunc; }
 void serverproto_cbreg_pd_request( void (*cbfunc)( char*, unsigned int, unsigned int ) )     { cb_pd_request = cbfunc; }
-void serverproto_cbreg_sb_sync( void (*cbfunc)( char* ) ) { cb_sb_sync = cbfunc; }
+void serverproto_cbreg_sb_sync( void (*cbfunc)( char*, short ) ) { cb_sb_sync = cbfunc; }
 void serverproto_cbreg_trun_sync( void (*cbfunc)( char*, unsigned int ) ) { cb_trun_sync = cbfunc; }
 void serverproto_cbreg_run_result_notify( void (*cbfunc)( char*, unsigned int, wchar_t* ) )  { cb_run_result_notify = cbfunc; }
 void serverproto_cbreg_run_sync( void (*cbfunc)( char* ) )  { cb_run_sync = cbfunc; }
@@ -74,6 +74,9 @@ void *serverproto_reqhand_thread( void *args );
 /* external sync variable (from proto_commonfunction.c) */
 extern pthread_mutex_t proto_sockfd_pass_mutex;
 extern pthread_cond_t proto_sockfd_pass_cv;
+
+/* external download management mutex from protointernal_listen.c */
+extern pthread_mutex_t proto_dlmgr_mutex;
 
 /* callback registration check function */
 static int serverproto_cbcheck( void )
@@ -102,7 +105,7 @@ int serverproto_listen( char *localaddr )
 		return -1;
 	}
 
-	if( proto_listen( localaddr, LISTEN_PORT_SERVER, serverproto_reqhand_thread ) < 0 )
+	if( proto_listen( localaddr, LISTEN_PORT_SERVER, LISTEN_PORT_VSFTP_SERVER, serverproto_reqhand_thread ) < 0 )
 	{
 #if PROTO_DBG > 0
 		printf("[serverproto_listen()] proto_listen() call failed.\n");
@@ -243,7 +246,7 @@ void *serverproto_reqhand_thread( void *args )
 	}
 	else if( RQID == OPID_SB_SYNC && ( RQSR == OPSR_ADMIN || RQSR == OPSR_TEAM ) )
 	{
-		(*cb_sb_sync)( src_ipaddr );
+		(*cb_sb_sync)( src_ipaddr, RQSR );
 	}
 	else if( RQID == OPID_TIMER_SYNC )
 	{
@@ -325,16 +328,25 @@ void *serverproto_reqhand_thread( void *args )
 				wchar_t *problem_name = proto_str_postrecv( problem_name_mb );
 				unsigned int time_limit = atoi( time_limit_str );
 				wchar_t *path_description = NULL, *path_input = NULL, *path_answer = NULL;
+				
+				/* mutex lock protection -- prevent concurrent downloading causing race condition */
+				pthread_mutex_lock( &proto_dlmgr_mutex );
+				send_sp( sockfd, "FSREADY", BUFLEN );
 
 				(*cb_problem_add)( src_ipaddr, problem_id, problem_name, time_limit, &path_description, &path_input, &path_answer );
 
 				/* download files */
-				filerecv( src_ipaddr, path_description );
-				filerecv( src_ipaddr, path_input );
-				filerecv( src_ipaddr, path_answer );
+				filerecv( path_description );
+				printf("first file received.\n");
+				filerecv( path_input );
+				printf("second file received.\n");
+				filerecv( path_answer );
 
 				(*cb_problem_add_dlfin)( src_ipaddr, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
 
+				/* mutex unlock */
+				pthread_mutex_unlock( &proto_dlmgr_mutex );
+				
 				free( problem_id_str );
 				free( problem_name_mb );
 				free( problem_name );
@@ -363,15 +375,22 @@ void *serverproto_reqhand_thread( void *args )
 				wchar_t *problem_name = proto_str_postrecv( problem_name_mb );
 				unsigned int time_limit = atoi( time_limit_str );
 				wchar_t *path_description = NULL, *path_input = NULL, *path_answer = NULL;
+				
+				/* mutex lock protection -- prevent concurrent downloading causing race condition */
+				pthread_mutex_lock( &proto_dlmgr_mutex );
+				send_sp( sockfd, "FSREADY", BUFLEN );
 
 				(*cb_problem_mod)( src_ipaddr, problem_id, problem_name, time_limit, &path_description, &path_input, &path_answer );
 
 				/* download files */
-				filerecv( src_ipaddr, path_description );
-				filerecv( src_ipaddr, path_input );
-				filerecv( src_ipaddr, path_answer );
+				filerecv( path_description );
+				filerecv( path_input );
+				filerecv( path_answer );
 
 				(*cb_problem_mod_dlfin)( src_ipaddr, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
+				
+				/* mutex unlock */
+				pthread_mutex_unlock( &proto_dlmgr_mutex );
 
 				free( problem_id_str );
 				free( problem_name_mb );
@@ -449,12 +468,19 @@ void *serverproto_reqhand_thread( void *args )
 			wchar_t *coding_language = proto_str_postrecv( coding_language_mb );
 			wchar_t *path_code = NULL;
 
+			/* mutex lock protection -- prevent concurrent downloading causing race condition */
+			pthread_mutex_lock( &proto_dlmgr_mutex );
+			send_sp( sockfd, "FSREADY", BUFLEN );
+			
 			(*cb_submission_request)( src_ipaddr, account_id, problem_id, coding_language, &path_code );
 
 			/* download file */
-			filerecv( src_ipaddr, path_code );
+			filerecv( path_code );
 
 			(*cb_submission_request_dlfin)( src_ipaddr, account_id, problem_id, coding_language, path_code );
+			
+			/* mutex unlock */
+			pthread_mutex_unlock( &proto_dlmgr_mutex );
 
 			free( account_id_str );
 			free( problem_id_str );
@@ -1021,6 +1047,7 @@ int serverproto_problem_upload( char *destip, wchar_t *path_description )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
+	char syncbuf[BUFLEN];
 	char *msgptr = NULL;
 
 	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_PUPLOAD );
@@ -1034,9 +1061,12 @@ int serverproto_problem_upload( char *destip, wchar_t *path_description )
 	}
 
 	send_sp( sockfd, sendbuf, BUFLEN );
+	
+	/* sync message from receiver: i'm ready */
+	recv( sockfd, syncbuf, BUFLEN, 0 );
 
 	/* upload files */
-	filesend( destip, path_description );
+	filesend( destip, OPSR_TEAM, path_description );
 
 	shutdown_wr_sp( sockfd );
 	return 0;
@@ -1046,6 +1076,7 @@ int serverproto_run_request( char *destip, unsigned int run_id, unsigned int pro
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
+	char syncbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *run_id_str = uint2str( run_id );
 	char *problem_id_str = uint2str( problem_id );
@@ -1065,9 +1096,12 @@ int serverproto_run_request( char *destip, unsigned int run_id, unsigned int pro
 	}
 
 	send_sp( sockfd, sendbuf, BUFLEN );
+	
+	/* sync message from receiver: i'm ready */
+	recv( sockfd, syncbuf, BUFLEN, 0 );
 
 	/* upload files */
-	filesend( destip, path_code );
+	filesend( destip, OPSR_JUDGE, path_code );
 
 	shutdown_wr_sp( sockfd );
 	free( run_id_str );
@@ -1165,6 +1199,7 @@ int serverproto_problem_update( char *destip, short desttype, unsigned int probl
 	int sockfd;
 	unsigned short listen_port;
 	char sendbuf[BUFLEN];
+	char syncbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *problem_id_str = uint2str( problem_id );
 	char *problem_name_mb = proto_str_presend( problem_name );
@@ -1196,11 +1231,23 @@ int serverproto_problem_update( char *destip, short desttype, unsigned int probl
 	}
 
 	send_sp( sockfd, sendbuf, BUFLEN );
+	
+	/* sync message from receiver: i'm ready */
+	recv( sockfd, syncbuf, BUFLEN, 0 );
 
 	/* upload files */
-	filesend( destip, path_description );
-	filesend( destip, path_input );
-	filesend( destip, path_answer );
+	if( desttype == OPSR_ADMIN )
+	{
+		filesend( destip, OPSR_ADMIN, path_description );
+		filesend( destip, OPSR_ADMIN, path_input );
+		filesend( destip, OPSR_ADMIN, path_answer );
+	}
+	else if( desttype == OPSR_JUDGE )
+	{
+		filesend( destip, OPSR_JUDGE, path_description );
+		filesend( destip, OPSR_JUDGE, path_input );
+		filesend( destip, OPSR_JUDGE, path_answer );
+	}
 
 	shutdown_wr_sp( sockfd );
 	free( problem_id_str );

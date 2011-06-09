@@ -1,7 +1,14 @@
 >> Open Online Judge Protocol Implementation Change Log <<
 
+protocol 0 revision 7
+released 2011.06.09   by Infinity
+ * server: Added srctype to sb_sync() callback.
+ * common: Generally no affection.
+ * internal: Largely improved filesend and filerecv related functionalities.
+
+
 protocol 0 revision 6
-ongoing
+released (forgot)
  + testsuite: Added several test programs used to debug protocol functions.
  Added a Windows batch to conviently compile testsuite programs.
      Usage:   compile.cmd <source file>
