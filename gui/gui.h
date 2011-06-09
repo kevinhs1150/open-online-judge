@@ -48,7 +48,6 @@ class LoginGUI : public wxDialog
 		wxStaticText* m_staticTextTitle;
 		wxStaticLine* m_staticlineTop;
 		wxStaticText* m_staticTextID;
-		wxTextCtrl* m_textCtrlID;
 		
 		wxStaticText* m_staticTextPassword;
 		wxTextCtrl* m_textCtrlPassword;
@@ -67,6 +66,7 @@ class LoginGUI : public wxDialog
 		
 	
 	public:
+		wxTextCtrl* m_textCtrlID;
 		
 		LoginGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Login"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxCAPTION|wxCLOSE_BOX|wxSTAY_ON_TOP|wxSYSTEM_MENU );
 		~LoginGUI();
@@ -147,7 +147,6 @@ class AdminGUI : public wxFrame
 		wxPanel* m_panelClar;
 		wxStaticText* m_staticText62;
 		wxChoice* m_choice6;
-		wxListCtrl* m_listCtrlClars;
 		wxStaticText* m_staticTextClarID;
 		wxStaticText* m_staticTextClarIDVal;
 		wxTextCtrl* m_textCtrlQuestion;
@@ -184,6 +183,7 @@ class AdminGUI : public wxFrame
 		wxListCtrl* m_listCtrlJudge;
 		wxListCtrl* m_listCtrlTeam;
 		wxListCtrl* m_listCtrlProblems;
+		wxListCtrl* m_listCtrlClars;
 		wxListCtrl* m_listCtrlSB;
 		wxString IDFilter; 
 		
