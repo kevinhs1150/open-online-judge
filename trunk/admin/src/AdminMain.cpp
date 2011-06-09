@@ -140,7 +140,7 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 	printf("DL\n");
 
 	FILE *file_d, *file_i, *file_o;
-	char path[20];
+	char path[100];
 	int i = 0;
 	
 	AdminFrameGlobal->m_mutexProblem.Lock();
@@ -157,6 +157,7 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 	
 	Problem p;
 	sprintf(path, "temp\\%d_d.tmp", i);
+	printf("%s\n", path);
 	p.path_description = wxString::Format(_("%s"), path);
 	file_d = fopen(path, "w");
 	
@@ -171,6 +172,8 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 	fclose(file_i);
 	fclose(file_d);
 	
+	wxMessageBox(p.path_description);
+	
 	//AdminFrameGlobal->temp_problem.push_back(p);
 	
 	//wchar_t *p_d = new wchar_t [wcslen(p.path_description.c_str()) + 1];
@@ -181,8 +184,9 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 	wcscpy(p_i, p.path_input.c_str());
 	//wchar_t *p_a = new wchar_t [wcslen(p.path_answer.c_str()) + 1];
 	wchar_t *p_a = (wchar_t*)malloc( ( wcslen(p.path_answer.c_str()) + 1 ) * sizeof( wchar_t ) );
-	
 	wcscpy(p_a, p.path_answer.c_str());
+	
+	wprintf(L"%s\n", p_d);
 	
 	*path_description = p_d;
 	*path_input = p_i;
