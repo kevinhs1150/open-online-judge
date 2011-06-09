@@ -214,7 +214,7 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 	changePassFrame->Show();
 	changePassFrame->set_account_id(this->account_id);
 	//=====================================================================================
-	problem_update_dlfin( 1, L"one", 3, L"problem/1.pdf", L"problem/1_input.txt", L"problem/1_ans.txt" );
+	/*problem_update_dlfin( 1, L"one", 3, L"problem/1.pdf", L"problem/1_input.txt", L"problem/1_ans.txt" );
 	problem_update_dlfin( 2, L"two", 3, L"problem/2.pdf", L"problem/2_input.txt", L"problem/2_ans.txt" );
 	
 	run_request_dlfin( 0, 1, L"c", L"0.c" );
@@ -223,8 +223,7 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 	run_request_dlfin( 3, 1, L"c", L"3.c" );
 	run_request_dlfin( 4, 1, L"c", L"4.c" );
 	
-	take_result(0,TAKE_SUCCESS);
-	printf("take\n");
+	take_result(0,TAKE_SUCCESS);*/
 	//======================================================================================
 }
 
