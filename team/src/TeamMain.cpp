@@ -6,8 +6,8 @@ extern "C"
 }
 #include <string.h>
 
-BEGIN_EVENT_TABLE(AdminFrame, wxFrame)
-    EVT_TIMER(-1, AdminFrame::OnTimerEvent)
+BEGIN_EVENT_TABLE(TeamFrame, wxFrame)
+    EVT_TIMER(-1, TeamFrame::OnTimerEvent)
 END_EVENT_TABLE()
 
 void cb_login_confirm( int confirm_code, unsigned int account_id );
