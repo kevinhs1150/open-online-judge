@@ -23,33 +23,35 @@ void JudgeCompareFrame::setProblemID(unsigned int problem_id)
 {
 	char officialOutputFile[50];
 	FILE *fptr1,*fptr2;
-    wxChar ch;
-	wxString officialOutput;
-	wxString userOutput;
+    char buf;
+	wxString officialOutput = wxEmptyString;
+	wxString userOutput = wxEmptyString;
 
-    sprintf(officialOutputFile, "problem/%s_answer.txt", problem_id);
+    sprintf(officialOutputFile, "problem/%u_answer.txt", problem_id);
 
     fptr1 = fopen(officialOutputFile,"r");
     fptr2 = fopen("ans.txt","r");
     if(fptr1 != NULL){
         if(fptr2 != NULL)
         {
-			ch = getc(fptr2);
-			userOutput = ch;
-            while(ch = getc(fptr2)!=EOF){
-				userOutput << ch;
-            }
+			while(1){
+				fread(&buf, sizeof(char), 1, fptr2);
+				if(feof(fptr2))
+					break;
+				userOutput << (wxChar)buf;
+			}
             fclose(fptr2);
         }
         else{
 			userOutput.Printf(wxT("File opening failure."));
         }
 		
-		ch = getc(fptr1);
-		officialOutput = ch;
-        while(ch = getc(fptr1) != EOF){
-			officialOutput << ch;
-		}
+        while(1){
+				fread(&buf, sizeof(char), 1, fptr1);
+				if(feof(fptr1))
+					break;
+				officialOutput << (wxChar)buf;
+			}
         fclose(fptr1);
     }
     else{

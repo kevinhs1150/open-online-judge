@@ -22,6 +22,10 @@ JudgeSubmissionFrame::JudgeSubmissionFrame(wxFrame *frame)
 {
 	IP_set();
 	setResultChoice();
+	
+	m_buttonShowInputData->Enable(false);
+	m_buttonShowSource->Enable(false);
+	m_buttonStop->Enable(false);
 }
 
 JudgeSubmissionFrame::~JudgeSubmissionFrame()
@@ -62,12 +66,10 @@ unsigned int JudgeSubmissionFrame::getTimeLimit()
 
 void JudgeSubmissionFrame::OnButtonClickShowInput( wxCommandEvent& event ) /**SKIP**/
 {
-	m_buttonShowInputData->Enable(false);
 }
 
 void JudgeSubmissionFrame::OnButtonClickShowSource( wxCommandEvent& event )/**SKIP**/
 {
-	m_buttonShowSource->Enable(false);
 }
 
 void JudgeSubmissionFrame::OnButtonClickRun( wxCommandEvent& event )
@@ -123,7 +125,6 @@ void JudgeSubmissionFrame::OnButtonClickRun( wxCommandEvent& event )
 
 void JudgeSubmissionFrame::OnButtonClickStop( wxCommandEvent& event ) /**SKIP**/
 {
-	m_buttonStop->Enable(false);
 }
 
 void JudgeSubmissionFrame::OnButtonClickShowOutput( wxCommandEvent& event )
@@ -155,16 +156,16 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 	confirmFrame->setJudgementVal(this->result);
 	if(confirmFrame->ShowModal() == 0){
 		if(this->result == YES){
-			swprintf(result_string,L"yes");
+			swprintf(result_string,L"YES");
 		}
 		else if(this->result == COMPLIE_ERROR){
-			swprintf(result_string,L"complie error");
+			swprintf(result_string,L"COMPLIE_ERROR");
 		}
 		else if(this->result == WRONG_ANSWER){
-			swprintf(result_string,L"wrong answer");
+			swprintf(result_string,L"WRONG_ANSWER");
 		}
 		else{
-			swprintf(result_string,L"time-limit exceed");
+			swprintf(result_string,L"TIME_LIMIT_EXCEED");
 		}
 		
 		if(judgeproto_judge_result(this->IP,this->run_id,result_string) != 0){
@@ -209,6 +210,7 @@ void JudgeSubmissionFrame::showStatus()
 	}
 	else{
 		m_buttonRun->Enable(false);
+		m_buttonShowOutput->Enable(false);
 		m_staticTextInputStatusValue->SetLabel(wxT("Not Exist"));
 	}
 	
@@ -228,6 +230,7 @@ void JudgeSubmissionFrame::showStatus()
 	else{
 		m_staticTextSourceStatusValue->SetLabel(wxT("Not Exist"));
 		m_buttonRun->Enable(false);
+		m_buttonShowOutput->Enable(false);
 	}
 	
 	m_staticTextResult->SetLabel(wxT("Not start"));
