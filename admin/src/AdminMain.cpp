@@ -26,7 +26,7 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 	int i;
 	
 	AdminFrameGlobal->m_mutexAccount.Lock();
-	wprintf(L"update %s\n", account);
+	//wprintf(L"update %s\n", account);
 	
 	//find in the lists
 	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlAdmin->GetItemCount() ; i++){
