@@ -20,8 +20,8 @@ int judge(unsigned int problem_id);
 JudgeSubmissionFrame::JudgeSubmissionFrame(wxFrame *frame)
     : JudgeSubmissionGUI(frame)
 {
+	IP_set();
 	setResultChoice();
-	showStatus();
 }
 
 JudgeSubmissionFrame::~JudgeSubmissionFrame()
@@ -62,10 +62,12 @@ unsigned int JudgeSubmissionFrame::getTimeLimit()
 
 void JudgeSubmissionFrame::OnButtonClickShowInput( wxCommandEvent& event ) /**SKIP**/
 {
+	m_buttonShowInputData->Enable(false);
 }
 
 void JudgeSubmissionFrame::OnButtonClickShowSource( wxCommandEvent& event )/**SKIP**/
 {
+	m_buttonShowSource->Enable(false);
 }
 
 void JudgeSubmissionFrame::OnButtonClickRun( wxCommandEvent& event )
@@ -121,6 +123,7 @@ void JudgeSubmissionFrame::OnButtonClickRun( wxCommandEvent& event )
 
 void JudgeSubmissionFrame::OnButtonClickStop( wxCommandEvent& event ) /**SKIP**/
 {
+	m_buttonStop->Enable(false);
 }
 
 void JudgeSubmissionFrame::OnButtonClickShowOutput( wxCommandEvent& event )
@@ -205,6 +208,7 @@ void JudgeSubmissionFrame::showStatus()
 		m_staticTextInputStatusValue->SetLabel(wxT("OK"));
 	}
 	else{
+		m_buttonRun->Enable(false);
 		m_staticTextInputStatusValue->SetLabel(wxT("Not Exist"));
 	}
 	
@@ -223,6 +227,7 @@ void JudgeSubmissionFrame::showStatus()
 	}
 	else{
 		m_staticTextSourceStatusValue->SetLabel(wxT("Not Exist"));
+		m_buttonRun->Enable(false);
 	}
 	
 	m_staticTextResult->SetLabel(wxT("Not start"));

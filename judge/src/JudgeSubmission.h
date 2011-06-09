@@ -26,6 +26,7 @@ class JudgeSubmissionFrame: public JudgeSubmissionGUI
         ~JudgeSubmissionFrame();
 		
 		void IP_set();
+		void showStatus();
 		void setRunProblemID(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language, wchar_t *problem_name, unsigned int time_limit);
 		unsigned int getTimeLimit();
 
@@ -46,7 +47,6 @@ class JudgeSubmissionFrame: public JudgeSubmissionGUI
 		void OnButtonClickJudge( wxCommandEvent& event );
 		void OnButtonClickCancel( wxCommandEvent& event );
 		void setResultChoice();
-		void showStatus();
 };
 
 #endif // _JUDGESUBMISSION_H_

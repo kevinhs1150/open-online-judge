@@ -22,6 +22,9 @@ class JudgeFrame: public JudgeGUI
     public:
 		unsigned int m_timeleft;
 		wxTimer m_timer;
+		wxMutex m_mutexRunRequest;
+		wxMutex m_mutexProblem;
+		wxMutex m_mutexClarRequest;
 		
         JudgeFrame(wxFrame *frame);
         ~JudgeFrame();
