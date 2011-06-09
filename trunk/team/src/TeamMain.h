@@ -8,7 +8,7 @@
 class TeamFrame: public TeamGUI
 {
     private:
-        wxTimer m_timer;
+
 
         void OnButtonClickChangePassword( wxCommandEvent& event );
         void OnButtonClickLogout( wxCommandEvent& event );
@@ -23,6 +23,7 @@ class TeamFrame: public TeamGUI
 	public:
         TeamFrame(wxFrame *frame);
         ~TeamFrame();
+        wxTimer m_timer;
         unsigned int m_timeleft;
 
 };
