@@ -232,6 +232,17 @@ void JudgeFrame::OnButtonClickLogout( wxCommandEvent& event )
 	judgeproto_logout(IP,account_id);
 }
 
+void JudgeFrame::OnChoiceFilter( wxCommandEvent& event )
+{
+	wxListItem item;
+	unsigned int problem_id;
+	char *problem_name;
+	wxString text;
+	
+	text = even.GetText();
+	text << (wxT("%u %s"),&problem_id,problem_name);
+}
+
 void JudgeFrame::OnCheckBoxAutoJudge( wxCommandEvent& event )
 {
 	if((m_checkBoxAutoJudge->IsChecked()) == true && unJudgeNumCount() > 0){
