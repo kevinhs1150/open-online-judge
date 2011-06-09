@@ -18,7 +18,10 @@
 #define LISTEN_PORT_ADMIN 27016
 #define LISTEN_PORT_JUDGE 27017
 #define LISTEN_PORT_TEAM 27018
-#define LISTEN_PORT_VSFTP 27020
+#define LISTEN_PORT_VSFTP_SERVER 27020
+#define LISTEN_PORT_VSFTP_ADMIN 27021
+#define LISTEN_PORT_VSFTP_JUDGE	27022
+#define LISTEN_PORT_VSFTP_TEAM	27023
 
 #ifdef _WIN32
 /* Win32 has no bzero implementation, but has an ZeroMemory which is identical to bzero in usage (implementation not sure). */
@@ -40,8 +43,9 @@ char *tcp_getaddr( int sockfd );
 
 /* file transfer -- given connected socket
  * note that file name should be Unicode string */
-int filesend( char *ipaddr, wchar_t *filepath );
-int filerecv( char *ipaddr, wchar_t *filepath );
+int filesend( char *destip, short desttype, wchar_t *filepath );
+int filerecv( wchar_t *filepath );
+//int filerecv( char *ipaddr, wchar_t *filepath );
 //int filesend( int sockfd, wchar_t *filepath );
 //int filerecv( int sockfd, wchar_t *filepath );
 /* file open function with cross platform unicode support*/
@@ -84,7 +88,7 @@ wchar_t *proto_str_postrecv( const char *src );
 
 /* internal common listen functions
  * function defined in protointernal_listen.c */
-int proto_listen( char *localaddr, unsigned short bind_port, void *(*cbthread)( void *) );
+int proto_listen( char *localaddr, unsigned short listen_bind_port, unsigned short vsftp_bind_port, void *(*cbthread)( void *) );
 int proto_activated( void );
 int proto_stop_listen( void );
 

@@ -21,6 +21,9 @@ void (*cb_sb_remove)( unsigned int rm_account_id ) = NULL;
 /* callback common to all clients */
 void (*cb_clar_reply)( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string ) = NULL;
 
+/* external download management mutex from protointernal_listen.c */
+extern pthread_mutex_t proto_dlmgr_mutex;
+
 /* utility function implementation */
 #if _WIN32
 int win32_sock_init( void )
@@ -65,6 +68,10 @@ int tcp_listen( char *bind_address, unsigned short bind_port )
 	servaddr.sin_family      = AF_INET;
 	servaddr.sin_addr.s_addr = inet_addr( bind_address );
 	servaddr.sin_port        = htons( bind_port );
+
+/*	int reuseaddr = 1;
+	int reuseaddr_len = sizeof(reuseaddr);
+	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, reuseaddr_len); */
 
 	if( bind( listenfd, (struct sockaddr *)&servaddr, sizeof( servaddr ) ) < 0 )
 	{
@@ -138,13 +145,23 @@ char *tcp_getaddr( int sockfd )
 	return addr_str;
 }
 
-int filesend( char *ipaddr, wchar_t *filepath )
+/* external vsftp listen socket from protointernal_listen.c */
+extern int proto_vsftp_listenfd;
+
+int filesend( char *destip, short desttype, wchar_t *filepath )
 {
-	int listenfd, sockfd;
-	char *recvbuf;
+	int sockfd;
+	unsigned short listen_port;
+	char recvbuf[BUFLEN];
 	FILE *fptr;
 	char sendbuf[BUFLEN];
+	char s_buf[BUFLEN];
 	int filesize;
+	size_t sendbyte = 0, a_sendbyte = 0;
+
+#if PROTO_DBG > 1
+	wprintf(L"Path: %s\n", filepath );
+#endif
 
 	fptr = fopen_sp( filepath, L"rb" );
 
@@ -152,121 +169,129 @@ int filesend( char *ipaddr, wchar_t *filepath )
 	fseek( fptr, 0, SEEK_END );
 	filesize = ftell( fptr );
 	fseek( fptr, 0, SEEK_SET );
-	
-#ifdef _WIN32
-	if( win32_sock_init() != 0 )
+
+	if( desttype == OPSR_ADMIN )
+		listen_port = LISTEN_PORT_VSFTP_ADMIN;
+	else if( desttype == OPSR_JUDGE )
+		listen_port = LISTEN_PORT_VSFTP_JUDGE;
+	else if( desttype == OPSR_TEAM )
+		listen_port = LISTEN_PORT_VSFTP_TEAM;
+	else if( desttype == OPSR_SERVER )
+		listen_port = LISTEN_PORT_VSFTP_SERVER;
+	else
 	{
-		printf("[filesend()] win32_sock_init() failed.\n");
-		return -1;
-	}
+#if PROTO_DBG > 0
+		printf("[filesend()] Destination type error.\n");
 #endif
-
-	if( ( listenfd = tcp_listen( ipaddr, LISTEN_PORT_VSFTP ) ) < 0 )
-	{
-		printf("[filesend()] tcp_listen() failed.\n");
 		return -1;
 	}
 
-	if( ( sockfd = accept( listenfd, NULL, NULL ) ) < 0 )
+	/* connect to receiver */
+	if( ( sockfd = tcp_connect( destip, listen_port ) ) < 0 )
 	{
-		printf("[filesend()] accept() failed.\n");
+#if PROTO_DBG > 0
+		printf("[filesend()] tcp_connect() call failed.\n");
+#endif
 		return -1;
 	}
 
 	/* sync: wait for receiver to standby */
-	recv_sp( sockfd, NULL );
-	
+	recv( sockfd, recvbuf, BUFLEN, 0 );
+
 	/* send file spec */
 	sprintf( sendbuf, "%d", filesize );
 	send_sp( sockfd, sendbuf, BUFLEN );
 
+#if PROTO_DBG > 1
+	printf("Filesize = %d\n", filesize );
+#endif
+
 	/* enter file transfer loop */
-	while( !feof( fptr ) )
+	while( a_sendbyte != filesize )
 	{
-		/* sync: wait for receiver to standby */
-		recv_sp( sockfd, NULL );
+		/* sync: send next packet size */
+		sendbyte = fread( sendbuf, 1, BUFLEN, fptr );
+		sprintf( s_buf, "%d", sendbyte );
+		send_sp( sockfd, s_buf, BUFLEN );
+		
+		/* first sync: are you ready? */
+		recv( sockfd, recvbuf, BUFLEN, 0 );
 
 		/* read 1KB(BUFLEN=1024bytes) block and send */
-		fread( sendbuf, BUFLEN, 1, fptr );
-		send_sp( sockfd, sendbuf, BUFLEN );
+		sendbyte = send_sp( sockfd, sendbuf, sendbyte );
+		a_sendbyte += sendbyte;
+		printf("%d, %d      \r", a_sendbyte, sendbyte);
+		
+		/* second sync: are you ready? */
+		recv( sockfd, recvbuf, BUFLEN, 0 );
 	}
-	
-	closesocket( sockfd );
-	
-#ifdef _WIN32
-	if( win32_sock_cleanup() != 0 )
-	{
-		printf("[APP] win32_sock_cleanup() failed.\n");
-		return -1;
-	}
-#endif
+	printf("\n");
+
+	shutdown_wr_sp( sockfd );
+	fclose( fptr );
 
 	return 0;
 }
 
-int filerecv( char *ipaddr, wchar_t *filepath )
+int filerecv( wchar_t *filepath )
 {
 	int sockfd;
-	char *recvbuf;
+	char recvbuf[BUFLEN];
 	size_t recvsize;
 	FILE *fptr;
 	char sendbuf[BUFLEN];
 	int filesize;
-	int a_recvbyte = 0, recvbyte;
+	int recvbyte = 0, a_recvbyte = 0;
 
-	fptr = fopen_sp( filepath, L"wb" );
-	
-#ifdef _WIN32
-	WSADATA wsaData;
-	
-	if( WSAStartup( MAKEWORD(2,2), &wsaData ) != 0 )
-	{
-		printf("[APP] WSAStartup() failed.\n");
-		return -1;
-	}
+#if PROTO_DBG > 1
+	wprintf(L"Path: %s\n", filepath );
 #endif
 
-	if( ( sockfd = tcp_connect( ipaddr, LISTEN_PORT_VSFTP ) ) < 0 )
+	fptr = fopen_sp( filepath, L"wb" );
+
+	if( ( sockfd = accept( proto_vsftp_listenfd, NULL, NULL ) ) < 0 )
 	{
-		printf("[APP] tcp_connect() failed.\n");
+#if PROTO_DBG > 0
+		printf("[filerecv()] accpet() call failed.\n");
+#endif
 		return -1;
 	}
 
 	/* sync: standby ready, setup (wwwww */
 	sprintf( sendbuf, "VSFTPREADY" );
 	send_sp( sockfd, sendbuf, BUFLEN );
-	
+
 	/* receive file spec */
-	recvsize = recv_sp( sockfd, &recvbuf );
+	recvsize = recv( sockfd, recvbuf, BUFLEN, 0 );
 	filesize = atoi( recvbuf );
-	free( recvbuf );
-	recvbuf = NULL;
-	
-	printf("filesize: %d\n", filesize );
+
+#if PROTO_DBG > 1
+	printf("Filesize = %d\n", filesize );
+#endif
 
 	/* enter file transfer loop */
 	while( a_recvbyte != filesize )
 	{
 		/* sync: standby ready */
-		send_sp( sockfd, sendbuf, BUFLEN );
+		recv( sockfd, recvbuf, BUFLEN, 0 );
+		sscanf( recvbuf, "%d", &recvbyte );
+		
+		/* first sync: i'm ready */
+		send( sockfd, sendbuf, BUFLEN, 0 );
 
 		/* recieve block and write */
-		recvbyte = recv_sp( sockfd, &recvbuf );
-		fwrite( recvbuf, BUFLEN, 1, fptr );
-		free( recvbuf );
-		recvbuf = NULL;
-		a_recvbyte = a_recvbyte + recvbyte;
+		recvbyte = recv( sockfd, recvbuf, recvbyte, 0 );
+		fwrite( recvbuf, 1, recvbyte, fptr );
+		a_recvbyte += recvbyte;
+		printf("%d, %d        \r", a_recvbyte, recvbyte );
+		
+		/* second sync: i'm ready */
+		send( sockfd, sendbuf, BUFLEN, 0 );
 	}
-	
-	closesocket( sockfd );
-	
-#ifdef _WIN32
-	if( win32_sock_cleanup() != 0 )
-	{
-		printf("[APP] win32_sock_cleanup() failed.\n");
-		return -1;
-	}
-#endif
+	printf("\n");
+
+	shutdown_wr_sp( sockfd );
+	fclose( fptr );
 
 	return 0;
 }
@@ -297,16 +322,16 @@ size_t recv_sp( int sockfd, char **buffer )
 	size_t r_recv;
 	char buftmp[BUFLEN];
 	int count;
-	
+
 	r_recv = recv( sockfd, buftmp, BUFLEN, 0 );
-	
+
 	if( buffer != NULL )
 	{
 		*buffer = (char *)realloc( *buffer, r_recv * sizeof( char ) );
 		for( count = 0; count < r_recv; count++ )
 			(*buffer)[count] = buftmp[count];
 	}
-	
+
 	return r_recv;
 }
 
@@ -360,7 +385,7 @@ char *proto_str_split( char *arr, char **next_msg )
 {
 	char *msg = (char *)malloc( ( strlen(arr) + 1 ) * sizeof( char ) );
 	strcpy( msg, arr );
-	
+
 	if( next_msg != NULL )
 		*next_msg = arr + strlen(arr) + 1;
 
@@ -448,7 +473,7 @@ int proto_commonreq( int RQSR, int RQID, char *msgptr )
 
 			int confirm_code = atoi( confirm_code_str );
 			unsigned int account_id = atoi( account_id_str );
-			
+
 			(*cb_login_confirm)( confirm_code, account_id );
 
 			free( confirm_code_str );
@@ -577,11 +602,11 @@ void proto_sb_update( char *msgptr )
 void proto_sb_remove( char *msgptr )
 {
 	char *rm_account_id_str = proto_str_split( msgptr, NULL );
-	
+
 	unsigned int rm_account_id = atoi( rm_account_id_str );
-	
+
 	(*cb_sb_remove)( rm_account_id );
-	
+
 	free( rm_account_id_str );
 }
 
@@ -595,15 +620,22 @@ void proto_problem_update( int sockfd, char *src_ipaddr, char *msgptr )
 	unsigned int problem_id = atoi( problem_id_str );
 	wchar_t *problem_name = proto_str_postrecv( problem_name_mb );
 	unsigned int time_limit = atoi( time_limit_str );
+	
+	/* mutex lock protection -- prevent concurrent downloading causing race condition */
+	pthread_mutex_lock( &proto_dlmgr_mutex );
+	send_sp( sockfd, "FSREADY", BUFLEN );
 
 	(*cb_problem_update)( problem_id, problem_name, time_limit, &path_description, &path_input, &path_answer );
 
 	/* download file */
-	filerecv( src_ipaddr, path_description );
-	filerecv( src_ipaddr, path_input );
-	filerecv( src_ipaddr, path_answer );
+	filerecv( path_description );
+	filerecv( path_input );
+	filerecv( path_answer );
 
 	(*cb_problem_update_dlfin)( problem_id, problem_name, time_limit, path_description, path_input, path_answer );
+	
+	/* mutex unlock */
+	pthread_mutex_unlock( &proto_dlmgr_mutex );
 
 	free( problem_id_str );
 	free( problem_name_mb );

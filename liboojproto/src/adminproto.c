@@ -72,7 +72,7 @@ int adminproto_listen( char *localaddr )
 		return -1;
 	}
 
-	if( proto_listen( localaddr, LISTEN_PORT_ADMIN, adminproto_reqhand_thread ) < 0 )
+	if( proto_listen( localaddr, LISTEN_PORT_ADMIN, LISTEN_PORT_VSFTP_ADMIN, adminproto_reqhand_thread ) < 0 )
 	{
 #if PROTO_DBG > 0
 		printf("[adminproto_listen()] proto_listen() call failed.\n");
@@ -325,6 +325,7 @@ int adminproto_problem_add( char *destip, unsigned int problem_id, wchar_t *prob
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
+	char syncbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *p_opid_str = uint2str( P_OPID_ADD );
 	char *problem_id_str = uint2str( problem_id );
@@ -344,13 +345,18 @@ int adminproto_problem_add( char *destip, unsigned int problem_id, wchar_t *prob
 #endif
 		return -1;
 	}
-
+	
 	send_sp( sockfd, sendbuf, BUFLEN );
 
+	/* sync message from receiver: i'm ready */
+	recv( sockfd, syncbuf, BUFLEN, 0 );
+
 	/* upload files */
-	filesend( destip, path_description );
-	filesend( destip, path_input );
-	filesend( destip, path_answer );
+	filesend( destip, OPSR_SERVER , path_description);
+	printf("first file sent.\n");
+	filesend( destip, OPSR_SERVER , path_input );
+	printf("second file sent.\n");
+	filesend( destip, OPSR_SERVER , path_answer );
 
 	shutdown_wr_sp( sockfd );
 	free( p_opid_str );
@@ -392,6 +398,7 @@ int adminproto_problem_mod( char *destip, unsigned int problem_id, wchar_t *prob
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
+	char syncbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *p_opid_str = uint2str( P_OPID_MOD );
 	char *problem_id_str = uint2str( problem_id );
@@ -411,13 +418,16 @@ int adminproto_problem_mod( char *destip, unsigned int problem_id, wchar_t *prob
 #endif
 		return -1;
 	}
-
+	
 	send_sp( sockfd, sendbuf, BUFLEN );
 
+	/* sync message from receiver: i'm ready */
+	recv( sockfd, syncbuf, BUFLEN, 0 );
+
 	/* upload files */
-	filesend( destip, path_description );
-	filesend( destip, path_input );
-	filesend( destip, path_answer );
+	filesend( destip, OPSR_SERVER, path_description );
+	filesend( destip, OPSR_SERVER, path_input );
+	filesend( destip, OPSR_SERVER, path_answer );
 
 	shutdown_wr_sp( sockfd );
 	free( p_opid_str );

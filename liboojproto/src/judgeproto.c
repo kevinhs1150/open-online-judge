@@ -47,6 +47,9 @@ void *judgeproto_reqhand_thread( void *args );
 extern pthread_mutex_t proto_sockfd_pass_mutex;
 extern pthread_cond_t proto_sockfd_pass_cv;
 
+/* external download management mutex from protointernal_listen.c */
+extern pthread_mutex_t proto_dlmgr_mutex;
+
 /* callback registration check function */
 static int judgeproto_cbcheck( void )
 {
@@ -70,7 +73,7 @@ int judgeproto_listen( char *localaddr )
 		return -1;
 	}
 
-	if( proto_listen( localaddr, LISTEN_PORT_JUDGE, judgeproto_reqhand_thread ) < 0 )
+	if( proto_listen( localaddr, LISTEN_PORT_JUDGE, LISTEN_PORT_VSFTP_JUDGE, judgeproto_reqhand_thread ) < 0 )
 	{
 #if PROTO_DBG > 0
 		printf("[judgeproto_listen()] proto_listen() call failed.\n");
@@ -133,12 +136,19 @@ void *judgeproto_reqhand_thread( void *args )
 			unsigned int problem_id = atoi( problem_id_str );
 			wchar_t *coding_language = proto_str_postrecv( coding_language_mb );
 
+			/* mutex lock protection -- prevent concurrent downloading causing race condition */
+			pthread_mutex_lock( &proto_dlmgr_mutex );
+			send_sp( sockfd, "FSREADY", BUFLEN );
+			
 			(*cb_run_request)( run_id, problem_id, coding_language, &path_code );
 
 			/* download file */
-			filerecv( src_ipaddr, path_code );
+			filerecv( path_code );
 
 			(*cb_run_request_dlfin)( run_id, problem_id, coding_language, path_code );
+			
+			/* mutex unlock */
+			pthread_mutex_unlock( &proto_dlmgr_mutex );
 
 			free( run_id_str );
 			free( problem_id_str );

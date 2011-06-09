@@ -6,6 +6,7 @@
 
 /* execution data */
 int proto_listenfd;
+int proto_vsftp_listenfd;
 int proto_stop = 0;
 
 /* listen thread */
@@ -22,14 +23,20 @@ void *(*proto_reqhand_thread)( void *args );
 pthread_mutex_t proto_sockfd_pass_mutex;
 pthread_cond_t proto_sockfd_pass_cv;
 
+/* mutex variables for download management
+ * this should be used to prevent concurrent download, which may cause race condition */
+pthread_mutex_t proto_dlmgr_mutex;
+
+/* listen socket bind information */
 char proto_bind_address[16];
 unsigned short proto_bind_port;
 
-int proto_listen( char *localaddr, unsigned short bind_port, void *(*cbthread)( void *) )
+int proto_listen( char *localaddr, unsigned short listen_bind_port, unsigned short vsftp_bind_port, void *(*cbthread)( void *) )
 {
 	/* initialize mutex and condition variable */
 	pthread_mutex_init( &proto_sockfd_pass_mutex, NULL );
 	pthread_cond_init( &proto_sockfd_pass_cv, NULL );
+	pthread_mutex_init( &proto_dlmgr_mutex, NULL );
 
 	/* startup socket */
 #ifdef _WIN32
@@ -42,17 +49,25 @@ int proto_listen( char *localaddr, unsigned short bind_port, void *(*cbthread)( 
 	}
 #endif
 
-	if( ( proto_listenfd = tcp_listen( localaddr, bind_port ) ) < 0 )
+	if( ( proto_listenfd = tcp_listen( localaddr, listen_bind_port ) ) < 0 )
 	{
 #if PROTO_DBG > 0
-		printf("[proto_listen()] tcp_listen() call failed.\n");
+		printf("[proto_listen()] tcp_listen() for listen socket failed.\n");
+#endif
+		return -1;
+	}
+	
+	if( ( proto_vsftp_listenfd = tcp_listen( localaddr, vsftp_bind_port ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[proto_listen()] tcp_listen() for VSFTP failed.\n");
 #endif
 		return -1;
 	}
 
 	/* store connection ifnormation for later use (see proto_stop_listen() function) */
 	strcpy( proto_bind_address, localaddr );
-	proto_bind_port = bind_port;
+	proto_bind_port = listen_bind_port;
 
 	/* prepare threading */
 	proto_stop = 0;
@@ -98,11 +113,13 @@ int proto_stop_listen( void )
 	}
 
 	close( sockfd );
+	close( proto_vsftp_listenfd );
 
 	/* wait for thread termination before clean up */
 	pthread_join( proto_listen_tid, NULL );
 	pthread_mutex_destroy( &proto_sockfd_pass_mutex );
 	pthread_cond_destroy( &proto_sockfd_pass_cv );
+	pthread_mutex_destroy( &proto_dlmgr_mutex );
 
 #ifdef _WIN32
 	if( win32_sock_cleanup() < 0 )

@@ -49,6 +49,9 @@ void *teamproto_reqhand_thread( void *args );
 extern pthread_mutex_t proto_sockfd_pass_mutex;
 extern pthread_cond_t proto_sockfd_pass_cv;
 
+/* external download management mutex from protointernal_listen.c */
+extern pthread_mutex_t proto_dlmgr_mutex;
+
 /* callback registration check function */
 static int teamproto_cbcheck( void )
 {
@@ -73,7 +76,7 @@ int teamproto_listen( char *localaddr )
 		return -1;
 	}
 
-	if( proto_listen( localaddr, LISTEN_PORT_TEAM, teamproto_reqhand_thread ) < 0 )
+	if( proto_listen( localaddr, LISTEN_PORT_TEAM, LISTEN_PORT_VSFTP_TEAM, teamproto_reqhand_thread ) < 0 )
 	{
 #if PROTO_DBG > 0
 		printf("[teamproto_listen()] proto_listen() call failed.\n");
@@ -115,7 +118,7 @@ void *teamproto_reqhand_thread( void *args )
 	sockfd = *((int *)args);
 	pthread_cond_signal( &proto_sockfd_pass_cv );
 	pthread_mutex_unlock( &proto_sockfd_pass_mutex );
-	
+
 	src_ipaddr = tcp_getaddr( sockfd );
 
 	/* receive and interpret message */
@@ -158,12 +161,19 @@ void *teamproto_reqhand_thread( void *args )
 		{
 			wchar_t *path_description = NULL;
 
+			/* mutex lock protection -- prevent concurrent downloading causing race condition */
+			pthread_mutex_lock( &proto_dlmgr_mutex );
+			send_sp( sockfd, "FSREADY", BUFLEN );
+
 			(*cb_pu_request)( &path_description );
 
 			/* download file */
-			filerecv( src_ipaddr, path_description );
+			filerecv( path_description );
 
 			(*cb_pu_request_dlfin)( path_description );
+
+			/* mutex unlock */
+			pthread_mutex_unlock( &proto_dlmgr_mutex );
 
 			free( path_description );
 		}
@@ -175,13 +185,13 @@ void *teamproto_reqhand_thread( void *args )
 			/* extract problem id */
 			char *problem_id_str = proto_str_split( msgptr ,&msgptr );
 			unsigned int problem_id = atoi( problem_id_str );
-			
+
 			if( pch_opid == PCH_OPID_ADD )
 			{
 				/* extract problem name */
 				char *problem_name_mb = proto_str_split( msgptr, NULL );
 				wchar_t *problem_name = proto_str_postrecv( problem_name_mb );
-				
+
 				(*cb_pch_add)( problem_id, problem_name );
 			}
 			else if( pch_opid == PCH_OPID_DEL )
@@ -230,6 +240,7 @@ int teamproto_submission( char *destip, unsigned int account_id, unsigned int pr
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
+	char syncbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *account_id_str = uint2str( account_id );
 	char *problem_id_str = uint2str( problem_id );
@@ -249,9 +260,12 @@ int teamproto_submission( char *destip, unsigned int account_id, unsigned int pr
 	}
 
 	send_sp( sockfd, sendbuf, BUFLEN );
+	
+	/* sync message from receiver: i'm ready */
+	recv( sockfd, syncbuf, BUFLEN, 0 );
 
 	/* upload files */
-	filesend( destip, path_code );
+	filesend( destip, OPSR_SERVER, path_code );
 
 	shutdown_wr_sp( sockfd );
 	free( account_id_str );

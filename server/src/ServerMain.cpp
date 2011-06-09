@@ -19,7 +19,7 @@ void callback_submission_request( char *srcip, unsigned int account_id, unsigned
 void callback_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code );
 
 void callback_pd_request( char *srcip, unsigned int account_id, unsigned int problem_id );
-void callback_sb_sync( char *srcip );
+void callback_sb_sync( char *srcip, short srctype );
 void callback_run_sync( char *srcip );
 void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result );
 void callback_trun_sync( char *srcip, unsigned int account_id );
@@ -421,7 +421,7 @@ void callback_pd_request( char *srcip, unsigned int account_id, unsigned int pro
 	sqlite3_free_table(table);
 }
 
-void callback_sb_sync( char *srcip )
+void callback_sb_sync( char *srcip, short srctype )
 {
 	char sqlquery[100], **table, *errMsg, **table2, account[25];
 	int rows, cols, i, rows2, cols2, j;

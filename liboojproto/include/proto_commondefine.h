@@ -1,7 +1,7 @@
 ﻿#ifndef PROTO_COMMONDEFINE_H_
 #define PROTO_COMMONDEFINE_H_
 
-#define PROTO_DBG 1
+#define PROTO_DBG 2
 
 /* include socket library */
 #ifdef _WIN32 /* winsock2 */

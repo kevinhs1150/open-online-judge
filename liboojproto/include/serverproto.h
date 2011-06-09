@@ -77,7 +77,7 @@ void serverproto_cbreg_pd_request( void (*cbfunc)( char *srcip, unsigned int acc
 /* Callback for scoreboard sync request. (from team and admin)
  * Server should update all entries immediately to the requesting client.
  *   reply function: serverproto_sb_update() */
-void serverproto_cbreg_sb_sync( void (*cbfunc)( char *srcip ) );
+void serverproto_cbreg_sb_sync( void (*cbfunc)( char *srcip, short srctype ) );
 
 /* Callback for run sync request. (from team)
  * Server should update all runs belong to that team to the reqesting client.
