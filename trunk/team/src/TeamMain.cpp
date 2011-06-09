@@ -513,7 +513,7 @@ void cb_pu_request( wchar_t **path_description )
     wchar_t *path = (wchar_t*)malloc( ( wcslen(temp.c_str()) + 1 ) * sizeof( wchar_t ) );
 	wcscpy( path, temp.c_str());
 	wprintf(L"path = %s\n", path);
-	path_description = &path;
+	*path_description = path;
 	return;
 }
 
