@@ -1,3 +1,4 @@
+#include <dir.h>
 #include "AdminMain.h"
 #include "AccountDialog.h"
 #include "ChangePassDialog.h"
@@ -18,12 +19,18 @@ unsigned int login_id;
 LoginDialog *loginDialog = NULL;
 ChangePassDialog *changePassDialog = NULL;
 
-int wxCALLBACK ListCompareFunction(long item1, long item2, long WXUNUSED(sortData)){
+int wxCALLBACK ListCompareFunction(long item1, long item2, long sortData){
     // inverse the order
     if (item1 < item2)
-        return -1;
+		if(sortData)
+			return 1;
+		else
+			return -1;
     if (item1 > item2)
-        return 1;
+		if(sortData)
+			return -1;
+		else
+			return 1;
 
     return 0;
 }
@@ -36,7 +43,6 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 	int i;
 	
 	AdminFrameGlobal->m_mutexAccount.Lock();
-	//wprintf(L"update %s\n", account);
 	
 	//find in the lists
 	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlAdmin->GetItemCount() ; i++){
@@ -143,36 +149,38 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 		sprintf(path, "temp\\%d_d.tmp", i);
 		temp = fopen(path, "r");
 		if(temp == NULL)
-			return;
+			break;
 		fclose(temp);
 		i++;
 	}
 	AdminFrameGlobal->m_mutexProblem.Unlock();
 	
-	file_d = fopen("temp\\%d_d.tmp", "w");
-	file_i = fopen("temp\\%d_i.tmp", "w");
-	file_o = fopen("temp\\%d_o.tmp", "w");
+	Problem p;
+	sprintf(path, "temp\\%d_d.tmp", i);
+	p.path_description = wxString::Format(_("%s"), path);
+	file_d = fopen(path, "w");
+	
+	sprintf(path, "temp\\%d_i.tmp", i);
+	p.path_input = wxString::Format(_("%s"), path);
+	file_i = fopen(path, "w");
+	
+	sprintf(path, "temp\\%d_o.tmp", i);
+	p.path_answer = wxString::Format(_("%s"), path);
+	file_o = fopen(path, "w");
 	fclose(file_o);
 	fclose(file_i);
 	fclose(file_d);
 	
-	Problem p;
-	//p.problem_id = problem_id;
-	//p.name = wxString(problem_name);
-	//p.time_limit = time_limit;
-	p.path_description = _("temp\\%d_d.tmp");
-	p.path_input = _("temp\\%d_i.tmp");
-	p.path_answer = _("temp\\%d_o.tmp");
 	//AdminFrameGlobal->temp_problem.push_back(p);
 	
 	//wchar_t *p_d = new wchar_t [wcslen(p.path_description.c_str()) + 1];
-	wchar_t *p_d = (wchar_t*)malloc(wcslen(p.path_description.c_str()) + 1);
+	wchar_t *p_d = (wchar_t*)malloc( ( wcslen(p.path_description.c_str()) + 1 ) * sizeof( wchar_t ) );
 	wcscpy(p_d, p.path_description.c_str());
 	//wchar_t *p_i = new wchar_t [wcslen(p.path_input.c_str()) + 1];
-	wchar_t *p_i = (wchar_t*)malloc(wcslen(p.path_input.c_str()) + 1);
+	wchar_t *p_i = (wchar_t*)malloc( ( wcslen(p.path_input.c_str()) + 1 ) * sizeof( wchar_t ) );
 	wcscpy(p_i, p.path_input.c_str());
 	//wchar_t *p_a = new wchar_t [wcslen(p.path_answer.c_str()) + 1];
-	wchar_t *p_a = (wchar_t*)malloc(wcslen(p.path_answer.c_str()) + 1);
+	wchar_t *p_a = (wchar_t*)malloc( ( wcslen(p.path_answer.c_str()) + 1 ) * sizeof( wchar_t ) );
 	
 	wcscpy(p_a, p.path_answer.c_str());
 	
@@ -445,6 +453,9 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	
 	isProblemInfoEnable = false;
 	AdminFrameGlobal = this;
+	ClarEnable(false);
+	//mkdir("/data");
+	//mkdir("/temp");
 	InitAccountList();
 	InitProblemList();
 	InitClarList();
@@ -567,6 +578,8 @@ void AdminFrame::InitClarList(){
 	itemCol.SetText(_("Message"));
 	m_listCtrlClars->InsertColumn(1, itemCol);
 	
+	m_selectedClar = -1;
+	
 	return;
 }
 
@@ -610,6 +623,16 @@ void AdminFrame::ProblemInfoEnable(bool enable){
 	m_buttonProblemApply->Enable(enable);
 	isProblemInfoEnable = enable;
 	
+	return;
+}
+
+void AdminFrame::ClarEnable(bool enable){
+	if(!enable){
+		m_staticTextClarIDVal->SetLabel(wxEmptyString);
+		m_textCtrlQuestion->Clear();
+		m_textCtrlAnswer->Clear();
+	}
+	m_buttonClarReply->Enable(enable);
 	return;
 }
 
@@ -872,6 +895,22 @@ void AdminFrame::OnButtonClickProblemApply( wxCommandEvent& event ){
 	}
 	
 	return;
+}
+
+void AdminFrame::OnListItemDeselectedClar( wxListEvent& event ){
+	m_selectedClar = -1;
+	ClarEnable(false);
+	
+	return;
+}
+void AdminFrame::OnListItemSelectedClar( wxListEvent& event ){
+/*
+	m_selectedClar = event.GetIndex();
+	m_staticTextClarIDVal->SetLabel(wxEmptyString);
+	m_textCtrlQuestion->Clear();
+	m_textCtrlAnswer->Clear();
+	m_buttonClarReply->Enable(true);
+*/
 }
 
 void AdminFrame::OnTimerEvent(wxTimerEvent &event){
