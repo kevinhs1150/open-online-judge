@@ -25,6 +25,10 @@ class ServerFrame: public ServerGUI
 		wxTimer m_timer;
 		void OnButtonClickStart( wxCommandEvent& event );
 		void OnButtonClickStop( wxCommandEvent& event );
+		
+		void OnTimerEvent(wxTimerEvent &event);
+		DECLARE_EVENT_TABLE()
+
 };
 
 #endif // _SERVERMAIN_H_

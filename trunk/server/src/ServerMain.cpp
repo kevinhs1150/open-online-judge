@@ -1,8 +1,8 @@
 #include "ServerMain.h"
 
-//BEGIN_EVENT_TABLE(ServerFrame, wxFrame)
-//    EVT_TIMER(-1, ServerFrame::OnTimerEvent)
-//END_EVENT_TABLE()
+BEGIN_EVENT_TABLE(ServerFrame, wxFrame)
+    EVT_TIMER(-1, ServerFrame::OnTimerEvent)
+END_EVENT_TABLE()
 
 /* server callback functions prototype. */
 void callback_login_request( char *srcip, short srctype, wchar_t *account, char *password );
@@ -54,13 +54,12 @@ sqlite3 *db;	/* sqlite variable */
 enum FUNC_NAME{PROBLEM_CHANGE_ADD, PROBLEM_CHANGE_DEL, PROBLEM_CHANGE_MOD};	/* Database tool function parameter */
 
 /* timer */
+bool is_timer_set;
 wxTimer m_timer;
-unsigned int timer_hr = 0;
-unsigned int timer_min = 0;
-unsigned int timer_sec = 0;
+unsigned int m_timeleft;
 
 ServerFrame::ServerFrame(wxFrame *frame)
-    : ServerGUI(frame)
+    : ServerGUI(frame), m_timer(this)
 {
 	/* "CREATE TABLE" SQL */
 	char create_user[] = "CREATE TABLE user("
@@ -104,7 +103,11 @@ ServerFrame::ServerFrame(wxFrame *frame)
 		"accept_count	INTEGER,"
 		"FOREIGN KEY(score_id) REFERENCES user(score_id));";
 	char *errMsg = NULL;
-
+	
+	/* timer variable */
+	m_timeleft = 0;
+	is_timer_set = false;
+	
 	/* create subdirectory to store files */
 	system( "mkdir submits" );
 	system( "mkdir problems" );
@@ -165,7 +168,8 @@ ServerFrame::~ServerFrame()
 
 void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 {
-	char sqlquery[100], *errMsg;
+	char sqlquery[100], **table, *errMsg;
+	int rows, cols, i;
 
 	/* start listen socket */
 	if( serverproto_listen("0.0.0.0") < 0 )
@@ -179,10 +183,15 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 	/* set wxStaticText label */
 	StaticTextStatus->SetLabel( wxT("NOW Running") );
 
-	/* add an admin account */
-	sprintf(sqlquery, "INSERT INTO user VALUES(NULL, 'admin01', 'admin01', '%d', NULL, 'no');", OPSR_ADMIN);
-	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
-
+	/* if admin01 not exist, add an admin01 account */
+	sprintf(sqlquery, "SELECT * FROM user WHERE account = 'admin01';");
+	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
+	if(rows == 0)
+	{
+		sprintf(sqlquery, "INSERT INTO user VALUES(NULL, 'admin01', 'admin01', '%d', NULL, 'no');", OPSR_ADMIN);
+		sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	}
+	sqlite3_free_table(table);
 }
 
 void ServerFrame::OnButtonClickStop( wxCommandEvent& event )
@@ -195,6 +204,17 @@ void ServerFrame::OnButtonClickStop( wxCommandEvent& event )
 	StaticTextStatus->SetLabel( wxT("Not Running") );
 }
 
+void ServerFrame::OnTimerEvent(wxTimerEvent &event){
+	if(is_timer_set == true)
+	{
+		m_timeleft--;
+		if( m_timeleft <= 0 )
+		{
+			m_timer.Stop();
+			is_contest_stop = true;
+		}
+	}
+}
 
 /* Server callback function definition. */
 void callback_login_request( char *srcip, short srctype, wchar_t *account, char *password )
@@ -289,7 +309,7 @@ void callback_password_change( char *srcip, short srctype, unsigned int account_
 
 void callback_timer_sync( char *srcip, short srctype )
 {
-	serverproto_timer_set( srcip, srctype, timer_hr, timer_min, timer_sec );
+	serverproto_timer_set( srcip, srctype, m_timeleft / 60 / 60, (m_timeleft / 60) % 60, m_timeleft % 60 );
 }
 
 void callback_contest_state_sync( char *srcip, short srctype )
@@ -309,22 +329,24 @@ void callback_admin_timer_set( char *srcip, unsigned int hours, unsigned int min
 	char sqlquery[100], **table, *errMsg;
 	int rows, cols, i;
 	unsigned int account_type;
-
-	timer_hr = hours;
-	timer_min = minutes;
-	timer_sec = seconds;
+	
+	/* set timer */
+	
+	m_timeleft = hours * 360 + minutes * 60 + seconds;
+	
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	sprintf(sqlquery, "SELECT account_type, ipaddress FROM user WHERE logged_in = 'yes';");
 	for(i=1;i<=rows;i++)
 	{
 		sscanf(table[i * cols + 0], "%u", &account_type);
-		serverproto_timer_set( table[i * cols + 1], account_type, timer_hr, timer_min, timer_sec );
+		serverproto_timer_set( table[i * cols + 1], account_type, hours, minutes, seconds );
 	}
 	sqlite3_free_table(table);
 }
 
 void callback_admin_contest_start( char *srcip )
 {
+	m_timer.Start(1000);
 	is_contest_stop = false;
 	serverdb_contest( serverproto_contest_start, OPSR_JUDGE );
 	serverdb_contest( serverproto_contest_start, OPSR_TEAM );
@@ -332,6 +354,7 @@ void callback_admin_contest_start( char *srcip )
 
 void callback_admin_contest_stop( char *srcip )
 {
+	m_timer.Stop();
 	is_contest_stop = true;
 	serverdb_contest( serverproto_contest_stop, OPSR_JUDGE );
 	serverdb_contest( serverproto_contest_stop, OPSR_TEAM );
