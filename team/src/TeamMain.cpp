@@ -19,6 +19,7 @@ void cb_contest_stop( void );
 void cb_run_reply( unsigned int run_id, wchar_t *result_string );
 void cb_clar_reply( unsigned int clar_id, wchar_t *result_string );
 void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
+void cb_sb_remove( unsigned int rm_account_id );
 void cb_pu_request( wchar_t **path_description );
 void cb_pu_request_dlfin( wchar_t *path_description );
 void cb_problem_add( unsigned int problem_id, wchar_t *problem_name ) );
@@ -35,7 +36,10 @@ ChangePassDialog* changepassdialog;
 SubmitConfirmDialog* submitconfirmdialog;
 ClarDialog* clardialog;
 ClarConfirmDialog* clarconfirmdialog;
-
+wxMutex mutexRun;
+wxMutex mutexClar;
+wxMutex mutexScoreboard;
+wxMutex mutexProblem;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -58,6 +62,7 @@ TeamFrame::TeamFrame(wxFrame *frame)
     teamproto_cbreg_run_reply( cb_run_reply );
     teamproto_cbreg_clar_reply( cb_clar_reply );
     teamproto_cbreg_sb_update( cb_sb_update );
+    teamproto_cbreg_sb_remove( cb_sb_remove );
     teamproto_cbreg_pu_request( cb_pu_request );
     teamproto_cbreg_pu_request_dlfin( cb_pu_request_dlfin );
     teamproto_cbreg_problem_add(cb_problem_add);
@@ -115,16 +120,19 @@ void TeamFrame::OnButtonClickChangePassword( wxCommandEvent& event )
     changepassdialog = new ChangePassDialog;
     changepassdialog->ShowModal();
     changepassdialog->Destroy();
+    return;
 }
 
 void TeamFrame::OnButtonClickLogout( wxCommandEvent& event )
 {
     teamproto_logout(server_ip, login_id);
+    return;
 }
 
 void TeamFrame::OnButtonClickDownload( wxCommandEvent& event )
 {
     teamproto_problem_download(server_ip, login_id, m_choiceProblem->GetCurrentSelection());
+    return;
 }
 
 void TeamFrame::OnButtonClickTest( wxCommandEvent& event )
@@ -137,6 +145,7 @@ void TeamFrame::OnButtonClickSubmit( wxCommandEvent& event )
     submitconfirmdialog = new SubmitConfirmDialog();
     submitconfirmdialog->ShowModal();
     submitconfirmdialog->Destroy();
+    return;
 }
 
 void TeamFrame::OnButtonClickAsk( wxCommandEvent& event )
@@ -144,6 +153,7 @@ void TeamFrame::OnButtonClickAsk( wxCommandEvent& event )
     clardialog = new ClarDialog();
     clardialog->ShowModal();
     clardialog->Destroy();
+    return;
 }
 void TeamFrame::OnTimerEvent(wxTimerEvent &event){
 	m_timeleft--;
@@ -257,6 +267,7 @@ void ClarDialog::OnButtonClickYes( wxCommandEvent& event )
     clarconfirmdialog = new ClarConfirmDialog;
     clarconfirmdialog->ShowModal();
     clarconfirmdialog->Destroy();
+    return;
 }
 
 void ClarDialog::OnButtonClickNo( wxCommandEvent& event )
@@ -350,6 +361,7 @@ void cb_password_change_confirm( confirm_code )
     else if(confirm_code == PASSWD_INVALID){
         wxMessageBox(_("Password invalid!"));
     }
+    return;
 }
 
 void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int seconds )
@@ -363,29 +375,62 @@ void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int second
 void cb_contest_start( void )
 {
     m_timer.Start();
+    return;
 }
 
 void cb_contest_stop( void )
 {
     m_timer.Stop();
+    return;
 }
 
 void cb_run_reply( unsigned int run_id, wchar_t *result_string )
 {
-    long temp = TeamFrameGlobal->m_listCtrlRuns->FindItem(-1, wxString(result_string, wxConvLibc))
+    mutexRun.Lock();
+    long temp = TeamFrameGlobal->m_listCtrlRuns->FindItem(-1, wxString() << run_id);
     if(temp == wxNOT_FOUND){
-
+        temp = TeamFrameGlobal->m_listCtrlRuns->InsertItem(0, wxString() << run_id);
     }
+    TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 1, wxString() << result_string);
+    mutexRun.Unlock();
+    return;
 }
 
 void cb_clar_reply( unsigned int clar_id, wchar_t *result_string )
 {
-
+    mutexClar.Lock();
+    long temp = TeamFrameGlobal->m_listCtrlClars->FindItem(-1, wxString() << clar_id);
+    if(temp == wxNOT_FOUND){
+        temp = TeamFrameGlobal->m_listCtrlClars->InsertItem(0, wxString() << clar_id);
+    }
+    TeamFrameGlobal->m_listCtrlClars->SetItem(temp, 1, wxString() << result_string);
+    mutexClar.Unlock();
+    return;
 }
 
 void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time )
 {
+    mutexScoreboard.Lock();
+    long temp = TeamFrameGlobal->m_listCtrlScore->FindItem(-1, wxString() << updated_account_id);
+    if(temp == wxNOT_FOUND){
+        temp = TeamFrameGlobal->m_listCtrlScore->InsertItem(0, wxString() << updated_account_id);
+    }
+    TeamFrameGlobal->m_listCtrlScore->SetItem(temp, 1, wxString() << new_account);
+    TeamFrameGlobal->m_listCtrlScore->SetItem(temp, 2, wxString() << new_accept_count);
+    TeamFrameGlobal->m_listCtrlScore->SetItem(temp, 3, wxString() << new_time);
+    mutexScoreboard.Unlock();
+    return;
+}
 
+void cb_sb_remove( unsigned int rm_account_id )
+{
+    mutexScoreboard.Lock();
+    long temp = TeamFrameGlobal->m_listCtrlScore->FindItem(-1, wxString() << updated_account_id);
+    if(temp != wxNOT_FOUND){
+        TeamFrameGlobal->m_listCtrlScore->DeleteItem(temp);
+    }
+    mutexScoreboard.Unlock();
+    return;
 }
 
 void cb_pu_request( wchar_t **path_description )
@@ -398,26 +443,33 @@ void cb_pu_request( wchar_t **path_description )
     wchar_t *path = malloc( ( wcslen(temp.c_str()) + 1 ) * sizeof( wchar_t ) );
 	wcscpy( path, temp.c_str());
 	path_description = &path;
+	return;
 }
 
 void cb_pu_request_dlfin( wchar_t *path_description )
 {
     wxMessageBox(_("Download Completed!"));
+    return;
 }
 
 void cb_problem_add( unsigned int problem_id, wchar_t *problem_name ) )
 {
+    mutexProblem.Lock();
     for(;max_problem_id <= problem_id; max_problem_id++)
         TeamFrameGlobal->m_choiceProblem.Append(_(""));
-    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString(problem_name, wxConvLibc));
+    mutexProblem.Unlock();
+    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString() << problem_name);
+    return;
 }
 
 void cb_problem_del( unsigned int problem_id ) )
 {
     TeamFrameGlobal->m_choiceProblem.SetString(problem_id, _(""));
+    return;
 }
 
 void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name ) )
 {
-    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString(problem_name, wxConvLibc);
+    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString << problem_name);
+    return;
 }
