@@ -167,11 +167,28 @@ void TeamFrame::OnButtonClickTest( wxCommandEvent& event )
     cb_problem_add( 15, temp );
     cb_problem_add( 0, temp );
 
+    cb_run_reply( 1, 3, temp );
+    cb_run_reply( 3, 5, temp );
+    cb_clar_reply( 1, temp, temp );
+    cb_clar_reply( 2, temp, temp );
+
+    cb_sb_update( 2, temp, 1, 1 );
+    cb_sb_update( 1, temp, 2, 2 );
+    cb_sb_update( 3, temp, 3, 3 );
+
+
     swprintf(temp, L"test2");
     cb_problem_add( 3, temp );
     cb_problem_del( 5 );
     cb_problem_del( 1 );
     cb_problem_mod( 15, temp );
+
+    cb_run_reply( 2, 3, temp );
+    cb_run_reply( 3, 5, temp );
+    cb_clar_reply( 1, temp, temp );
+
+    cb_sb_update( 1, temp, 4, 4 );
+    cb_sb_remove( 3 );
 }
 
 void TeamFrame::OnButtonClickSubmit( wxCommandEvent& event )
@@ -440,7 +457,7 @@ void cb_run_reply( unsigned int run_id, unsigned int problem_id, wchar_t *result
     if(temp == wxNOT_FOUND){
         temp = TeamFrameGlobal->m_listCtrlRuns->InsertItem(0, wxString() << run_id);
     }
-    TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 1, wxString() << problem_id);
+    TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 1, TeamFrameGlobal->m_choiceProblem->GetString(problem_id));
     TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 2, wxString() << result_string);
     mutexRun.Unlock();
     return;
