@@ -214,8 +214,8 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 	changePassFrame->Show();
 	changePassFrame->set_account_id(this->account_id);
 	//=====================================================================================
-	 problem_update_dlfin( 1, L"one", 3, L"problem/1.pdf", L"problem/1_input.txt", L"problem/1_ans.txt" );
-	 problem_update_dlfin( 2, L"two", 3, L"problem/2.pdf", L"problem/2_input.txt", L"problem/2_ans.txt" );
+	problem_update_dlfin( 1, L"one", 3, L"problem/1.pdf", L"problem/1_input.txt", L"problem/1_ans.txt" );
+	problem_update_dlfin( 2, L"two", 3, L"problem/2.pdf", L"problem/2_input.txt", L"problem/2_ans.txt" );
 	
 	run_request_dlfin( 0, 1, L"c", L"0.c" );
 	run_request_dlfin( 1, 1, L"c", L"1.c" );
@@ -224,6 +224,7 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 	run_request_dlfin( 4, 1, L"c", L"4.c" );
 	
 	take_result(0,TAKE_SUCCESS);
+	printf("take\n");
 	//======================================================================================
 }
 
@@ -352,9 +353,11 @@ void run_request_dlfin( unsigned int run_id, unsigned int problem_id, wchar_t *c
 {
 	unsigned int unJudgeNum;
 	
+	mainFrame->m_mutexRunRequest.Lock();
     id_insert(run_id,problem_id,coding_language);
 	unJudgeNum = unJudgeNumCount();
 	mainFrame->setUnJudgeNum(unJudgeNum);
+	mainFrame->m_mutexRunRequest.Unlock();
 	
 	if(unJudgeNum == 1 && (mainFrame->m_checkBoxAutoJudge->IsChecked()) == true){
 		autoJudge_take();
@@ -383,8 +386,10 @@ void problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned in
 void problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
     /**TODO:problem view**/
+	mainFrame->m_mutexProblem.Lock();
 	problem_insert(problem_id, problem_name, time_limit);
 	mainFrame->setPtoblemFilterChoice(problem_id, problem_name);
+	mainFrame->m_mutexProblem.Unlock();
 }
 
 void problem_remove( unsigned int problem_id )
@@ -398,36 +403,34 @@ void problem_remove( unsigned int problem_id )
 	swprintf(file,L"problem/%u_answer.txt",problem_id);
 	DeleteFile(file);
 	
+	mainFrame->m_mutexProblem.Lock();
 	run_search_delete(problem_id);
 	problem_search_delete(problem_id);
+	mainFrame->m_mutexProblem.Unlock();
 }
 
 void take_result( unsigned int run_id, int success )
-{/***HERE***/
+{
     run_request_id *rptr = search(run_id);
 	problem_all *proptr = problem_search(rptr->problem_id);
 	unsigned int unJudgeNum;
 	
 	if(success == TAKE_SUCCESS){
-	printf("1\n");
 		if(mainFrame->m_checkBoxAutoJudge->IsChecked()){
 			autoJudge(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->time_limit);
 		}
 		else{
-	printf("2\n");
 			submissionFrame = new JudgeSubmissionFrame(0L);
-			printf("%d",submissionFrame);
-	printf("3\n");
 			submissionFrame->setRunProblemID(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->problem_name, proptr->time_limit);
-	printf("4\n");
+			submissionFrame->showStatus();
 			if(submissionFrame->ShowModal() == 0){
-	printf("5\n");
+				mainFrame->m_mutexRunRequest.Lock();
 				id_delete(rptr->run_id);
 				unJudgeNum = unJudgeNumCount();
 				mainFrame->setUnJudgeNum(unJudgeNum);
+				mainFrame->m_mutexRunRequest.Unlock();
 			}
 			submissionFrame->Destroy();
-	printf("6\n");
 		}
 	}
 	else{
@@ -436,17 +439,20 @@ void take_result( unsigned int run_id, int success )
 		}
 		else{
 			wxMessageBox( wxT("Take run Error.\nPromble: This problem has been judged."), wxT("Take run Error"),wxOK|wxICON_EXCLAMATION);
+			mainFrame->m_mutexRunRequest.Lock();
 			id_delete(run_id);
 			unJudgeNum = unJudgeNumCount();
 			mainFrame->setUnJudgeNum(unJudgeNum);
+			mainFrame->m_mutexRunRequest.Unlock();
 		}
 	}
-	printf("7\n");
 }
 
 void clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg )
 {
+	mainFrame->m_mutexClarRequest.Lock();
     clar_insert(clar_id,account_id,account,private_byte,clarmsg);
+	mainFrame->m_mutexClarRequest.Unlock();
 }
 
 void clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string )
