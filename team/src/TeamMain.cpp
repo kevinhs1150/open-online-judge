@@ -93,8 +93,8 @@ TeamFrame::TeamFrame(wxFrame *frame)
 			logindialog->Destroy();
 			Destroy();
 		}
-		logindialog->Destroy();
 		m_staticTextTeamName->SetLabel(logindialog->m_textCtrlID->GetValue());
+		logindialog->Destroy();
     }
 
     m_choiceLang->Append(wxString() << _("c"));
@@ -329,7 +329,10 @@ ClarDialog::~ClarDialog()
 void ClarDialog::OnButtonClickYes( wxCommandEvent& event )
 {
     clarconfirmdialog = new ClarConfirmDialog(NULL);
-    clarconfirmdialog->ShowModal();
+    if(clarconfirmdialog->ShowModal() == 1){
+        clarconfirmdialog->Destroy();
+		Destroy();
+    }
     clarconfirmdialog->Destroy();
     return;
 }
