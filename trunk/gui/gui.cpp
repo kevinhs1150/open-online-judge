@@ -544,7 +544,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelProblems->SetSizer( bSizerProblemsPage );
 	m_panelProblems->Layout();
 	bSizerProblemsPage->Fit( m_panelProblems );
-	m_notebook->AddPage( m_panelProblems, wxT("Problems"), true );
+	m_notebook->AddPage( m_panelProblems, wxT("Problems"), false );
 	m_panelClar = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerClarPage;
 	bSizerClarPage = new wxBoxSizer( wxHORIZONTAL );
@@ -566,8 +566,8 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	bSizerClarList->Add( bSizerClarListTop, 0, wxEXPAND, 5 );
 	
-	m_listCtrl10 = new wxListCtrl( m_panelClar, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_ICON|wxLC_LIST );
-	bSizerClarList->Add( m_listCtrl10, 1, wxALL|wxEXPAND, 5 );
+	m_listCtrlClars = new wxListCtrl( m_panelClar, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_ICON|wxLC_REPORT );
+	bSizerClarList->Add( m_listCtrlClars, 1, wxALL|wxEXPAND, 5 );
 	
 	bSizerClarPage->Add( bSizerClarList, 1, wxEXPAND, 5 );
 	
@@ -587,49 +587,53 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	bSizerClarInfo->Add( bSizerClarID, 0, wxEXPAND, 5 );
 	
-	wxBoxSizer* bSizerClarProblem;
-	bSizerClarProblem = new wxBoxSizer( wxHORIZONTAL );
+	wxStaticBoxSizer* sbSizerQuestion;
+	sbSizerQuestion = new wxStaticBoxSizer( new wxStaticBox( m_panelClar, wxID_ANY, wxT("Question") ), wxVERTICAL );
 	
-	m_staticTextClarProblem = new wxStaticText( m_panelClar, wxID_ANY, wxT("Problem:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticTextClarProblem->Wrap( -1 );
-	bSizerClarProblem->Add( m_staticTextClarProblem, 0, wxALL, 5 );
+	m_textCtrlQuestion = new wxTextCtrl( m_panelClar, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+	sbSizerQuestion->Add( m_textCtrlQuestion, 1, wxALL|wxEXPAND, 5 );
 	
-	m_staticTextClarProblemVal = new wxStaticText( m_panelClar, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticTextClarProblemVal->Wrap( -1 );
-	bSizerClarProblem->Add( m_staticTextClarProblemVal, 0, wxALL, 5 );
+	bSizerClarInfo->Add( sbSizerQuestion, 1, wxEXPAND, 5 );
 	
-	bSizerClarInfo->Add( bSizerClarProblem, 0, wxEXPAND, 5 );
+	wxStaticBoxSizer* sbSizerAnswer;
+	sbSizerAnswer = new wxStaticBoxSizer( new wxStaticBox( m_panelClar, wxID_ANY, wxT("Answer") ), wxVERTICAL );
 	
-	wxStaticBoxSizer* sbSizer18;
-	sbSizer18 = new wxStaticBoxSizer( new wxStaticBox( m_panelClar, wxID_ANY, wxT("label") ), wxVERTICAL );
+	m_textCtrlAnswer = new wxTextCtrl( m_panelClar, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE );
+	sbSizerAnswer->Add( m_textCtrlAnswer, 1, wxALL|wxEXPAND, 5 );
 	
-	m_textCtrl17 = new wxTextCtrl( m_panelClar, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
-	sbSizer18->Add( m_textCtrl17, 1, wxALL|wxEXPAND, 5 );
+	bSizerClarInfo->Add( sbSizerAnswer, 1, wxEXPAND, 5 );
 	
-	bSizerClarInfo->Add( sbSizer18, 1, wxEXPAND, 5 );
+	wxBoxSizer* bSizerClarBtn;
+	bSizerClarBtn = new wxBoxSizer( wxHORIZONTAL );
 	
-	wxStaticBoxSizer* sbSizer19;
-	sbSizer19 = new wxStaticBoxSizer( new wxStaticBox( m_panelClar, wxID_ANY, wxT("label") ), wxVERTICAL );
+	m_checkBoxClarPrivate = new wxCheckBox( m_panelClar, wxID_ANY, wxT("Private"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerClarBtn->Add( m_checkBoxClarPrivate, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_textCtrl18 = new wxTextCtrl( m_panelClar, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE );
-	sbSizer19->Add( m_textCtrl18, 1, wxALL|wxEXPAND, 5 );
 	
-	bSizerClarInfo->Add( sbSizer19, 1, wxEXPAND, 5 );
+	bSizerClarBtn->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	wxBoxSizer* bSizer90;
-	bSizer90 = new wxBoxSizer( wxVERTICAL );
+	m_buttonClarReply = new wxButton( m_panelClar, wxID_ANY, wxT("Reply"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerClarBtn->Add( m_buttonClarReply, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_button42 = new wxButton( m_panelClar, wxID_ANY, wxT("Reply"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer90->Add( m_button42, 0, wxALIGN_RIGHT|wxALL, 5 );
-	
-	bSizerClarInfo->Add( bSizer90, 0, wxEXPAND, 5 );
+	bSizerClarInfo->Add( bSizerClarBtn, 0, wxEXPAND, 5 );
 	
 	bSizerClarPage->Add( bSizerClarInfo, 2, wxEXPAND, 5 );
 	
 	m_panelClar->SetSizer( bSizerClarPage );
 	m_panelClar->Layout();
 	bSizerClarPage->Fit( m_panelClar );
-	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), false );
+	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), true );
+	m_panelSB = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizerSBMain;
+	bSizerSBMain = new wxBoxSizer( wxVERTICAL );
+	
+	m_listCtrlSB = new wxListCtrl( m_panelSB, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_ICON|wxLC_REPORT );
+	bSizerSBMain->Add( m_listCtrlSB, 1, wxALL|wxEXPAND, 5 );
+	
+	m_panelSB->SetSizer( bSizerSBMain );
+	m_panelSB->Layout();
+	bSizerSBMain->Fit( m_panelSB );
+	m_notebook->AddPage( m_panelSB, wxT("Scoreborad"), false );
 	
 	bSizerNotebook->Add( m_notebook, 1, wxEXPAND|wxALL, 5 );
 	
