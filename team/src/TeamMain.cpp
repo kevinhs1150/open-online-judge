@@ -362,7 +362,7 @@ void ClarConfirmDialog::OnButtonClickYes( wxCommandEvent& event )
 	printf("ClarConfirmDialog::OnButtonClickYes 2\n");
 	wcscpy( temp, m_textCtrlFileQuestion->GetValue().c_str() );
 	printf("ClarConfirmDialog::OnButtonClickYes 3\n");
-	wprintf(L"%s\n", temp);
+	wprintf(L"temp = %s\n", temp);
 	printf("ClarConfirmDialog::OnButtonClickYes 4\n");
     teamproto_clar(server_ip, login_id, 0, temp);
     printf("ClarConfirmDialog::OnButtonClickYes 5\n");
@@ -506,10 +506,13 @@ void cb_pu_request( wchar_t **path_description )
     wxString temp;
     do
     {
-        temp = wxFileSelector(_("Download File"), _(""), _("problem"), _("pdf"));
+        temp = wxFileSelector(_("Download Problem File"), _(""), TeamFrameGlobal->m_choiceProblem->GetStringSelection(), _(".pdf"), _(".pdf"), wxFD_SAVE);
     }while( temp.empty() );
+    wprintf(L"Msg Box will print temp(set by wxFileSelector)\n");
+    wxMessageBox(temp);
     wchar_t *path = (wchar_t*)malloc( ( wcslen(temp.c_str()) + 1 ) * sizeof( wchar_t ) );
 	wcscpy( path, temp.c_str());
+	wprintf(L"path = %s\n", path);
 	path_description = &path;
 	return;
 }
