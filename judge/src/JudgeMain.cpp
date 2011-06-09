@@ -237,7 +237,6 @@ void JudgeFrame::OnChoiceFilter( wxCommandEvent& event )
 {
 	wxListItem item;
 	unsigned int problem_id;
-	//char *problem_name;
 	wxString text;
 	int post;
 	
@@ -245,6 +244,8 @@ void JudgeFrame::OnChoiceFilter( wxCommandEvent& event )
 	post = text.Find(wxT(" "));
 	text.Remove(post);
 	problem_id = wxAtoi(text);
+	
+	problem_filter_search(problem_id);
 }
 
 void JudgeFrame::OnCheckBoxAutoJudge( wxCommandEvent& event )
@@ -555,18 +556,22 @@ void problem_insert(unsigned int problem_id, wchar_t *problem_name, unsigned int
 }
 
 void problem_filter_search(unsigned int problem_id)
-{
-	unsigned int row;/////////////////////////////////////////////
+{///////////////////////////////////////////////////////////////////////
+	unsigned int row = 0;
 	run_request_id *pfptr = pptr;
+	wxString insertString;
+	long tmp;
+	
+	mainFrame->m_listCtrlRuns->DeleteAllItems();
 	
 	while(1){
 		if(pfptr->problem_id == problem_id){
 			row = unJudgeNumCount() + 1 ;
-			insertString.Printf(wxT("%d"),run_id);
+			insertString.Printf(wxT("%d"),pfptr->run_id);
 			tmp = mainFrame->m_listCtrlRuns->InsertItem(row,insertString);
-			insertString.Printf(wxT("%d"),problem_id);
+			insertString.Printf(wxT("%d"),pfptr->problem_id);
 			mainFrame->m_listCtrlRuns->SetItem(tmp, 1, insertString);
-			insertString.Printf(wxT("%s"),coding_language);
+			insertString.Printf(wxT("%s"),pfptr->coding_language);
 			mainFrame->m_listCtrlRuns->SetItem(tmp, 2, insertString);
 		}
 		if(pfptr->next == NULL)
