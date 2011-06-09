@@ -48,6 +48,7 @@ class AdminFrame: public AdminGUI
     private:
 		bool isProblemInfoEnable;
 		int m_selectedProblem;
+		int m_selectedClar;
 	
 		//void OnClose( wxCloseEvent& event );
 		void InitAccountList();
@@ -55,6 +56,7 @@ class AdminFrame: public AdminGUI
 		void InitClarList();
 		void InitSBList();
 		void ProblemInfoEnable(bool enable);
+		void ClarEnable(bool enable);
 		
 		void OnButtonClickChangePassword( wxCommandEvent& event );
 		void OnButtonClickLogout( wxCommandEvent& event );
@@ -74,6 +76,8 @@ class AdminFrame: public AdminGUI
 		void OnButtonClickAddProblem( wxCommandEvent& event );
 		void OnButtonClickDelProblem( wxCommandEvent& event );
 		void OnButtonClickProblemApply( wxCommandEvent& event );
+		void OnListItemDeselectedClar( wxListEvent& event );
+		void OnListItemSelectedClar( wxListEvent& event );
 		
 		void OnTimerEvent(wxTimerEvent &event);
 		DECLARE_EVENT_TABLE()

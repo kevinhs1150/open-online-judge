@@ -414,7 +414,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizerProblemName->Add( m_staticTextProblemID, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_textCtrlProblemID = new wxTextCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 40,-1 ), 0 );
-	m_textCtrlProblemID->SetValidator( wxTextValidator( wxFILTER_NUMERIC, &IDFilter ) );
+	m_textCtrlProblemID->SetValidator( wxTextValidator( wxFILTER_ALPHANUMERIC|wxFILTER_NUMERIC, &IDFilter ) );
 	
 	bSizerProblemName->Add( m_textCtrlProblemID, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
@@ -566,7 +566,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	bSizerClarList->Add( bSizerClarListTop, 0, wxEXPAND, 5 );
 	
-	m_listCtrlClars = new wxListCtrl( m_panelClar, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_ICON|wxLC_REPORT );
+	m_listCtrlClars = new wxListCtrl( m_panelClar, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_ICON|wxLC_REPORT|wxLC_SINGLE_SEL );
 	bSizerClarList->Add( m_listCtrlClars, 1, wxALL|wxEXPAND, 5 );
 	
 	bSizerClarPage->Add( bSizerClarList, 1, wxEXPAND, 5 );
