@@ -196,9 +196,11 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	sprintf(path, "data\\%d_d.dat", problem_id);
 	inFile = fopen_sp(path_description, mode);
 	outFile = fopen(path, "wb");
-	while( !feof( inFile ) ){
+	while(1){
 		char buf;
 		fread( &buf, sizeof( char ), 1, inFile );
+		if(feof(inFile))
+			break;
 		fwrite( &buf, sizeof( char ), 1, outFile );
 	}
 	fclose(outFile);
@@ -207,9 +209,11 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	sprintf(path, "data\\%d_i.dat", problem_id);
 	inFile = fopen_sp(path_input, mode);
 	outFile = fopen(path, "wb");
-	while( !feof( inFile ) ){
+	while(1){
 		char buf;
 		fread( &buf, sizeof( char ), 1, inFile );
+		if(feof(inFile))
+			break;
 		fwrite( &buf, sizeof( char ), 1, outFile );
 	}
 	fclose(outFile);
@@ -218,9 +222,11 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	sprintf(path, "data\\%d_o.dat", problem_id);
 	inFile = fopen_sp(path_answer, mode);
 	outFile = fopen(path, "wb");
-	while( !feof( inFile ) ){
+	while(1){
 		char buf;
 		fread( &buf, sizeof( char ), 1, inFile );
+		if(feof(inFile))
+			break;
 		fwrite( &buf, sizeof( char ), 1, outFile );
 	}
 	fclose(outFile);
@@ -284,23 +290,58 @@ void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int second
 }
 
 void cb_contest_start( void ){
+	AdminFrameGlobal->m_timer.Start(1000);
 	
+	return;
 }
 
 void cb_contest_stop( void ){
-
+	AdminFrameGlobal->m_timer.Stop();
+	
+	return;
 }
 
 void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg ){
-	/*
 	AdminFrameGlobal->m_mutexClar.Lock();
 	
+	int i;
 	for(i = 0 ; i < AdminFrameGlobal->list_clar.size() ; i++)
 		if(AdminFrameGlobal->list_clar[i].clar_id == clar_id)
 			break;
+	if(i < AdminFrameGlobal->list_clar.size()){ // in list
+		AdminFrameGlobal->list_clar[i].account_id = account_id;
+		AdminFrameGlobal->list_clar[i].clar_msg = wxString(clarmsg);
+		AdminFrameGlobal->list_clar[i].private_byte = private_byte;
+		/*
+		int j;
+		for(int j = 0 ; j < AdminFrameGlobal->m_listCtrlClars->GetItemCount() ; i++){
+			if(AdminFrameGlobal->m_listCtrlClars->GetItemData(j) == clar_id){
+				AdminFrameGlobal->m_listCtrlClars->DeleteItem(j);
+				break;
+			}
+		}
+		*/
+	}
+	else{ // not in list
+		Clar c;
+		c.clar_id = clar_id;
+		c.account_id = account_id;
+		c.name = wxString(account);
+		c.private_byte = private_byte;
+		c.clar_msg = wxString(clarmsg);
+		AdminFrameGlobal->list_clar.push_back(c);
+		
+		long tmp;
+		tmp = AdminFrameGlobal->m_listCtrlClars->InsertItem(0, wxString() << clar_id);
+		wxString msg = wxString(clarmsg);
+		msg = msg.Mid(0, 10);
+		msg << _("...");
+		AdminFrameGlobal->m_listCtrlClars->SetItem(tmp, 1, msg);
+		AdminFrameGlobal->m_listCtrlClars->SetItemData(tmp, clar_id);
+	}
 	
 	AdminFrameGlobal->m_mutexClar.Unlock();
-	*/
+	
 	return;
 }
 
@@ -338,9 +379,12 @@ void cb_clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_stri
 void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ){
 	AdminFrameGlobal->m_mutexScoreboard.Lock();
 	
-	for(int i = 0 ; i < AdminFrameGlobal->m_listCtrlSB->GetItemCount() ; i++)
-		if(AdminFrameGlobal->m_listCtrlSB->GetItemData(i) == updated_account_id)
+	for(int i = 0 ; i < AdminFrameGlobal->m_listCtrlSB->GetItemCount() ; i++){
+		if(AdminFrameGlobal->m_listCtrlSB->GetItemData(i) == updated_account_id){
 			AdminFrameGlobal->m_listCtrlSB->DeleteItem(i);
+			break;
+		}
+	}
 	long tmp;
 	tmp = AdminFrameGlobal->m_listCtrlSB->InsertItem(0, wxString(new_account));
 	AdminFrameGlobal->m_listCtrlSB->SetItem(tmp, 1, wxString(new_account));

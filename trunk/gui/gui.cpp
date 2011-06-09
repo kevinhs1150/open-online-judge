@@ -622,7 +622,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelClar->SetSizer( bSizerClarPage );
 	m_panelClar->Layout();
 	bSizerClarPage->Fit( m_panelClar );
-	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), false );
+	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), true );
 	m_panelSB = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerSBMain;
 	bSizerSBMain = new wxBoxSizer( wxVERTICAL );
@@ -633,7 +633,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelSB->SetSizer( bSizerSBMain );
 	m_panelSB->Layout();
 	bSizerSBMain->Fit( m_panelSB );
-	m_notebook->AddPage( m_panelSB, wxT("Scoreborad"), true );
+	m_notebook->AddPage( m_panelSB, wxT("Scoreborad"), false );
 	
 	bSizerNotebook->Add( m_notebook, 1, wxEXPAND|wxALL, 5 );
 	
