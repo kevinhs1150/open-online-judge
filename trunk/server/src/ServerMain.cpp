@@ -430,14 +430,14 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 {
 	char sqlquery[100], result_char[25], destip[20], **table, *errMsg = NULL;
 	int rows, cols;
-	unsigned int problem_id, account_id;
+	unsigned int problem_id, account_id, accept_count;
 
 	/* record result information into db */
 	wcstombs(result_char, result, 25);
  	sprintf(sqlquery, "UPDATE submission SET judge_result = '%s' WHERE run_id = '%u';", result_char, run_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
-
-	/* redirect the result to corresponding team */
+	
+	/* get account_id and problem_id */
 	sprintf(sqlquery, "SELECT account_id, problem_id FROM submission WHERE run_id = '%u';", run_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	if(rows >= 1)
@@ -446,6 +446,25 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 		sscanf(table[1 * cols + 1], "%u", &problem_id);
 	}
 	sqlite3_free_table(table);
+	
+	/* update accept_count in scoreboard if result = "YES" */
+	if(strcmp( result_char, "YES" ) == 0)	
+	{
+		/* get accept_count */
+		sprintf(sqlquery, "SELECT accept_count FROM scoreboard WHERE account_id = '%u';", account_id);
+		sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+		if(rows >=1)
+		{
+			sscanf(table[1 * cols + 0], "%u", &accept_count);
+		}
+		sqlite3_free_table(table);
+		
+		/* update accept_count */
+		sprintf(sqlquery, "UPDATE scoreboard SET accept_count = '%u' WHERE = account_id = '%u';", accept_count + 1, account_id);
+		sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	}
+	
+	/* redirect the result to corresponding team */
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_id = '%u';", account_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	if(rows >= 1)
@@ -622,23 +641,31 @@ void callback_problem_add( char *srcip, unsigned int problem_id, wchar_t *proble
 {
 	char sqlquery[100];
 	char path_description_char[50], path_input_char[50], path_answer_char[50];
-
+	
 	/* edit path names */
+	*path_description = (wchar_t *) malloc( 50 * sizeof(wchar_t) );
 	sprintf(path_description_char, "problems/path_descr%u.pdf", problem_id);
 	mbstowcs(*path_description, path_description_char, 50);
-
+	wprintf(L"path = %ls\n", *path_description);
+	
+	*path_input = (wchar_t *) malloc( 50 * sizeof(wchar_t) );
 	sprintf(path_input_char, "problems/p%u_in.txt", problem_id);
 	mbstowcs(*path_input, path_input_char, 50);
-
+	wprintf(L"input = %ls\n", *path_input);
+	
+	*path_answer = (wchar_t *) malloc( 50 * sizeof(wchar_t) );
 	sprintf(path_answer_char, "problems/p%u_out.txt", problem_id);
 	mbstowcs(*path_answer, path_answer_char, 50);
+	wprintf(L"ans = %ls\n", *path_answer);
 }
 
 void callback_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
 	char sqlquery[100], *errMsg = NULL;
 	char problem_name_char[20], path_description_char[50], path_input_char[50], path_answer_char[50];
-
+	
+	printf("download finish start\n");
+	
 	/* record the new problem into db */
 	wcstombs(problem_name_char, problem_name, 20);
 	wcstombs(path_description_char, path_description, 50);
