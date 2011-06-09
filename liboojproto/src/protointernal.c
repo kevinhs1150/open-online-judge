@@ -213,7 +213,7 @@ int filesend( char *destip, short desttype, wchar_t *filepath )
 		sendbyte = fread( sendbuf, 1, BUFLEN, fptr );
 		sprintf( s_buf, "%d", sendbyte );
 		send_sp( sockfd, s_buf, BUFLEN );
-		
+
 		/* first sync: are you ready? */
 		recv( sockfd, recvbuf, BUFLEN, 0 );
 
@@ -221,7 +221,7 @@ int filesend( char *destip, short desttype, wchar_t *filepath )
 		sendbyte = send_sp( sockfd, sendbuf, sendbyte );
 		a_sendbyte += sendbyte;
 		printf("%d, %d      \r", a_sendbyte, sendbyte);
-		
+
 		/* second sync: are you ready? */
 		recv( sockfd, recvbuf, BUFLEN, 0 );
 	}
@@ -275,7 +275,7 @@ int filerecv( wchar_t *filepath )
 		/* sync: standby ready */
 		recv( sockfd, recvbuf, BUFLEN, 0 );
 		sscanf( recvbuf, "%d", &recvbyte );
-		
+
 		/* first sync: i'm ready */
 		send( sockfd, sendbuf, BUFLEN, 0 );
 
@@ -284,7 +284,7 @@ int filerecv( wchar_t *filepath )
 		fwrite( recvbuf, 1, recvbyte, fptr );
 		a_recvbyte += recvbyte;
 		printf("%d, %d        \r", a_recvbyte, recvbyte );
-		
+
 		/* second sync: i'm ready */
 		send( sockfd, sendbuf, BUFLEN, 0 );
 	}
@@ -410,12 +410,21 @@ char *proto_str_comb( char *arr, char *msg )
 char *int2str( int input )
 {
 	char *out;
+	int input_cpy = abs( input );
+	int input_digit;
+	int size;
+	
+	/* to prevent floating point precision trouble */
+	if( input_cpy == 0 )
+		input_cpy = 1;
+		
 	/* take log10 to count the digits */
-	int size = ceil( log10( input ) ) + 1;
+	input_digit = (int)ceil( log10( input_cpy ) );
+	size = ( input_digit + 2 ) * sizeof( char );
 
 	/* space for negative sign */
 	if( input < 0 )
-		size++;
+		size = size + sizeof( char );
 
 	out = (char *)malloc( size );
 	sprintf( out, "%d", input );
@@ -424,7 +433,19 @@ char *int2str( int input )
 
 char *uint2str( unsigned int input )
 {
-	char *out = (char *)malloc( ceil( log10( input ) ) + 1 );
+	char *out;
+	int input_cpy = abs( input );
+	int input_digit;
+	int size;
+	
+	/* to prevent floating point precision trouble */
+	if( input_cpy == 0 )
+		input_cpy = 1;
+	
+	input_digit = (int)ceil( log10( input_cpy ) );
+	size = ( input_digit + 2 ) * sizeof( char );
+
+	out = (char *)malloc( size );
 	sprintf( out, "%d", input );
 	return out;
 }
@@ -620,7 +641,7 @@ void proto_problem_update( int sockfd, char *src_ipaddr, char *msgptr )
 	unsigned int problem_id = atoi( problem_id_str );
 	wchar_t *problem_name = proto_str_postrecv( problem_name_mb );
 	unsigned int time_limit = atoi( time_limit_str );
-	
+
 	/* mutex lock protection -- prevent concurrent downloading causing race condition */
 	pthread_mutex_lock( &proto_dlmgr_mutex );
 	send_sp( sockfd, "FSREADY", BUFLEN );
@@ -633,7 +654,7 @@ void proto_problem_update( int sockfd, char *src_ipaddr, char *msgptr )
 	filerecv( path_answer );
 
 	(*cb_problem_update_dlfin)( problem_id, problem_name, time_limit, path_description, path_input, path_answer );
-	
+
 	/* mutex unlock */
 	pthread_mutex_unlock( &proto_dlmgr_mutex );
 
