@@ -440,10 +440,10 @@ void callback_sb_sync( char *srcip )
 		if(rows2 >= 1)
 		{
 			mbstowcs(new_account_wchar, table[1 * cols2 + 0], 25);
-			sscanf(table2[1 * cols + 0], "%u", &account_type);
+			sscanf(table2[1 * cols2 + 0], "%u", &account_type);
 			serverproto_sb_update( srcip, account_type, account_id, new_account_wchar, new_accept_count, new_time );
 		}
-		sqlite3_free_table(table);
+		sqlite3_free_table(table2);
 
 	}
 	sqlite3_free_table(table);
