@@ -404,6 +404,7 @@ class JudgeGUI : public wxFrame
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnButtonClickChangePassword( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickLogout( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnChoiceFilter( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnCheckBoxAutoJudge( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnListItemActivatedRuns( wxListEvent& event ) { event.Skip(); }
 		virtual void OnListItemActivatedClar( wxListEvent& event ) { event.Skip(); }
