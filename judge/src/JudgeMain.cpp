@@ -556,7 +556,7 @@ void problem_insert(unsigned int problem_id, wchar_t *problem_name, unsigned int
 }
 
 void problem_filter_search(unsigned int problem_id)
-{///////////////////////////////////////////////////////////////////////
+{
 	unsigned int row = 0;
 	run_request_id *pfptr = pptr;
 	wxString insertString;

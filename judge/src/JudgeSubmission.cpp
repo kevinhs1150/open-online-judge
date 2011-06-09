@@ -78,15 +78,27 @@ void JudgeSubmissionFrame::OnButtonClickRun( wxCommandEvent& event )
     wchar_t type[20];
 	int errtyp;
 	
-	swprintf(file_name, L"%u", run_id);
 	wcscpy(type, this->coding_language);
-	m_staticTextResult->SetLabel(wxT("Compile..."));
+	
+	if(!(wcscmp(type, L"c"))){
+		wsprintf(file_name,L"%u.c",this->run_id);
+	}
+	else if(!(wcscmp(type, L"c++"))){
+		wsprintf(file_name,L"%u.cpp",this->run_id);
+	}
+	else{
+		errtyp = TYPE_ERROR;
+	}
+	
+	m_staticTextRunStatus->SetLabel(wxT("Compile..."));
 	errtyp = compile(file_name, type);
 	if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
-		m_staticTextResult->SetLabel(wxT("File execute..."));
+		m_staticTextRunStatus->SetLabel(wxT("File execute..."));
 		if(time() == 0){
 			if(judge(this->problem_id) != 0){
 				errtyp = OUTPUT_ERROR;
+				m_staticTextRunStatus->SetLabel(wxT("Submission file type error."));
+				return;
 			}
 		}
 		else{
@@ -95,31 +107,31 @@ void JudgeSubmissionFrame::OnButtonClickRun( wxCommandEvent& event )
 	}
 	
 	if(errtyp == SUCCESS){
-		m_staticTextResult->SetLabel(wxT("Compile success."));
+		m_staticTextRunStatus->SetLabel(wxT("Compile success."));
 	}
 	else if(errtyp == SUCCESS_WITH_WARNING){
-		m_staticTextResult->SetLabel(wxT("Compile success, but has warning."));
+		m_staticTextRunStatus->SetLabel(wxT("Compile success, but has warning."));
 	}
 	else if(errtyp == COMPLIE_ERROR){
-		m_staticTextResult->SetLabel(wxT("Compile error."));
+		m_staticTextRunStatus->SetLabel(wxT("Compile error."));
 	}
 	else if(errtyp == OUTPUT_ERROR){
-		m_staticTextResult->SetLabel(wxT("Output error."));
+		m_staticTextRunStatus->SetLabel(wxT("Output error."));
 	}
 	else if(errtyp == TYPE_ERROR){
-		m_staticTextResult->SetLabel(wxT("Submission file type error."));
+		m_staticTextRunStatus->SetLabel(wxT("Submission file type error."));
 	}
 	else if(errtyp == FILE_OPEN_ERROR){
-		m_staticTextResult->SetLabel(wxT("Submission file open error."));
+		m_staticTextRunStatus->SetLabel(wxT("Submission file open error."));
 	}
 	else if(errtyp == OUTPUT_OPEN_ERROR){
-		m_staticTextResult->SetLabel(wxT("Complie result file open error."));
+		m_staticTextRunStatus->SetLabel(wxT("Complie result file open error."));
 	}
 	else if(errtyp == TIME_OUT){
-		m_staticTextResult->SetLabel(wxT("Execute time out."));
+		m_staticTextRunStatus->SetLabel(wxT("Execute time out."));
 	}
 	else{
-		m_staticTextResult->SetLabel(wxT("Other unexpected error."));
+		m_staticTextRunStatus->SetLabel(wxT("Other unexpected error."));
 	}
 }
 
@@ -233,7 +245,7 @@ void JudgeSubmissionFrame::showStatus()
 		m_buttonShowOutput->Enable(false);
 	}
 	
-	m_staticTextResult->SetLabel(wxT("Not start"));
+	m_staticTextRunStatus->SetLabel(wxT("Not start"));
 }
 
 int compile(wchar_t file_name[], wchar_t type[])
@@ -248,36 +260,36 @@ int compile(wchar_t file_name[], wchar_t type[])
         fclose(fptr1);
         DeleteFile(L"out.exe");
     }
-
+	
     fptr1=fopen_sp(file_name,L"r");
     if(fptr1!=NULL)
     {
-        if(!(wcscmp(type, L"c"))){
-            wcscpy(call, L"gcc -o out.exe ");
-            wcscat(call, file_name);
-            wcscat(call, L" > output.txt 2>&1");
+		if(!(wcscmp(type, L"c"))){
+			wcscpy(call, L"gcc -o out.exe ");
+			wcscat(call, file_name);
+			wcscat(call, L" > output.txt 2>&1");
 
-            call_mbsize = wcstombs( NULL, call, 0 ) + 1;
-            wcstombs( call_mb, call, call_mbsize );
+			call_mbsize = wcstombs( NULL, call, 0 ) + 1;
+			wcstombs( call_mb, call, call_mbsize );
+			
+	printf("%s\n",call_mb);
+			system(call_mb);
+			return(complie_result());
+		}
+		else if(!(wcscmp(type, L"c++"))){
+			wcscpy(call, L"g++ -o out.exe ");
+			wcscat(call, file_name);
+			wcscat(call, L" > output.txt 2>&1");
 
-            system(call_mb);
-            return(complie_result());
-
-        }
-        else if(!(wcscmp(type, L"c++"))){
-            wcscpy(call, L"g++ -o out.exe ");
-            wcscat(call, file_name);
-            wcscat(call, L" > output.txt 2>&1");
-
-            call_mbsize = wcstombs( NULL, call, 0 ) + 1;
-            wcstombs( call_mb, call, call_mbsize );
-
-            system(call_mb);
-            return(complie_result());
-        }
-        else{
-            return TYPE_ERROR;
-        }
+			call_mbsize = wcstombs( NULL, call, 0 ) + 1;
+			wcstombs( call_mb, call, call_mbsize );
+			
+			system(call_mb);
+			return(complie_result());
+		}
+		else{
+			return TYPE_ERROR;
+		}
         fclose(fptr1);
     }
     else{
@@ -290,6 +302,7 @@ int complie_result(){
     char ch;
     int result = SUCCESS;
 
+	printf("result1\n");
     fptr1 = fopen("out.exe","r");
     fptr2 = fopen("output.txt","r");
     if(fptr1 != NULL){
