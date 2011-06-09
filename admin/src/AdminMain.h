@@ -26,6 +26,9 @@ class AdminFrame: public AdminGUI
 		bool isLogin;
 		unsigned int m_timeleft;
 		vector<Problem> list_problem;
+		wxMutex m_mutexAccount;
+		wxMutex m_mutexProblem;
+		wxMutex m_mutexScoreboard;
 		
     private:
 		bool isProblemInfoEnable;
@@ -35,6 +38,8 @@ class AdminFrame: public AdminGUI
 		//void OnClose( wxCloseEvent& event );
 		void InitAccountList();
 		void InitProblemList();
+		void InitClarList();
+		void InitSBList();
 		void ProblemInfoEnable(bool enable);
 		
 		void OnButtonClickChangePassword( wxCommandEvent& event );

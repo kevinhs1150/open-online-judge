@@ -147,14 +147,15 @@ class AdminGUI : public wxFrame
 		wxPanel* m_panelClar;
 		wxStaticText* m_staticText62;
 		wxChoice* m_choice6;
-		wxListCtrl* m_listCtrl10;
+		wxListCtrl* m_listCtrlClars;
 		wxStaticText* m_staticTextClarID;
 		wxStaticText* m_staticTextClarIDVal;
-		wxStaticText* m_staticTextClarProblem;
-		wxStaticText* m_staticTextClarProblemVal;
-		wxTextCtrl* m_textCtrl17;
-		wxTextCtrl* m_textCtrl18;
-		wxButton* m_button42;
+		wxTextCtrl* m_textCtrlQuestion;
+		wxTextCtrl* m_textCtrlAnswer;
+		wxCheckBox* m_checkBoxClarPrivate;
+		
+		wxButton* m_buttonClarReply;
+		wxPanel* m_panelSB;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnButtonClickChangePassword( wxCommandEvent& event ) { event.Skip(); }
@@ -183,6 +184,7 @@ class AdminGUI : public wxFrame
 		wxListCtrl* m_listCtrlJudge;
 		wxListCtrl* m_listCtrlTeam;
 		wxListCtrl* m_listCtrlProblems;
+		wxListCtrl* m_listCtrlSB;
 		wxString IDFilter; 
 		
 		AdminGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Admin"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 753,553 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );

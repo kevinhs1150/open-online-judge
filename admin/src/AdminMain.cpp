@@ -23,86 +23,42 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 	wxString name(account);
 	wxString id = wxString() << account_id;
 	long tmp;
-	unsigned int old_type;
-	int index;
 	int i;
-	bool found = false;
 	
+	AdminFrameGlobal->m_mutexAccount.Lock();
 	wprintf(L"update %s\n", account);
 	
 	//find in the lists
-	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlAdmin->GetItemCount() ; i++)
-		if(AdminFrameGlobal->m_listCtrlAdmin->GetItemData(i) == account_id)
+	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlAdmin->GetItemCount() ; i++){
+		if(AdminFrameGlobal->m_listCtrlAdmin->GetItemData(i) == account_id){
+			AdminFrameGlobal->m_listCtrlAdmin->DeleteItem(i);
 			break;
-	if(i < AdminFrameGlobal->m_listCtrlAdmin->GetItemCount()){
-		index = i;
-		old_type = SRC_ADMIN;
-		found = true;
-	}
-	
-	if(!found){
-		for(i = 0 ; i < AdminFrameGlobal->m_listCtrlJudge->GetItemCount() ; i++)
-			if(AdminFrameGlobal->m_listCtrlJudge->GetItemData(i) == account_id)
-				break;
-		if(i < AdminFrameGlobal->m_listCtrlJudge->GetItemCount()){
-			index = i;
-			old_type = SRC_JUDGE;
-			found = true;
 		}
 	}
-	
-	if(!found){
-		for(i = 0 ; i < AdminFrameGlobal->m_listCtrlTeam->GetItemCount() ; i++)
-			if(AdminFrameGlobal->m_listCtrlTeam->GetItemData(i) == account_id)
-				break;
-		if(i < AdminFrameGlobal->m_listCtrlTeam->GetItemCount()){
-			index = i;
-			old_type = SRC_TEAM;
-			found = true;
+	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlJudge->GetItemCount() ; i++){
+		if(AdminFrameGlobal->m_listCtrlJudge->GetItemData(i) == account_id){
+			AdminFrameGlobal->m_listCtrlJudge->DeleteItem(i);
+			break;
+		}
+	}
+	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlTeam->GetItemCount() ; i++){
+		if(AdminFrameGlobal->m_listCtrlTeam->GetItemData(i) == account_id){
+			AdminFrameGlobal->m_listCtrlTeam->DeleteItem(i);
+			break;
 		}
 	}
 	
 	if(type == SRC_ADMIN){ // new type is admin
-		if(found && type == old_type){ // type no change
-			AdminFrameGlobal->m_listCtrlAdmin->SetItem(index, 1, name);
-			return;
-		}
-		if(found){ // type change
-			if(old_type == SRC_JUDGE)
-				AdminFrameGlobal->m_listCtrlJudge->DeleteItem(index);
-			else if(old_type == SRC_TEAM)
-				AdminFrameGlobal->m_listCtrlTeam->DeleteItem(index);
-		}
 		tmp = AdminFrameGlobal->m_listCtrlAdmin->InsertItem(AdminFrameGlobal->m_listCtrlAdmin->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlAdmin->SetItem(tmp, 1, name);
 		AdminFrameGlobal->m_listCtrlAdmin->SetItemData(tmp, account_id);
 	}
 	else if(type == SRC_JUDGE){
-		if(found && type == old_type){ // type no change
-			AdminFrameGlobal->m_listCtrlJudge->SetItem(index, 1, name);
-			return;
-		}
-		if(found){ // type change
-			if(old_type == SRC_ADMIN)
-				AdminFrameGlobal->m_listCtrlAdmin->DeleteItem(index);
-			else if(old_type == SRC_TEAM)
-				AdminFrameGlobal->m_listCtrlTeam->DeleteItem(index);
-		}
 		tmp = AdminFrameGlobal->m_listCtrlJudge->InsertItem(AdminFrameGlobal->m_listCtrlJudge->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlJudge->SetItem(tmp, 1, name);
 		AdminFrameGlobal->m_listCtrlJudge->SetItemData(tmp, account_id);
 	}
 	else if(type == SRC_TEAM){
-		if(found && type == old_type){ // type no change
-			AdminFrameGlobal->m_listCtrlTeam->SetItem(index, 1, name);
-			return;
-		}
-		if(found){ // type change
-			if(old_type == SRC_JUDGE)
-				AdminFrameGlobal->m_listCtrlJudge->DeleteItem(index);
-			else if(old_type == SRC_ADMIN)
-				AdminFrameGlobal->m_listCtrlAdmin->DeleteItem(index);
-		}
 		tmp = AdminFrameGlobal->m_listCtrlTeam->InsertItem(AdminFrameGlobal->m_listCtrlTeam->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlTeam->SetItem(tmp, 1, name);
 		AdminFrameGlobal->m_listCtrlTeam->SetItemData(tmp, account_id);
@@ -110,6 +66,8 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 	else{
 		// no definition, it must a mistake!
 	}
+	
+	AdminFrameGlobal->m_mutexAccount.Unlock();
 	
 	return;
 }
@@ -120,32 +78,37 @@ void cb_account_remove( unsigned int account_id ){
 	item.SetColumn(0);
 	item.SetMask(wxLIST_MASK_TEXT);
 	
+	AdminFrameGlobal->m_mutexAccount.Lock();
+	
 	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlAdmin->GetItemCount() ; i++){
 		item.SetId(i);
 		AdminFrameGlobal->m_listCtrlAdmin->GetItem(item);
 		if(atoi(item.GetText().char_str()) == account_id){
 			AdminFrameGlobal->m_listCtrlAdmin->DeleteItem(i);
+			AdminFrameGlobal->m_mutexAccount.Unlock();
 			return;
 		}
 	}
-
 	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlJudge->GetItemCount() ; i++){
 		item.SetId(i);
 		AdminFrameGlobal->m_listCtrlJudge->GetItem(item);
 		if(atoi(item.GetText().char_str()) == account_id){
 			AdminFrameGlobal->m_listCtrlJudge->DeleteItem(i);
+			AdminFrameGlobal->m_mutexAccount.Unlock();
 			return;
 		}
 	}
-	
 	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlTeam->GetItemCount() ; i++){
 		item.SetId(i);
 		AdminFrameGlobal->m_listCtrlTeam->GetItem(item);
 		if(atoi(item.GetText().char_str()) == account_id){
 			AdminFrameGlobal->m_listCtrlTeam->DeleteItem(i);
+			AdminFrameGlobal->m_mutexAccount.Unlock();
 			return;
 		}
 	}
+	
+	AdminFrameGlobal->m_mutexAccount.Unlock();
 	
 	return;
 }
@@ -158,6 +121,7 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 	char path[20];
 	int i = 0;
 	
+	AdminFrameGlobal->m_mutexProblem.Lock();
 	while(1){
 		FILE *temp;
 		sprintf(path, "temp\\%d_d.tmp", i);
@@ -167,6 +131,7 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 		fclose(temp);
 		i++;
 	}
+	AdminFrameGlobal->m_mutexProblem.Unlock();
 	
 	file_d = fopen("temp\\%d_d.tmp", "w");
 	file_i = fopen("temp\\%d_i.tmp", "w");
@@ -174,7 +139,6 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 	fclose(file_o);
 	fclose(file_i);
 	fclose(file_d);
-	
 	
 	Problem p;
 	//p.problem_id = problem_id;
@@ -203,12 +167,14 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ){
 	printf("DLFIN\n");
 	
-	int i = 0;
+	AdminFrameGlobal->m_mutexProblem.Lock();
+	int i;
 	for(i = 0 ; i < AdminFrameGlobal->list_problem.size() ; i++)
 		if(AdminFrameGlobal->list_problem[i].problem_id == problem_id)
 			break;
 	if(i < AdminFrameGlobal->list_problem.size())
 		AdminFrameGlobal->list_problem.erase(AdminFrameGlobal->list_problem.begin() + i);
+	AdminFrameGlobal->m_mutexProblem.Unlock();
 	
 	Problem p;
 	p.problem_id = problem_id;
@@ -257,6 +223,12 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	fclose(inFile);
 	
 	AdminFrameGlobal->list_problem.push_back(p);
+	
+	AdminFrameGlobal->m_mutexProblem.Lock();
+	long tmp;
+	tmp = AdminFrameGlobal->m_listCtrlProblems->InsertItem(0, wxString() << p.problem_id);
+	AdminFrameGlobal->m_listCtrlProblems->SetItem(tmp, 1, wxString() << p.name);
+	AdminFrameGlobal->m_mutexProblem.Unlock();
 	
 	return;
 }
@@ -328,16 +300,24 @@ void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsign
 }
 
 void cb_sb_remove( unsigned int rm_account_id ){
-
+	AdminFrameGlobal->m_mutexScoreboard.Lock();
+	for(int i = 0 ; i < AdminFrameGlobal->m_listCtrlSB->GetItemCount() ; i++)
+		if(AdminFrameGlobal->m_listCtrlSB->GetItemData(i) == rm_account_id)
+			AdminFrameGlobal->m_listCtrlSB->DeleteItem(i);
+	AdminFrameGlobal->m_mutexScoreboard.Unlock();
+	
+	return;
 }
 
 void cb_problem_remove( unsigned int problem_id ){
-	int i;
-	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlProblems->GetItemCount() ; i++){
+	AdminFrameGlobal->m_mutexProblem.Lock();
+	for(int i = 0 ; i < AdminFrameGlobal->m_listCtrlProblems->GetItemCount() ; i++){
 		if(AdminFrameGlobal->m_listCtrlProblems->GetItemData(i) == problem_id){
 			AdminFrameGlobal->m_listCtrlProblems->DeleteItem(i);
+			break;
 		}
 	}
+	AdminFrameGlobal->m_mutexProblem.Unlock();
 	
 	return;
 }
@@ -353,6 +333,8 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	AdminFrameGlobal = this;
 	InitAccountList();
 	InitProblemList();
+	InitClarList();
+	InitSBList();
 	m_timeleft = 0;
 	
 	loginDialog = new LoginDialog(this);
@@ -457,6 +439,41 @@ void AdminFrame::InitProblemList(){
 	return;
 }
 
+void AdminFrame::InitClarList(){
+	wxListItem itemCol;
+	
+	m_listCtrlClars->DeleteAllItems();
+	while(m_listCtrlClars->GetColumnCount())
+		m_listCtrlClars->DeleteColumn(0);
+	
+	itemCol.SetText(_("ID"));
+	m_listCtrlClars->InsertColumn(0, itemCol);
+	
+	itemCol.SetText(_("Message"));
+	m_listCtrlClars->InsertColumn(1, itemCol);
+	
+	return;
+}
+
+void AdminFrame::InitSBList(){
+	wxListItem itemCol;
+	
+	m_listCtrlSB->DeleteAllItems();
+	while(m_listCtrlSB->GetColumnCount())
+		m_listCtrlSB->DeleteColumn(0);
+	
+	itemCol.SetText(_("Rank"));
+	m_listCtrlSB->InsertColumn(0, itemCol);
+	
+	itemCol.SetText(_("ID-Name"));
+	m_listCtrlSB->InsertColumn(1, itemCol);
+
+	itemCol.SetText(_("Penalty"));
+	m_listCtrlSB->InsertColumn(2, itemCol);
+	
+	return;
+}
+
 void AdminFrame::ProblemInfoEnable(bool enable){
 	if(isProblemInfoEnable == enable)
 		return;
@@ -486,28 +503,6 @@ void AdminFrame::OnButtonClickChangePassword( wxCommandEvent& event ){
 }
 
 void AdminFrame::OnButtonClickLogout( wxCommandEvent& event ){
-	long tmp;
-	tmp = m_listCtrlAdmin->InsertItem(0, _("Test A"));
-	m_listCtrlAdmin->SetItem(tmp, 1, _("Test B"));
-	
-	tmp = m_listCtrlAdmin->InsertItem(1, _("Test C"));
-	m_listCtrlAdmin->SetItem(tmp, 1, _("Test D"));
-	
-	tmp = m_listCtrlJudge->InsertItem(0, _("Test E"));
-	m_listCtrlJudge->SetItem(tmp, 1, _("Test F"));
-	
-	tmp = m_listCtrlJudge->InsertItem(1, _("Test G"));
-	m_listCtrlJudge->SetItem(tmp, 1, _("Test H"));
-	
-	tmp = m_listCtrlJudge->InsertItem(2, _("Test I"));
-	m_listCtrlJudge->SetItem(tmp, 1, _("Test J"));
-	
-	tmp = m_listCtrlTeam->InsertItem(0, _("Test K"));
-	m_listCtrlTeam->SetItem(tmp, 1, _("Test L"));
-	
-	tmp = m_listCtrlTeam->InsertItem(1, _("Test M"));
-	m_listCtrlTeam->SetItem(tmp, 1, _("Test N"));
-	
 	if(adminproto_logout(server_ip, login_id) < 0)
 		wxMessageBox(_("Server not responding"));
 	
