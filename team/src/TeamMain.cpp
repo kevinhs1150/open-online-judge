@@ -147,20 +147,51 @@ void TeamFrame::OnButtonClickLogout( wxCommandEvent& event )
 
 void TeamFrame::OnButtonClickDownload( wxCommandEvent& event )
 {
-    teamproto_problem_download(server_ip, login_id, m_choiceProblem->GetCurrentSelection());
+    if(m_choiceProblem->GetStringSelection().IsEmpty()){
+        wxMessageBox(_("Plz select problem!"));
+    }
+    else{
+        teamproto_problem_download(server_ip, login_id, m_choiceProblem->GetCurrentSelection());
+    }
     return;
 }
 
 void TeamFrame::OnButtonClickTest( wxCommandEvent& event )
 {
+    wchar_t temp[10];
 
+    swprintf(temp, L"test");
+
+    cb_problem_add( 5, temp );
+    cb_problem_add( 3, temp );
+    cb_problem_add( 15, temp );
+    cb_problem_add( 0, temp );
+
+    swprintf(temp, L"test2");
+    cb_problem_add( 3, temp );
+    cb_problem_del( 5 );
+    cb_problem_del( 1 );
+    cb_problem_mod( 15, temp );
 }
 
 void TeamFrame::OnButtonClickSubmit( wxCommandEvent& event )
 {
-    submitconfirmdialog = new SubmitConfirmDialog(this);
-    submitconfirmdialog->ShowModal();
-    submitconfirmdialog->Destroy();
+    if(m_choiceProblem->GetStringSelection().IsEmpty() || m_choiceLang->GetStringSelection().IsEmpty()|| m_filePicker->GetPath().IsEmpty()){
+        if(m_choiceProblem->GetStringSelection().IsEmpty()){
+            wxMessageBox(_("Plz select problem!"));
+        }
+        if(m_choiceLang->GetStringSelection().IsEmpty()){
+            wxMessageBox(_("Plz select code lang!"));
+        }
+        if(m_filePicker->GetPath().IsEmpty()){
+            wxMessageBox(_("Plz select path!"));
+        }
+    }
+    else{
+        submitconfirmdialog = new SubmitConfirmDialog(this);
+        submitconfirmdialog->ShowModal();
+        submitconfirmdialog->Destroy();
+    }
     return;
 }
 
@@ -392,7 +423,7 @@ void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int second
 
 void cb_contest_start( void )
 {
-    TeamFrameGlobal->m_timer.Start();
+    TeamFrameGlobal->m_timer.Start(1000);
     return;
 }
 
