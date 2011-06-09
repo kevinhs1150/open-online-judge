@@ -2,6 +2,8 @@
 #include "JudgeSubmission.h"
 #include "JudgeCompare.h"
 #include "JudgementConfirm.h"
+#include <wx/process.h>
+#include <wx/filefn.h>
 
 extern "C"
 {
@@ -258,7 +260,13 @@ int compile(wchar_t file_name[], wchar_t type[])
     fptr1=fopen("out.exe","r");
     if(fptr1 != NULL){
         fclose(fptr1);
-        DeleteFile(L"out.exe");
+        wxRemoveFile(wxT("out.exe"));
+    }
+	
+	fptr1=fopen("ans.txt","r");
+    if(fptr1 != NULL){
+        fclose(fptr1);
+        wxRemoveFile(wxT("ans.txt"));
     }
 	
     fptr1=fopen_sp(file_name,L"r");
@@ -272,7 +280,6 @@ int compile(wchar_t file_name[], wchar_t type[])
 			call_mbsize = wcstombs( NULL, call, 0 ) + 1;
 			wcstombs( call_mb, call, call_mbsize );
 			
-	printf("%s\n",call_mb);
 			system(call_mb);
 			return(complie_result());
 		}
@@ -302,7 +309,6 @@ int complie_result(){
     char ch;
     int result = SUCCESS;
 
-	printf("result1\n");
     fptr1 = fopen("out.exe","r");
     fptr2 = fopen("output.txt","r");
     if(fptr1 != NULL){
@@ -327,29 +333,21 @@ int complie_result(){
 
 int time(){
     int i;
+	long pid;
+	wxProcess *wxP = NULL;
 
-    PROCESS_INFORMATION pi;
-    STARTUPINFO si;
-    HANDLE hProg;
-
-    memset(&si,0,sizeof(si));
-    si.cb= sizeof(si);
-
-    CreateProcess( NULL, L"executive.exe", NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
-    hProg = pi.hProcess;
-
+	pid = wxExecute(wxT("executive.exe"),wxEXEC_NOHIDE,wxP);
     for(i = 0; i < (submissionFrame->getTimeLimit()) ;i++){
         Sleep(1000);
-        if(WaitForSingleObject(hProg,0) != WAIT_TIMEOUT){
+		if(wxProcess::Exists(pid) == true){
             break;
         }
     }
 
-    if(WaitForSingleObject(hProg,0) == WAIT_TIMEOUT){
+	if(wxProcess::Exists(pid) == false){
         system("taskkill /F /IM out.exe");
         return -1;
     }
-
     return 0;
 }
 
@@ -359,7 +357,7 @@ int judge(unsigned int problem_id){
     char o;
 	char problem_ans[50];
 
-    sprintf(problem_ans, "problem/%s_answer.txt", problem_id);
+    sprintf(problem_ans, "problem/%u_answer.txt", problem_id);
 
     fptr1 = fopen(problem_ans,"r");
     fptr2 = fopen("ans.txt","r");
