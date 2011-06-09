@@ -26,6 +26,8 @@ struct Clar{
 	wxString result_msg;
 };
 
+int wxCALLBACK ListCompareFunction(long item1, long item2, long WXUNUSED(sortData));
+
 class AdminFrame: public AdminGUI
 {
     public:
