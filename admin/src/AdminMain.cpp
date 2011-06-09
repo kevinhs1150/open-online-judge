@@ -477,6 +477,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	loginDialog->Destroy();
 	
 	if(isLogin){
+		m_staticTextName->SetLabel(m_loginName);
 		adminproto_account_sync(server_ip);
 		adminproto_problem_sync(server_ip);
 		adminproto_sb_sync(server_ip);

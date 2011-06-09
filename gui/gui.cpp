@@ -663,6 +663,8 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_buttonProblemAdd->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickAddProblem ), NULL, this );
 	m_buttonProblemDel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDelProblem ), NULL, this );
 	m_buttonProblemApply->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickProblemApply ), NULL, this );
+	m_listCtrlClars->Connect( wxEVT_COMMAND_LIST_ITEM_DESELECTED, wxListEventHandler( AdminGUI::OnListItemDeselectedClar ), NULL, this );
+	m_listCtrlClars->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedClar ), NULL, this );
 }
 
 AdminGUI::~AdminGUI()
@@ -686,6 +688,8 @@ AdminGUI::~AdminGUI()
 	m_buttonProblemAdd->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickAddProblem ), NULL, this );
 	m_buttonProblemDel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDelProblem ), NULL, this );
 	m_buttonProblemApply->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickProblemApply ), NULL, this );
+	m_listCtrlClars->Disconnect( wxEVT_COMMAND_LIST_ITEM_DESELECTED, wxListEventHandler( AdminGUI::OnListItemDeselectedClar ), NULL, this );
+	m_listCtrlClars->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedClar ), NULL, this );
 	
 }
 
