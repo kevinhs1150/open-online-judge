@@ -483,7 +483,7 @@ class JudgeSubmissionGUI : public wxDialog
 		
 		wxStaticText* m_staticTextResult;
 		wxChoice* m_choiceJudgement;
-		wxButton* m_button35;
+		wxButton* m_buttonShowOutput;
 		
 		
 		wxButton* m_buttonJudge;

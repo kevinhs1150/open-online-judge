@@ -622,7 +622,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelClar->SetSizer( bSizerClarPage );
 	m_panelClar->Layout();
 	bSizerClarPage->Fit( m_panelClar );
-	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), true );
+	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), false );
 	m_panelSB = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerSBMain;
 	bSizerSBMain = new wxBoxSizer( wxVERTICAL );
@@ -633,7 +633,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelSB->SetSizer( bSizerSBMain );
 	m_panelSB->Layout();
 	bSizerSBMain->Fit( m_panelSB );
-	m_notebook->AddPage( m_panelSB, wxT("Scoreborad"), false );
+	m_notebook->AddPage( m_panelSB, wxT("Scoreborad"), true );
 	
 	bSizerNotebook->Add( m_notebook, 1, wxEXPAND|wxALL, 5 );
 	
@@ -1530,8 +1530,8 @@ JudgeSubmissionGUI::JudgeSubmissionGUI( wxWindow* parent, wxWindowID id, const w
 	m_choiceJudgement->SetSelection( 0 );
 	bSizer69->Add( m_choiceJudgement, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_button35 = new wxButton( this, wxID_ANY, wxT("Show Output"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer69->Add( m_button35, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_buttonShowOutput = new wxButton( this, wxID_ANY, wxT("Show Output"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer69->Add( m_buttonShowOutput, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	
 	bSizer69->Add( 0, 0, 1, wxEXPAND, 5 );
@@ -1569,7 +1569,7 @@ JudgeSubmissionGUI::JudgeSubmissionGUI( wxWindow* parent, wxWindowID id, const w
 	m_buttonShowSource->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickShowSource ), NULL, this );
 	m_buttonRun->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickRun ), NULL, this );
 	m_buttonStop->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickStop ), NULL, this );
-	m_button35->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickShowOutput ), NULL, this );
+	m_buttonShowOutput->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickShowOutput ), NULL, this );
 	m_buttonJudge->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickJudge ), NULL, this );
 	m_buttonCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickCancel ), NULL, this );
 }
@@ -1581,7 +1581,7 @@ JudgeSubmissionGUI::~JudgeSubmissionGUI()
 	m_buttonShowSource->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickShowSource ), NULL, this );
 	m_buttonRun->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickRun ), NULL, this );
 	m_buttonStop->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickStop ), NULL, this );
-	m_button35->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickShowOutput ), NULL, this );
+	m_buttonShowOutput->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickShowOutput ), NULL, this );
 	m_buttonJudge->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickJudge ), NULL, this );
 	m_buttonCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( JudgeSubmissionGUI::OnButtonClickCancel ), NULL, this );
 	
