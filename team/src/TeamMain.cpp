@@ -43,6 +43,7 @@ wxMutex mutexScoreboard;
 wxMutex mutexProblem;
 
 
+
 ///////////////////////////////////////////////////////////////////////////////
 /// TeamFrame
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,8 +93,15 @@ TeamFrame::TeamFrame(wxFrame *frame)
 			logindialog->Destroy();
 			Destroy();
 		}
+		logindialog->Destroy();
 		m_staticTextTeamName->SetLabel(logindialog->m_textCtrlID->GetValue());
     }
+
+    m_choiceLang->Append(wxString() << _("c"));
+    m_choiceLang->Append(wxString() << _("cpp"));
+    m_choiceLang->Append(wxString() << _("cs"));
+    m_choiceLang->Append(wxString() << _("java"));
+    m_choiceLang->Append(wxString() << _("vb"));
 
     itemCol.SetText(_("ID"));
 	m_listCtrlRuns->InsertColumn(0, itemCol);
@@ -178,7 +186,7 @@ void TeamFrame::OnTimerEvent(wxTimerEvent &event){
 ///////////////////////////////////////////////////////////////////////////////
 /// ChangePassDialog
 ///////////////////////////////////////////////////////////////////////////////
-ChangePassDialog::ChangePassDialog(wxFrame *frame) : ChangePassGUI( this )
+ChangePassDialog::ChangePassDialog(wxFrame *frame) : ChangePassGUI( frame )
 {
 
 }
@@ -222,7 +230,7 @@ void ChangePassDialog::ChangeSuccess(){
 ///////////////////////////////////////////////////////////////////////////////
 /// SubmitConfirmDialog
 ///////////////////////////////////////////////////////////////////////////////
-SubmitConfirmDialog::SubmitConfirmDialog(wxFrame *frame) : SubmitConfirmGUI( this )
+SubmitConfirmDialog::SubmitConfirmDialog(wxFrame *frame) : SubmitConfirmGUI( frame )
 {
     m_staticTextProblemVal->SetLabel(TeamFrameGlobal->m_choiceProblem->GetStringSelection());
     m_staticTextLangVal->SetLabel(TeamFrameGlobal->m_choiceLang->GetStringSelection());
@@ -260,7 +268,7 @@ void SubmitConfirmDialog::OnButtonClickNo( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////////
 /// ClarDialog
 ///////////////////////////////////////////////////////////////////////////////
-ClarDialog::ClarDialog(wxFrame *frame) : ClarDialogGUI( this )
+ClarDialog::ClarDialog(wxFrame *frame) : ClarDialogGUI( frame )
 {
 
 }
@@ -289,7 +297,7 @@ void ClarDialog::OnButtonClickNo( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////////
 /// ClarConfirmDialog
 ///////////////////////////////////////////////////////////////////////////////
-ClarConfirmDialog::ClarConfirmDialog(wxFrame *frame) : ClarConfirmGUI( this )
+ClarConfirmDialog::ClarConfirmDialog(wxFrame *frame) : ClarConfirmGUI( frame )
 {
     m_textCtrlFileQuestion->SetValue(clardialog->m_textCtrlFileQuestion->GetValue());
 }
@@ -301,9 +309,15 @@ ClarConfirmDialog::~ClarConfirmDialog()
 
 void ClarConfirmDialog::OnButtonClickYes( wxCommandEvent& event )
 {
+    printf("ClarConfirmDialog::OnButtonClickYes 1\n");
     wchar_t *temp = new wchar_t [wcslen(m_textCtrlFileQuestion->GetValue().c_str()) + 1];
+	printf("ClarConfirmDialog::OnButtonClickYes 2\n");
 	wcscpy( temp, m_textCtrlFileQuestion->GetValue().c_str() );
+	printf("ClarConfirmDialog::OnButtonClickYes 3\n");
+	wprintf(L"%s\n", temp);
+	printf("ClarConfirmDialog::OnButtonClickYes 4\n");
     teamproto_clar(server_ip, login_id, 0, temp);
+    printf("ClarConfirmDialog::OnButtonClickYes 5\n");
 
     delete temp;
     EndModal(1);
@@ -345,11 +359,7 @@ void cb_logout_confirm( int confirm_code )
 {
     if(confirm_code == LOGOUT_OK){
 		wxMessageBox(_("Logout success!"));
-		login_id = NULL;
-		if(logindialog->ShowModal() == 0){
-			logindialog->Destroy();
-			TeamFrameGlobal->Destroy();
-		}
+		TeamFrameGlobal->Destroy();
 	}
 	else if(confirm_code == LOGOUT_FAIL){
 		wxMessageBox(_("Logout fail!"));
