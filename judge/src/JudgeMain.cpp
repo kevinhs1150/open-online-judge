@@ -63,6 +63,7 @@ void clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string 
 unsigned int unJudgeNumCount(void);
 void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_language);
 void problem_insert(unsigned int problem_id,wchar_t *problem_name, unsigned int time_limit);
+void problem_filter_search(unsigned int problem_id);
 problem_all *problem_search(unsigned int problem_id);
 void problem_search_delete(unsigned int problem_id);
 void run_search_delete(unsigned int problem_id);
@@ -214,7 +215,7 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 	changePassFrame->Show();
 	changePassFrame->set_account_id(this->account_id);
 	//=====================================================================================
-	/*problem_update_dlfin( 1, L"one", 3, L"problem/1.pdf", L"problem/1_input.txt", L"problem/1_ans.txt" );
+	problem_update_dlfin( 1, L"one", 3, L"problem/1.pdf", L"problem/1_input.txt", L"problem/1_ans.txt" );
 	problem_update_dlfin( 2, L"two", 3, L"problem/2.pdf", L"problem/2_input.txt", L"problem/2_ans.txt" );
 	
 	run_request_dlfin( 0, 1, L"c", L"0.c" );
@@ -223,7 +224,7 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 	run_request_dlfin( 3, 1, L"c", L"3.c" );
 	run_request_dlfin( 4, 1, L"c", L"4.c" );
 	
-	take_result(0,TAKE_SUCCESS);*/
+	take_result(0,TAKE_SUCCESS);
 	//======================================================================================
 }
 
@@ -236,11 +237,14 @@ void JudgeFrame::OnChoiceFilter( wxCommandEvent& event )
 {
 	wxListItem item;
 	unsigned int problem_id;
-	char *problem_name;
+	//char *problem_name;
 	wxString text;
+	int post;
 	
-	text = even.GetText();
-	text << (wxT("%u %s"),&problem_id,problem_name);
+	text = event.GetString();
+	post = text.Find(wxT(" "));
+	text.Remove(post);
+	problem_id = wxAtoi(text);
 }
 
 void JudgeFrame::OnCheckBoxAutoJudge( wxCommandEvent& event )
@@ -548,6 +552,28 @@ void problem_insert(unsigned int problem_id, wchar_t *problem_name, unsigned int
 
 		currentPtr->next = temp_id;
 	}
+}
+
+void problem_filter_search(unsigned int problem_id)
+{
+	unsigned int row;/////////////////////////////////////////////
+	run_request_id *pfptr = pptr;
+	
+	while(1){
+		if(pfptr->problem_id == problem_id){
+			row = unJudgeNumCount() + 1 ;
+			insertString.Printf(wxT("%d"),run_id);
+			tmp = mainFrame->m_listCtrlRuns->InsertItem(row,insertString);
+			insertString.Printf(wxT("%d"),problem_id);
+			mainFrame->m_listCtrlRuns->SetItem(tmp, 1, insertString);
+			insertString.Printf(wxT("%s"),coding_language);
+			mainFrame->m_listCtrlRuns->SetItem(tmp, 2, insertString);
+		}
+		if(pfptr->next == NULL)
+			break;
+		pfptr = pfptr->next; 
+	}
+	
 }
 
 problem_all *problem_search(unsigned int problem_id)
