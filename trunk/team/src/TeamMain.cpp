@@ -5,7 +5,7 @@ extern "C"
     #include "teamproto.h"
 }
 #include <string.h>
-<wx/choice.h>
+#include <stdlib.h>
 
 BEGIN_EVENT_TABLE(TeamFrame, wxFrame)
     EVT_TIMER(-1, TeamFrame::OnTimerEvent)
@@ -92,6 +92,7 @@ TeamFrame::TeamFrame(wxFrame *frame)
 			logindialog->Destroy();
 			Destroy();
 		}
+		m_staticTextTeamName->SetLabel(logindialog->m_textCtrlID->GetValue());
     }
 
     itemCol.SetText(_("ID"));
@@ -449,7 +450,7 @@ void cb_pu_request( wchar_t **path_description )
     {
         temp = wxFileSelector(_("Download File"), _(""), _("problem"), _("pdf"));
     }while( temp.empty() );
-    wchar_t *path = malloc( ( wcslen(temp.c_str()) + 1 ) * sizeof( wchar_t ) );
+    wchar_t *path = (wchar_t*)malloc( ( wcslen(temp.c_str()) + 1 ) * sizeof( wchar_t ) );
 	wcscpy( path, temp.c_str());
 	path_description = &path;
 	return;
@@ -465,20 +466,20 @@ void cb_problem_add( unsigned int problem_id, wchar_t *problem_name )
 {
     mutexProblem.Lock();
     for(;max_problem_id <= problem_id; max_problem_id++)
-        TeamFrameGlobal->m_choiceProblem.Append(wxString() << _(""));
+        TeamFrameGlobal->m_choiceProblem->Append(wxString() << _(""));
     mutexProblem.Unlock();
-    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString() << problem_name);
+    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << problem_name);
     return;
 }
 
 void cb_problem_del( unsigned int problem_id )
 {
-    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString() << _(""));
+    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << _(""));
     return;
 }
 
 void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name )
 {
-    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString() << problem_name);
+    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << problem_name);
     return;
 }
