@@ -17,6 +17,14 @@ struct Problem{
 	wxString path_answer;
 };
 
+struct Clar{
+	unsigned int clar_id;
+	unsigned int account_id;
+	int private_byte;
+	wxString clar_msg;
+	wxString result_msg;
+};
+
 class AdminFrame: public AdminGUI
 {
     public:
@@ -26,8 +34,10 @@ class AdminFrame: public AdminGUI
 		bool isLogin;
 		unsigned int m_timeleft;
 		vector<Problem> list_problem;
+		vector<Clar> list_clar;
 		wxMutex m_mutexAccount;
 		wxMutex m_mutexProblem;
+		wxMutex m_mutexClar;
 		wxMutex m_mutexScoreboard;
 		
     private:

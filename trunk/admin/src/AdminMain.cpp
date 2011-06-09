@@ -149,11 +149,15 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 	p.path_answer = _("temp\\%d_o.tmp");
 	//AdminFrameGlobal->temp_problem.push_back(p);
 	
-	wchar_t *p_d = new wchar_t [wcslen(p.path_description.c_str()) + 1];
+	//wchar_t *p_d = new wchar_t [wcslen(p.path_description.c_str()) + 1];
+	wchar_t *p_d = (wchar_t*)malloc(wcslen(p.path_description.c_str()) + 1);
 	wcscpy(p_d, p.path_description.c_str());
-	wchar_t *p_i = new wchar_t [wcslen(p.path_input.c_str()) + 1];
+	//wchar_t *p_i = new wchar_t [wcslen(p.path_input.c_str()) + 1];
+	wchar_t *p_i = (wchar_t*)malloc(wcslen(p.path_input.c_str()) + 1);
 	wcscpy(p_i, p.path_input.c_str());
-	wchar_t *p_a = new wchar_t [wcslen(p.path_answer.c_str()) + 1];
+	//wchar_t *p_a = new wchar_t [wcslen(p.path_answer.c_str()) + 1];
+	wchar_t *p_a = (wchar_t*)malloc(wcslen(p.path_answer.c_str()) + 1);
+	
 	wcscpy(p_a, p.path_answer.c_str());
 	
 	*path_description = p_d;
@@ -280,7 +284,7 @@ void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int second
 }
 
 void cb_contest_start( void ){
-
+	
 }
 
 void cb_contest_stop( void ){
@@ -288,15 +292,65 @@ void cb_contest_stop( void ){
 }
 
 void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg ){
-
+	/*
+	AdminFrameGlobal->m_mutexClar.Lock();
+	
+	for(i = 0 ; i < AdminFrameGlobal->list_clar.size() ; i++)
+		if(AdminFrameGlobal->list_clar[i].clar_id == clar_id)
+			break;
+	
+	AdminFrameGlobal->m_mutexClar.Unlock();
+	*/
+	return;
 }
 
 void cb_clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string ){
-
+	AdminFrameGlobal->m_mutexClar.Lock();
+	int i;
+	for(i = 0 ; i < AdminFrameGlobal->list_clar.size() ; i++)
+		if(AdminFrameGlobal->list_clar[i].clar_id == clar_id)
+			break;
+	if(i < AdminFrameGlobal->list_clar.size()){ // in list
+		//list_clar[i].clar_msg = wxString(clarmsg);
+		AdminFrameGlobal->list_clar[i].result_msg = wxString(result_string);
+		/*
+		int j;
+		for(j = 0 ; j < AdminFrameGlobal->m_listCtrlClars->GetItemCount() ; j++)
+			if(AdminFrameGlobal->m_listCtrlClars->GetItemData(j) == clar_id)
+				break;
+		if(j < AdminFrameGlobal->m_listCtrlClars->GetItemCount()){
+			AdminFrameGlobal->m_listCtrlClars->SetItem(j, 1, wxString(new_account));
+		}
+		*/
+	}
+	else{
+		Clar c;
+		c.clar_id = clar_id;
+		//c.clar_msg = wxString(clarmsg);
+		c.result_msg = wxString(result_string);
+		AdminFrameGlobal->list_clar.push_back(c);
+	}
+	AdminFrameGlobal->m_mutexClar.Unlock();
+	
+	return;
 }
 
 void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ){
-
+	AdminFrameGlobal->m_mutexScoreboard.Lock();
+	
+	for(int i = 0 ; i < AdminFrameGlobal->m_listCtrlSB->GetItemCount() ; i++)
+		if(AdminFrameGlobal->m_listCtrlSB->GetItemData(i) == updated_account_id)
+			AdminFrameGlobal->m_listCtrlSB->DeleteItem(i);
+	long tmp;
+	tmp = AdminFrameGlobal->m_listCtrlSB->InsertItem(0, wxString(new_account));
+	AdminFrameGlobal->m_listCtrlSB->SetItem(tmp, 1, wxString(new_account));
+	AdminFrameGlobal->m_listCtrlSB->SetItem(tmp, 2, wxString() << new_accept_count);
+	AdminFrameGlobal->m_listCtrlSB->SetItem(tmp, 3, wxString() << new_time);
+	AdminFrameGlobal->m_listCtrlSB->SetItemData(tmp, updated_account_id);
+	
+	AdminFrameGlobal->m_mutexScoreboard.Unlock();
+	
+	return;
 }
 
 void cb_sb_remove( unsigned int rm_account_id ){
@@ -381,7 +435,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	if(isLogin){
 		adminproto_account_sync(server_ip);
 		adminproto_problem_sync(server_ip);
-		//adminproto_sb_sync(server_ip);
+		adminproto_sb_sync(server_ip);
 		adminproto_timer_sync(server_ip);
 		adminproto_contest_state_sync(server_ip);
 		adminproto_clar_sync(server_ip);
@@ -467,9 +521,12 @@ void AdminFrame::InitSBList(){
 	
 	itemCol.SetText(_("ID-Name"));
 	m_listCtrlSB->InsertColumn(1, itemCol);
-
-	itemCol.SetText(_("Penalty"));
+	
+	itemCol.SetText(_("Accept"));
 	m_listCtrlSB->InsertColumn(2, itemCol);
+	
+	itemCol.SetText(_("Penalty"));
+	m_listCtrlSB->InsertColumn(3, itemCol);
 	
 	return;
 }
@@ -681,6 +738,7 @@ void AdminFrame::OnButtonClickDelProblem( wxCommandEvent& event ){
 }
 
 void AdminFrame::OnButtonClickProblemApply( wxCommandEvent& event ){
+	printf("Apply click\n");
 	if(m_selectedProblem == -1){
 		//new
 		if(m_textCtrlProblemID->IsEmpty()){
@@ -722,13 +780,31 @@ void AdminFrame::OnButtonClickProblemApply( wxCommandEvent& event ){
 			return;
 		}
 		
-		wchar_t *name = m_textCtrlProblemName->GetLabel().wchar_str();
-		wchar_t *p_path = m_filePickerProblemFile->GetPath().wchar_str();
-		unsigned int time_limit = m_spinCtrlTimeLimitVal->GetValue();
-		wchar_t *i_path = m_filePickerProblemInputData->GetPath().wchar_str();
-		wchar_t *o_path = m_filePickerProblemOutputData->GetPath().wchar_str();
+		//wchar_t *name = m_textCtrlProblemName->GetLabel().wchar_str();
+		wchar_t *name = new wchar_t [wcslen(m_textCtrlProblemName->GetLabel().c_str()) + 1];
+		wcscpy( name, m_textCtrlProblemName->GetLabel().c_str() );
 		
+		//wchar_t *p_path = m_filePickerProblemFile->GetPath().wchar_str();
+		wchar_t *p_path = new wchar_t [wcslen(m_filePickerProblemFile->GetPath().c_str()) + 1];
+		wcscpy( p_path, m_filePickerProblemFile->GetPath().c_str() );
+		
+		unsigned int time_limit = m_spinCtrlTimeLimitVal->GetValue();
+		//wchar_t *i_path = m_filePickerProblemInputData->GetPath().wchar_str();
+		wchar_t *i_path = new wchar_t [wcslen(m_filePickerProblemInputData->GetPath().c_str()) + 1];
+		wcscpy( i_path, m_filePickerProblemInputData->GetPath().c_str() );
+		
+		//wchar_t *o_path = m_filePickerProblemOutputData->GetPath().wchar_str();
+		wchar_t *o_path = new wchar_t [wcslen(m_filePickerProblemOutputData->GetPath().c_str()) + 1];
+		wcscpy( o_path, m_filePickerProblemOutputData->GetPath().c_str() );
+		
+		wprintf(L"%s\n", name);
+		wprintf(L"%s\n", p_path);
+		wprintf(L"%s\n", i_path);
+		wprintf(L"%s\n", o_path);
+		
+		printf("call add before\n");
 		adminproto_problem_add(server_ip, id, name, time_limit, p_path, i_path, o_path);
+		printf("call add after\n");
 	}
 	else{
 		//edit
