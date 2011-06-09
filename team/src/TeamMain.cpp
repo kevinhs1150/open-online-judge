@@ -5,6 +5,7 @@ extern "C"
     #include "teamproto.h"
 }
 #include <string.h>
+<wx/choice.h>
 
 BEGIN_EVENT_TABLE(TeamFrame, wxFrame)
     EVT_TIMER(-1, TeamFrame::OnTimerEvent)
@@ -12,19 +13,19 @@ END_EVENT_TABLE()
 
 void cb_login_confirm( int confirm_code, unsigned int account_id );
 void cb_logout_confirm( int confirm_code );
-void cb_password_change_confirm( confirm_code );
+void cb_password_change_confirm( int confirm_code );
 void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int seconds );
 void cb_contest_start( void );
 void cb_contest_stop( void );
-void cb_run_reply( unsigned int run_id, wchar_t *result_string );
-void cb_clar_reply( unsigned int clar_id, wchar_t *result_string );
+void cb_run_reply( unsigned int run_id, unsigned int problem_id, wchar_t *result_string );
+void cb_clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
 void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
 void cb_sb_remove( unsigned int rm_account_id );
 void cb_pu_request( wchar_t **path_description );
 void cb_pu_request_dlfin( wchar_t *path_description );
-void cb_problem_add( unsigned int problem_id, wchar_t *problem_name ) );
-void cb_problem_del( unsigned int problem_id ) );
-void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name ) );
+void cb_problem_add( unsigned int problem_id, wchar_t *problem_name );
+void cb_problem_del( unsigned int problem_id );
+void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name );
 
 //global variables
 char server_ip[20];
@@ -86,7 +87,7 @@ TeamFrame::TeamFrame(wxFrame *frame)
 	else{
 		sprintf(server_ip, "%d.%d.%d.%d", ip1, ip2, ip3, ip4);
 		//pop out LoginDialog
-		logindialog = new LoginDialog();
+		logindialog = new LoginDialog(this);
 		if(logindialog->ShowModal() == 0){
 			logindialog->Destroy();
 			Destroy();
@@ -98,9 +99,15 @@ TeamFrame::TeamFrame(wxFrame *frame)
 	m_listCtrlClars->InsertColumn(0, itemCol);
 	m_listCtrlScore->InsertColumn(0, itemCol);
 
-	itemCol.SetText(_("Result"));
+	itemCol.SetText(_("Problem"));
     m_listCtrlRuns->InsertColumn(1, itemCol);
+
+    itemCol.SetText(_("Clarmsg"));
 	m_listCtrlClars->InsertColumn(1, itemCol);
+
+	itemCol.SetText(_("Result"));
+    m_listCtrlRuns->InsertColumn(2, itemCol);
+	m_listCtrlClars->InsertColumn(2, itemCol);
 
 	itemCol.SetText(_("Team"));
 	m_listCtrlScore->InsertColumn(1, itemCol);
@@ -117,7 +124,7 @@ TeamFrame::~TeamFrame()
 
 void TeamFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 {
-    changepassdialog = new ChangePassDialog;
+    changepassdialog = new ChangePassDialog(this);
     changepassdialog->ShowModal();
     changepassdialog->Destroy();
     return;
@@ -142,7 +149,7 @@ void TeamFrame::OnButtonClickTest( wxCommandEvent& event )
 
 void TeamFrame::OnButtonClickSubmit( wxCommandEvent& event )
 {
-    submitconfirmdialog = new SubmitConfirmDialog();
+    submitconfirmdialog = new SubmitConfirmDialog(this);
     submitconfirmdialog->ShowModal();
     submitconfirmdialog->Destroy();
     return;
@@ -150,7 +157,7 @@ void TeamFrame::OnButtonClickSubmit( wxCommandEvent& event )
 
 void TeamFrame::OnButtonClickAsk( wxCommandEvent& event )
 {
-    clardialog = new ClarDialog();
+    clardialog = new ClarDialog(this);
     clardialog->ShowModal();
     clardialog->Destroy();
     return;
@@ -170,7 +177,7 @@ void TeamFrame::OnTimerEvent(wxTimerEvent &event){
 ///////////////////////////////////////////////////////////////////////////////
 /// ChangePassDialog
 ///////////////////////////////////////////////////////////////////////////////
-ChangePassDialog::ChangePassDialog(wxFrame *frame)
+ChangePassDialog::ChangePassDialog(wxFrame *frame) : ChangePassGUI( this )
 {
 
 }
@@ -182,12 +189,12 @@ ChangePassDialog::~ChangePassDialog()
 
 void ChangePassDialog::OnButtonClickOK( wxCommandEvent& event )
 {
-    cahr* op = new char [strlen(m_textCtrlOldPass->GetValue().mb_str()) + 1];
+    char* op = new char [strlen(m_textCtrlOldPass->GetValue().mb_str()) + 1];
     strcpy( op, m_textCtrlOldPass->GetValue().mb_str());
-    cahr* np = new char [strlen(m_textCtrlNewPass->GetValue().mb_str()) + 1];
-    strcpy( np, m_textCtrlNewPass->GetValue().mb_str();
-    cahr* cp = new char [strlen(m_textCtrlConfirmPass->GetValue().mb_str()) + 1];
-    strcpy( cp, m_textCtrlConfirmPass->GetValue().mb_str();
+    char* np = new char [strlen(m_textCtrlNewPass->GetValue().mb_str()) + 1];
+    strcpy( np, m_textCtrlNewPass->GetValue().mb_str());
+    char* cp = new char [strlen(m_textCtrlConfirmPass->GetValue().mb_str()) + 1];
+    strcpy( cp, m_textCtrlConfirmPass->GetValue().mb_str());
     if( strcmp(np, cp) == 0 )
         teamproto_password_change(server_ip, login_id, op, np);
     else
@@ -214,7 +221,7 @@ void ChangePassDialog::ChangeSuccess(){
 ///////////////////////////////////////////////////////////////////////////////
 /// SubmitConfirmDialog
 ///////////////////////////////////////////////////////////////////////////////
-SubmitConfirmDialog::SubmitConfirmDialog(wxFrame *frame)
+SubmitConfirmDialog::SubmitConfirmDialog(wxFrame *frame) : SubmitConfirmGUI( this )
 {
     m_staticTextProblemVal->SetLabel(TeamFrameGlobal->m_choiceProblem->GetStringSelection());
     m_staticTextLangVal->SetLabel(TeamFrameGlobal->m_choiceLang->GetStringSelection());
@@ -252,7 +259,7 @@ void SubmitConfirmDialog::OnButtonClickNo( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////////
 /// ClarDialog
 ///////////////////////////////////////////////////////////////////////////////
-ClarDialog::ClarDialog(wxFrame *frame)
+ClarDialog::ClarDialog(wxFrame *frame) : ClarDialogGUI( this )
 {
 
 }
@@ -264,7 +271,7 @@ ClarDialog::~ClarDialog()
 
 void ClarDialog::OnButtonClickYes( wxCommandEvent& event )
 {
-    clarconfirmdialog = new ClarConfirmDialog;
+    clarconfirmdialog = new ClarConfirmDialog(NULL);
     clarconfirmdialog->ShowModal();
     clarconfirmdialog->Destroy();
     return;
@@ -281,7 +288,7 @@ void ClarDialog::OnButtonClickNo( wxCommandEvent& event )
 ///////////////////////////////////////////////////////////////////////////////
 /// ClarConfirmDialog
 ///////////////////////////////////////////////////////////////////////////////
-ClarConfirmDialog::ClarConfirmDialog(wxFrame *frame)
+ClarConfirmDialog::ClarConfirmDialog(wxFrame *frame) : ClarConfirmGUI( this )
 {
     m_textCtrlFileQuestion->SetValue(clardialog->m_textCtrlFileQuestion->GetValue());
 }
@@ -320,7 +327,7 @@ void cb_login_confirm( int confirm_code, unsigned int account_id )
 		logindialog->LoginSuccess();
 
         teamproto_sb_sync(server_ip);
-        teamproto_run_sync(server_ip);
+        teamproto_run_sync(server_ip, login_id);
         teamproto_timer_sync(server_ip);
         teamproto_contest_state_sync(server_ip);
 	}
@@ -340,7 +347,7 @@ void cb_logout_confirm( int confirm_code )
 		login_id = NULL;
 		if(logindialog->ShowModal() == 0){
 			logindialog->Destroy();
-			Destroy();
+			TeamFrameGlobal->Destroy();
 		}
 	}
 	else if(confirm_code == LOGOUT_FAIL){
@@ -349,7 +356,7 @@ void cb_logout_confirm( int confirm_code )
 	return;
 }
 
-void cb_password_change_confirm( confirm_code )
+void cb_password_change_confirm( int confirm_code )
 {
     if(confirm_code == PASSWD_SUCCESS){
         wxMessageBox(_("Password change success!"));
@@ -374,36 +381,38 @@ void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int second
 
 void cb_contest_start( void )
 {
-    m_timer.Start();
+    TeamFrameGlobal->m_timer.Start();
     return;
 }
 
 void cb_contest_stop( void )
 {
-    m_timer.Stop();
+    TeamFrameGlobal->m_timer.Stop();
     return;
 }
 
-void cb_run_reply( unsigned int run_id, wchar_t *result_string )
+void cb_run_reply( unsigned int run_id, unsigned int problem_id, wchar_t *result_string )
 {
     mutexRun.Lock();
     long temp = TeamFrameGlobal->m_listCtrlRuns->FindItem(-1, wxString() << run_id);
     if(temp == wxNOT_FOUND){
         temp = TeamFrameGlobal->m_listCtrlRuns->InsertItem(0, wxString() << run_id);
     }
-    TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 1, wxString() << result_string);
+    TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 1, wxString() << problem_id);
+    TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 2, wxString() << result_string);
     mutexRun.Unlock();
     return;
 }
 
-void cb_clar_reply( unsigned int clar_id, wchar_t *result_string )
+void cb_clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string )
 {
     mutexClar.Lock();
     long temp = TeamFrameGlobal->m_listCtrlClars->FindItem(-1, wxString() << clar_id);
     if(temp == wxNOT_FOUND){
         temp = TeamFrameGlobal->m_listCtrlClars->InsertItem(0, wxString() << clar_id);
     }
-    TeamFrameGlobal->m_listCtrlClars->SetItem(temp, 1, wxString() << result_string);
+    TeamFrameGlobal->m_listCtrlClars->SetItem(temp, 1, wxString() << clarmsg);
+    TeamFrameGlobal->m_listCtrlClars->SetItem(temp, 2, wxString() << result_string);
     mutexClar.Unlock();
     return;
 }
@@ -425,7 +434,7 @@ void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsign
 void cb_sb_remove( unsigned int rm_account_id )
 {
     mutexScoreboard.Lock();
-    long temp = TeamFrameGlobal->m_listCtrlScore->FindItem(-1, wxString() << updated_account_id);
+    long temp = TeamFrameGlobal->m_listCtrlScore->FindItem(-1, wxString() << rm_account_id);
     if(temp != wxNOT_FOUND){
         TeamFrameGlobal->m_listCtrlScore->DeleteItem(temp);
     }
@@ -439,7 +448,7 @@ void cb_pu_request( wchar_t **path_description )
     do
     {
         temp = wxFileSelector(_("Download File"), _(""), _("problem"), _("pdf"));
-    }while( filename.empty() );
+    }while( temp.empty() );
     wchar_t *path = malloc( ( wcslen(temp.c_str()) + 1 ) * sizeof( wchar_t ) );
 	wcscpy( path, temp.c_str());
 	path_description = &path;
@@ -452,24 +461,24 @@ void cb_pu_request_dlfin( wchar_t *path_description )
     return;
 }
 
-void cb_problem_add( unsigned int problem_id, wchar_t *problem_name ) )
+void cb_problem_add( unsigned int problem_id, wchar_t *problem_name )
 {
     mutexProblem.Lock();
     for(;max_problem_id <= problem_id; max_problem_id++)
-        TeamFrameGlobal->m_choiceProblem.Append(_(""));
+        TeamFrameGlobal->m_choiceProblem.Append(wxString() << _(""));
     mutexProblem.Unlock();
     TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString() << problem_name);
     return;
 }
 
-void cb_problem_del( unsigned int problem_id ) )
+void cb_problem_del( unsigned int problem_id )
 {
-    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, _(""));
+    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString() << _(""));
     return;
 }
 
-void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name ) )
+void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name )
 {
-    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString << problem_name);
+    TeamFrameGlobal->m_choiceProblem.SetString(problem_id, wxString() << problem_name);
     return;
 }
