@@ -32,7 +32,9 @@ int win32_sock_init( void )
 
 	if( WSAStartup( MAKEWORD(2,2), &wsaData ) != 0 )
 	{
+#if PROTO_DBG > 0
 		printf("[win32_sock_init()] WSAStartup() call failed.\n");
+#endif
 		return -1;
 	}
 
@@ -43,7 +45,9 @@ int win32_sock_cleanup( void )
 {
 	if( WSACleanup() != 0 )
 	{
+#if PROTO_DBG > 0
 		printf("[win32_sock_cleanup()] WSACleanup() call failed.\n");
+#endif
 		return -1;
 	}
 
@@ -220,12 +224,17 @@ int filesend( char *destip, short desttype, wchar_t *filepath )
 		/* read 1KB(BUFLEN=1024bytes) block and send */
 		sendbyte = send_sp( sockfd, sendbuf, sendbyte );
 		a_sendbyte += sendbyte;
+
+#if PROTO_DBG > 1
 		printf("%d, %d      \r", a_sendbyte, sendbyte);
+#endif
 
 		/* second sync: are you ready? */
 		recv( sockfd, recvbuf, BUFLEN, 0 );
 	}
+#if PROTO_DBG > 1
 	printf("\n");
+#endif
 
 	shutdown_wr_sp( sockfd );
 	fclose( fptr );
@@ -283,12 +292,17 @@ int filerecv( wchar_t *filepath )
 		recvbyte = recv( sockfd, recvbuf, recvbyte, 0 );
 		fwrite( recvbuf, 1, recvbyte, fptr );
 		a_recvbyte += recvbyte;
+	
+#if PROTO_DBG >1
 		printf("%d, %d        \r", a_recvbyte, recvbyte );
+#endif
 
 		/* second sync: i'm ready */
 		send( sockfd, sendbuf, BUFLEN, 0 );
 	}
+#if PROTO_DBG > 1
 	printf("\n");
+#endif
 
 	shutdown_wr_sp( sockfd );
 	fclose( fptr );
@@ -413,11 +427,11 @@ char *int2str( int input )
 	int input_cpy = abs( input );
 	int input_digit;
 	int size;
-	
+
 	/* to prevent floating point precision trouble */
 	if( input_cpy == 0 )
 		input_cpy = 1;
-		
+
 	/* take log10 to count the digits */
 	input_digit = (int)ceil( log10( input_cpy ) );
 	size = ( input_digit + 2 ) * sizeof( char );
@@ -437,11 +451,11 @@ char *uint2str( unsigned int input )
 	int input_cpy = abs( input );
 	int input_digit;
 	int size;
-	
+
 	/* to prevent floating point precision trouble */
 	if( input_cpy == 0 )
 		input_cpy = 1;
-	
+
 	input_digit = (int)ceil( log10( input_cpy ) );
 	size = ( input_digit + 2 ) * sizeof( char );
 
