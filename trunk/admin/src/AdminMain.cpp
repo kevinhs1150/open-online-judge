@@ -140,60 +140,50 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 	printf("DL\n");
 
 	FILE *file_d, *file_i, *file_o;
-	char path[100];
 	int i = 0;
 	
 	AdminFrameGlobal->m_mutexProblem.Lock();
 	while(1){
 		FILE *temp;
+		char path[50];
 		sprintf(path, "temp\\%d_d.tmp", i);
+		printf("chcek :%s\n", path);
 		temp = fopen(path, "r");
 		if(temp == NULL)
 			break;
 		fclose(temp);
 		i++;
 	}
-	AdminFrameGlobal->m_mutexProblem.Unlock();
-	
-	Problem p;
-	sprintf(path, "temp\\%d_d.tmp", i);
-	printf("%s\n", path);
-	p.path_description = wxString::Format(_("%s"), path);
-	file_d = fopen(path, "w");
-	
-	sprintf(path, "temp\\%d_i.tmp", i);
-	p.path_input = wxString::Format(_("%s"), path);
-	file_i = fopen(path, "w");
-	
-	sprintf(path, "temp\\%d_o.tmp", i);
-	p.path_answer = wxString::Format(_("%s"), path);
-	file_o = fopen(path, "w");
+	char temp[50];
+	sprintf(temp, "temp\\%d_d.tmp", i);
+	file_d = fopen(temp, "w");
+	sprintf(temp, "temp\\%d_i.tmp", i);
+	file_i = fopen(temp, "w");
+	sprintf(temp, "temp\\%d_o.tmp", i);
+	file_o = fopen(temp, "w");
 	fclose(file_o);
 	fclose(file_i);
 	fclose(file_d);
+	AdminFrameGlobal->m_mutexProblem.Unlock();
+
+	wxString path;
+	path = wxString::Format(_("temp\\%d_d.tmp"), i);
+	wchar_t *path_d = (wchar_t*)malloc( (wcslen(path.c_str()) + 1) * sizeof(wchar_t) );
+	wcscpy(path_d, path.c_str());
 	
-	wxMessageBox(p.path_description);
+	path = wxString::Format(_("temp\\%d_i.tmp"), i);
+	wchar_t *path_i = (wchar_t*)malloc( (wcslen(path.c_str()) + 1) * sizeof(wchar_t) );
+	wcscpy(path_i, path.c_str());
 	
-	//AdminFrameGlobal->temp_problem.push_back(p);
-	
-	//wchar_t *p_d = new wchar_t [wcslen(p.path_description.c_str()) + 1];
-	wchar_t *p_d = (wchar_t*)malloc( ( wcslen(p.path_description.c_str()) + 1 ) * sizeof( wchar_t ) );
-	wcscpy(p_d, p.path_description.c_str());
-	//wchar_t *p_i = new wchar_t [wcslen(p.path_input.c_str()) + 1];
-	wchar_t *p_i = (wchar_t*)malloc( ( wcslen(p.path_input.c_str()) + 1 ) * sizeof( wchar_t ) );
-	wcscpy(p_i, p.path_input.c_str());
-	//wchar_t *p_a = new wchar_t [wcslen(p.path_answer.c_str()) + 1];
-	wchar_t *p_a = (wchar_t*)malloc( ( wcslen(p.path_answer.c_str()) + 1 ) * sizeof( wchar_t ) );
-	wcscpy(p_a, p.path_answer.c_str());
-	
-	wprintf(L"%s\n", p_d);
-	
-	*path_description = p_d;
-	*path_input = p_i;
-	*path_answer = p_a;
+	path = wxString::Format(_("temp\\%d_o.tmp"), i);
+	wchar_t *path_o = (wchar_t*)malloc( (wcslen(path.c_str()) + 1) * sizeof(wchar_t) );
+	wcscpy(path_o, path.c_str());
+
+	*path_description = path_d;
+	*path_input = path_i;
+	*path_answer = path_o;
 	
 	return;
-
 }
 
 void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ){
