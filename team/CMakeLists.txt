@@ -2,6 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(Team)
 INCLUDE_DIRECTORIES("../gui")
 INCLUDE_DIRECTORIES("../liboojproto/include")
+INCLUDE_DIRECTORIES("../libpthread")
 
 SET(srcs src/TeamApp.cpp src/TeamMain.cpp src/LoginDialog.cpp)
 ADD_EXECUTABLE(Team WIN32 ${srcs})
