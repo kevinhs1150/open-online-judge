@@ -294,8 +294,8 @@ void SubmitConfirmDialog::OnButtonClickYes( wxCommandEvent& event )
 {
     wchar_t *lang = new wchar_t [wcslen(m_staticTextLangVal->GetLabel().c_str()) + 1];
 	wcscpy( lang, m_staticTextLangVal->GetLabel().c_str() );
-	wchar_t *path = new wchar_t [wcslen(m_staticTextFilePath->GetLabel().c_str()) + 1];
-	wcscpy( path, m_staticTextFilePath->GetLabel().c_str() );
+	wchar_t *path = new wchar_t [wcslen(m_textCtrlFilePathVal->GetValue().c_str()) + 1];
+	wcscpy( path, m_textCtrlFilePathVal->GetValue().c_str() );
 
     teamproto_submission(server_ip, login_id, TeamFrameGlobal->m_choiceProblem->GetCurrentSelection(), lang, path);
 
