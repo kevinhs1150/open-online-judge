@@ -113,6 +113,7 @@ JudgeFrame::JudgeFrame(wxFrame *frame)
 		return;
     }
 	
+    system("mkdir problem");
     IP_set();
     mainFrame = this;
 	mainFrame->setUnJudgeNum(0);
@@ -371,7 +372,7 @@ void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_
     }
 
     /**TODO: new memory for *path_code**/
-    *path_code = (wchar_t *) malloc( (strlen(filename)) +1 * sizeof(wchar_t));
+    *path_code = (wchar_t *) malloc( (strlen(filename) +1 ) * sizeof(wchar_t));
     wsprintf(*path_code, L"%s", filename );
 }
 
@@ -392,21 +393,20 @@ void run_request_dlfin( unsigned int run_id, unsigned int problem_id, wchar_t *c
 
 void problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer)
 {/***HERE***/
-    /**TODO:improve mkdir**/
-    system("mkdir problem");
+    wchar_t path[50];
 
-    char path[50];
-
-    sprintf(path, "problem/%u", problem_id);
+    wsprintf(path, L"problem/%u", problem_id);
 
     /**TODO: new memory for *path_code**/
-    *path_description = (wchar_t *) malloc( (strlen(path))+1 * sizeof(wchar_t));
-    *path_input = (wchar_t *)malloc( strlen(path)+1 * sizeof(wchar_t));
-    *path_answer = (wchar_t *)malloc( strlen(path)+1 * sizeof(wchar_t));
+    *path_description = (wchar_t *) malloc( ( wcslen(path)+1 ) * sizeof(wchar_t));
+    *path_input = (wchar_t *)malloc( ( wcslen(path)+1 ) * sizeof(wchar_t));
+    *path_answer = (wchar_t *)malloc( ( wcslen(path)+1 ) * sizeof(wchar_t));
 
     wsprintf(*path_description, L"%s.pdf", path );
     wsprintf(*path_input, L"%s_input.txt", path );
     wsprintf(*path_answer, L"%s_answer.txt", path );
+	
+	wprintf(L"%s\n", *path_description);
 }
 
 void problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
