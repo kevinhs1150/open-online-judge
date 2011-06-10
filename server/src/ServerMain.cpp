@@ -168,7 +168,7 @@ ServerFrame::~ServerFrame()
 
 void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 {
-	char sqlquery[100], **table, *errMsg;
+	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 
 	/* start listen socket */
@@ -219,7 +219,8 @@ void ServerFrame::OnTimerEvent(wxTimerEvent &event){
 /* Server callback function definition. */
 void callback_login_request( char *srcip, short srctype, wchar_t *account, char *password )
 {
-	char sqlquery[100], account_char[28], **table, *errMsg = NULL;
+	char sqlquery[100], **table, *errMsg = NULL;
+	char account_char[28];
 	int rows, cols;
 	unsigned int account_id;
 
@@ -326,7 +327,7 @@ void callback_contest_state_sync( char *srcip, short srctype )
 
 void callback_admin_timer_set( char *srcip, unsigned int hours, unsigned int minutes, unsigned int seconds )
 {
-	char sqlquery[100], **table, *errMsg;
+	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 	unsigned int account_type;
 	
@@ -334,8 +335,8 @@ void callback_admin_timer_set( char *srcip, unsigned int hours, unsigned int min
 	
 	m_timeleft = hours * 360 + minutes * 60 + seconds;
 	
-	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	sprintf(sqlquery, "SELECT account_type, ipaddress FROM user WHERE logged_in = 'yes';");
+	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
 		sscanf(table[i * cols + 0], "%u", &account_type);
@@ -363,22 +364,27 @@ void callback_admin_contest_stop( char *srcip )
 /* the function needs a subdirectory "submits/" */
 void callback_submission_request( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )
 {
-	char sqlquery[100], coding_language_char[10], path_code_char[30], **table, *errMsg = NULL;
+	char sqlquery[100], **table, *errMsg = NULL;
+	char coding_language_char[10], path_code_char[30];
 	int rows, cols;
 
 	/* set path_code */
 	sprintf(sqlquery, "SELECT * FROM submission;");
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
-	wcstombs(coding_language_char, coding_language, 10);
-	sprintf(path_code_char, "submits/submit%d.%s", rows + 1, coding_language_char);
-	mbstowcs(*path_code, path_code_char, 30);
+	if(rows >= 1)
+	{
+		wcstombs(coding_language_char, coding_language, 10);
+		sprintf(path_code_char, "submits/submit%d.%s", rows + 1, coding_language_char);
+		mbstowcs(*path_code, path_code_char, 30);
+	}
+	
 	sqlite3_free_table(table);
 }
 
 void callback_submission_request_dlfin( char *srcip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
 {
-	char sqlquery[100], path_code_char[30], coding_language_char[10];
-	char **table, *errMsg = NULL;
+	char sqlquery[100], **table, *errMsg = NULL;
+	char path_code_char[30], coding_language_char[10];
 	int rows, cols, i;
 	unsigned int run_id;
 
@@ -405,9 +411,11 @@ void callback_submission_request_dlfin( char *srcip, unsigned int account_id, un
 
 void callback_pd_request( char *srcip, unsigned int account_id, unsigned int problem_id )
 {
-	char sqlquery[100], path_description_char[50], **table, *errMsg = NULL;
-	wchar_t path_description_wchar[50];
+	char sqlquery[100], **table, *errMsg = NULL;
+	char path_description_char[50];
 	int rows, cols;
+	wchar_t path_description_wchar[50];
+	
 
 	/* upload the corresponding problem pack to user  */
 	sprintf(sqlquery, "SELECT path_description FROM problem WHERE problem_id = '%u';", problem_id);
@@ -423,7 +431,8 @@ void callback_pd_request( char *srcip, unsigned int account_id, unsigned int pro
 
 void callback_sb_sync( char *srcip, short srctype )
 {
-	char sqlquery[100], **table, *errMsg, **table2, account[25];
+	char sqlquery[100], **table, **table2, *errMsg = NULL;
+	char account[25];
 	int rows, cols, i, rows2, cols2, j;
 	unsigned int account_id, new_time, new_accept_count, account_type;
 	wchar_t new_account_wchar[25];
@@ -451,7 +460,8 @@ void callback_sb_sync( char *srcip, short srctype )
 
 void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result )
 {
-	char sqlquery[100], result_char[25], destip[20], **table, *errMsg = NULL;
+	char sqlquery[100], **table, *errMsg = NULL;
+	char result_char[25], destip[20];
 	int rows, cols;
 	unsigned int problem_id, account_id, accept_count;
 
@@ -542,7 +552,7 @@ void callback_run_sync( char *srcip)
 
 void callback_take_run( char *srcip, unsigned int run_id )
 {
-	char sqlquery[100], **table, *errMsg;
+	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 
 	/* mark the judge as taken */
@@ -641,7 +651,8 @@ void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_ac
 void callback_account_sync( char *srcip )
 {
 	/* updates account listing to administrator */
-	char sqlquery[100], acc_char[25], **table, *errMsg;
+	char sqlquery[100], **table, *errMsg = NULL;
+	char acc_char[25];
 	int rows, cols, i;
 	unsigned int account_id, account_type;
 	wchar_t acc_wchar[25];
@@ -752,9 +763,9 @@ void callback_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 
 void callback_problem_sync( char *srcip, short srctype )
 {
-	char sqlquery[100], **table, *errMsg;
-	int rows, cols, i;
+	char sqlquery[100], **table, *errMsg = NULL;
 	char problem_name_char[20], path_description_char[50], correct_input_filename_char[50], correct_output_filename_char[50];
+	int rows, cols, i;
 	wchar_t problem_name_wchar[20], path_description_wchar[50], correct_input_filename_wchar[50], correct_output_filename_wchar[50];
 	unsigned int problem_id, time_limit;
 
@@ -782,9 +793,11 @@ void callback_problem_sync( char *srcip, short srctype )
 
 void callback_clar_request( char *srcip, unsigned int account_id, int private_byte, wchar_t *clarmsg )
 {
-	char sqlquery[100], *errMsg = NULL, **table, clarmsg_char[100];
-	unsigned int clar_id;
+	char sqlquery[100], **table, *errMsg = NULL;
+	char clarmsg_char[100];
 	int rows, cols;
+	unsigned int clar_id;
+	
 
 	/* record clarification information into db */
 	wcstombs(clarmsg_char, clarmsg, 100);
@@ -805,7 +818,8 @@ void callback_clar_request( char *srcip, unsigned int account_id, int private_by
 
 void callback_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string )
 {
-	char sqlquery[100], **table, *errMsg = NULL, result_string_char[100];
+	char sqlquery[100], **table, *errMsg = NULL; 
+	char result_string_char[100];
 	int rows, cols, i;
 	unsigned int account_id;
 	wchar_t msg_wchar[100];
@@ -869,7 +883,8 @@ void callback_clar_sync( char *srcip, short srctype )
 /* sets contest state for clients */
 void serverdb_contest( int (*serverproto)(char *destip, short desttype), short desttype )
 {
-	char sqlquery[100], **table, *errMsg = NULL, destip[20];
+	char sqlquery[100], **table, *errMsg = NULL;
+	char destip[20];
 	int rows, cols, i;
 
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", desttype);
@@ -884,7 +899,7 @@ void serverdb_contest( int (*serverproto)(char *destip, short desttype), short d
 /* notify all team clients about changes on a problem */
 void serverdb_problem_change( unsigned int FUNC, unsigned int problem_id, wchar_t *problem_name )
 {
-	char sqlquery[100], **table, *errMsg;
+	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%d';", OPSR_TEAM);
@@ -905,7 +920,8 @@ void serverdb_problem_change( unsigned int FUNC, unsigned int problem_id, wchar_
 /* request clarification to admin and judge clients */
 void serverdb_clar_request( short desttype, unsigned int clar_id, int private_byte, wchar_t *clarmsg )
 {
-	char sqlquery[100], **table, *errMsg = NULL, destip[20];
+	char sqlquery[100], **table, *errMsg = NULL;
+	char destip[20];
 	int rows, cols, i;
 
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", desttype);
@@ -920,7 +936,7 @@ void serverdb_clar_request( short desttype, unsigned int clar_id, int private_by
 
 void serverdb_sb_update( short desttype, unsigned int upd_acc_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time )
 {
-	char sqlquery[100], **table, *errMsg;
+	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", desttype);

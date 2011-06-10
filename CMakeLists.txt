@@ -6,7 +6,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(OOJ)
 
 # modify your wxWidgets directory HERE!
-SET(wxWidgets_ROOT_DIR C:/wxMSW-2.8.12)
+SET(wxWidgets_ROOT_DIR C:/wxWidgets)
 FIND_PACKAGE(wxWidgets COMPONENTS core base REQUIRED)
 INCLUDE(${wxWidgets_USE_FILE})
 
