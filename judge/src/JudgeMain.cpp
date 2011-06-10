@@ -188,6 +188,9 @@ void JudgeFrame::setClarListColumn()
 void JudgeFrame::start()
 {
     state = START;
+	if(m_timer.IsRunning() == false){
+		m_timer.Start(1000);
+	}
 }
 
 void JudgeFrame::stop()
@@ -342,7 +345,6 @@ void timer_set(unsigned int hours, unsigned int minutes, unsigned int seconds)
 {
 	mainFrame->m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), hours, minutes, seconds));
 	mainFrame->m_timeleft = hours * 60 * 60 + minutes * 60 + seconds;
-	mainFrame->m_timer.Start(1000);
 }
 
 void contest_start( void )
@@ -357,22 +359,22 @@ void contest_stop( void )
 
 void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )
 {/***HERE***/
-    char filename[50];
+    wchar_t filename[50];
 
     if( !wcscmp(coding_language, L"c") )
     {
-        sprintf(filename, "%u.c", run_id);
+        wsprintf(filename, L"%u.c", run_id);
     }
     else if(!wcscmp(coding_language,L"c++"))
     {
-        sprintf(filename, "%u.cpp", run_id);
+        wsprintf(filename, L"%u.cpp", run_id);
     }
     else{
         return;
     }
 
     /**TODO: new memory for *path_code**/
-    *path_code = (wchar_t *) malloc( (strlen(filename) +1 ) * sizeof(wchar_t));
+    *path_code = (wchar_t *) malloc( (wcslen(filename) +1 ) * sizeof(wchar_t));
     wsprintf(*path_code, L"%s", filename );
 }
 
