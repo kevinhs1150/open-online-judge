@@ -390,7 +390,7 @@ void callback_admin_contest_stop( char *srcip )
 {
 	//m_timer.Stop();
 	wxCommandEvent event(wxEVT_CALL_TIMER);
-	event.SetInt(1);
+	event.SetInt(0);
 	wxPostEvent(mainFrame, event);
 	
 	is_contest_stop = true;
