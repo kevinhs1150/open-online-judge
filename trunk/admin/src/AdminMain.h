@@ -80,7 +80,9 @@ class AdminFrame: public AdminGUI
 		void OnListItemSelectedClar( wxListEvent& event );
 		
 		void OnTimerEvent(wxTimerEvent &event);
+		void TimerCall(wxCommandEvent &event);
 		DECLARE_EVENT_TABLE()
+		
 };
 
 

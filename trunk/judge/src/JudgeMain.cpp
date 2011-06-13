@@ -35,8 +35,21 @@ typedef struct problem_list{
 	struct problem_list *next;
 } problem_all;
 
+BEGIN_DECLARE_EVENT_TYPES()
+	DECLARE_LOCAL_EVENT_TYPE( wxEVT_CALL_TIMER, 7777 )
+END_DECLARE_EVENT_TYPES()
+DEFINE_EVENT_TYPE( wxEVT_CALL_TIMER )
+
+#define EVT_CALL_TIMER( id, fn )\
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_CALL_TIMER, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject*)NULL\
+    ),
+
 BEGIN_EVENT_TABLE(JudgeFrame, wxFrame)
     EVT_TIMER(-1, JudgeFrame::OnTimerEvent)
+	EVT_CALL_TIMER(wxID_ANY, JudgeFrame::TimerCall)
 END_EVENT_TABLE()
 
 JudgeLoginFrame *loginframe;
@@ -189,13 +202,20 @@ void JudgeFrame::start()
 {
     state = START;
 	if(m_timer.IsRunning() == false){
-		m_timer.Start(1000);
+		wxCommandEvent event(wxEVT_CALL_TIMER);
+		event.SetInt(1);
+		wxPostEvent(mainFrame, event);
 	}
 }
 
 void JudgeFrame::stop()
 {
     state = STOP;
+	if(m_timer.IsRunning() == true){
+		wxCommandEvent event(wxEVT_CALL_TIMER);
+		event.SetInt(0);
+		wxPostEvent(mainFrame, event);
+	}
 }
 
 void JudgeFrame::IP_set()
@@ -312,6 +332,19 @@ void JudgeFrame::OnTimerEvent(wxTimerEvent &event){
 	if(m_timeleft <= 0){
 		//contest end
 		m_timer.Stop();
+	}
+	
+	return;
+}
+
+void JudgeFrame::TimerCall(wxCommandEvent &event){
+	if(event.GetInt() == 1){
+		//callback function said that contest is running.
+		//add your code here
+	}
+	else if(event.GetInt() == 0){
+		//callback function said that contest is not running.
+		//add your code here
 	}
 	
 	return;
@@ -1019,5 +1052,3 @@ int judge_auto(unsigned int problem_id){
 	
     return 0;
 }
-
-

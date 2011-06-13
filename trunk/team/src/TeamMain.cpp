@@ -7,8 +7,21 @@ extern "C"
 #include <string.h>
 #include <stdlib.h>
 
+BEGIN_DECLARE_EVENT_TYPES()
+	DECLARE_LOCAL_EVENT_TYPE( wxEVT_CALL_TIMER, 7777 )
+END_DECLARE_EVENT_TYPES()
+DEFINE_EVENT_TYPE( wxEVT_CALL_TIMER )
+
+#define EVT_CALL_TIMER( id, fn )\
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_CALL_TIMER, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject*)NULL\
+    ),
+
 BEGIN_EVENT_TABLE(TeamFrame, wxFrame)
     EVT_TIMER(-1, TeamFrame::OnTimerEvent)
+	EVT_CALL_TIMER(wxID_ANY, TeamFrame::TimerCall)
 END_EVENT_TABLE()
 
 void cb_login_confirm( int confirm_code, unsigned int account_id );
@@ -230,6 +243,18 @@ void TeamFrame::OnTimerEvent(wxTimerEvent &event){
 	return;
 }
 
+void TeamFrame::TimerCall(wxCommandEvent &event){
+	if(event.GetInt() == 1){
+		//callback function said that contest is running.
+		//add your code here
+	}
+	else if(event.GetInt() == 0){
+		//callback function said that contest is not running.
+		//add your code here
+	}
+	
+	return;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 /// ChangePassDialog
@@ -443,13 +468,19 @@ void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int second
 
 void cb_contest_start( void )
 {
-    TeamFrameGlobal->m_timer.Start(1000);
+    //TeamFrameGlobal->m_timer.Start(1000);
+	wxCommandEvent event(wxEVT_CALL_TIMER);
+	event.SetInt(1);
+	wxPostEvent(TeamFrameGlobal, event);
     return;
 }
 
 void cb_contest_stop( void )
 {
-    TeamFrameGlobal->m_timer.Stop();
+    //TeamFrameGlobal->m_timer.Stop();
+	wxCommandEvent event(wxEVT_CALL_TIMER);
+	event.SetInt(0);
+	wxPostEvent(TeamFrameGlobal, event);
     return;
 }
 

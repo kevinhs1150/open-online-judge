@@ -18,6 +18,7 @@ class TeamFrame: public TeamGUI
 		void OnButtonClickAsk( wxCommandEvent& event );
 
 		void OnTimerEvent(wxTimerEvent &event);
+		void TimerCall(wxCommandEvent &event);
 		DECLARE_EVENT_TABLE()
 
 	public:

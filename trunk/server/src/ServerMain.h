@@ -27,6 +27,7 @@ class ServerFrame: public ServerGUI
 		void OnButtonClickStop( wxCommandEvent& event );
 		
 		void OnTimerEvent(wxTimerEvent &event);
+		void TimerCall(wxCommandEvent &event);
 		DECLARE_EVENT_TABLE()
 
 };
