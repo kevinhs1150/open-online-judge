@@ -7,8 +7,21 @@ extern "C"
 #include "adminproto.h"
 }
 
+BEGIN_DECLARE_EVENT_TYPES()
+	DECLARE_LOCAL_EVENT_TYPE( wxEVT_CALL_TIMER, 7777 )
+END_DECLARE_EVENT_TYPES()
+DEFINE_EVENT_TYPE( wxEVT_CALL_TIMER )
+
+#define EVT_CALL_TIMER( id, fn )\
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_CALL_TIMER, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject*)NULL\
+    ),
+
 BEGIN_EVENT_TABLE(AdminFrame, wxFrame)
     EVT_TIMER(-1, AdminFrame::OnTimerEvent)
+	EVT_CALL_TIMER(wxID_ANY, AdminFrame::TimerCall)
 END_EVENT_TABLE()
 
 AdminFrame* AdminFrameGlobal;
@@ -304,18 +317,26 @@ void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int second
 	AdminFrameGlobal->m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), hours, minutes, seconds));
 	AdminFrameGlobal->m_timeleft = hours * 60 * 60 + minutes * 60 + seconds;
 	
+	//wxCommandEvent event(wxEVT_CALL_TIMER);
+	//event.SetInt(1);
+	//wxPostEvent(AdminFrameGlobal, event);
+	
 	return;
 }
 
 void cb_contest_start( void ){
-	AdminFrameGlobal->m_timer.Start(1000);
+	wxCommandEvent event(wxEVT_CALL_TIMER);
+	event.SetInt(1);
+	wxPostEvent(AdminFrameGlobal, event);
 	
+	printf("Start\n");
 	return;
 }
 
 void cb_contest_stop( void ){
-	AdminFrameGlobal->m_timer.Stop();
-	
+	wxCommandEvent event(wxEVT_CALL_TIMER);
+	event.SetInt(0);
+	wxPostEvent(AdminFrameGlobal, event);
 	return;
 }
 
@@ -914,6 +935,15 @@ void AdminFrame::OnTimerEvent(wxTimerEvent &event){
 		//contest end
 		m_timer.Stop();
 	}
+	
+	return;
+}
+
+void AdminFrame::TimerCall(wxCommandEvent &event){
+	if(event.GetInt() == 1 && m_timer.IsRunning() == 0)
+		m_timer.Start(1000);
+	else if(event.GetInt() == 0 && m_timer.IsRunning() == 1)
+		m_timer.Stop();
 	
 	return;
 }

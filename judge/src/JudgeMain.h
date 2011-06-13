@@ -53,6 +53,7 @@ class JudgeFrame: public JudgeGUI
 		void OnListItemActivatedClar( wxListEvent& event );
 		
 		void OnTimerEvent(wxTimerEvent &event);
+		void TimerCall(wxCommandEvent &event);
 		DECLARE_EVENT_TABLE()
 };
 

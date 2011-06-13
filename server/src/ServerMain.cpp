@@ -1,7 +1,20 @@
 #include "ServerMain.h"
 
+BEGIN_DECLARE_EVENT_TYPES()
+	DECLARE_LOCAL_EVENT_TYPE( wxEVT_CALL_TIMER, 7777 )
+END_DECLARE_EVENT_TYPES()
+DEFINE_EVENT_TYPE( wxEVT_CALL_TIMER )
+
+#define EVT_CALL_TIMER( id, fn )\
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_CALL_TIMER, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject*)NULL\
+    ),
+
 BEGIN_EVENT_TABLE(ServerFrame, wxFrame)
     EVT_TIMER(-1, ServerFrame::OnTimerEvent)
+	EVT_CALL_TIMER(wxID_ANY, ServerFrame::TimerCall)
 END_EVENT_TABLE()
 
 /* server callback functions prototype. */
@@ -51,6 +64,7 @@ void serverdb_sb_update( short desttype, unsigned int upd_acc_id, wchar_t *new_a
 /* global variables */
 bool is_contest_stop;	/* contest_state */
 sqlite3 *db;	/* sqlite variable */
+ServerFrame *mainFrame;
 enum FUNC_NAME{PROBLEM_CHANGE_ADD, PROBLEM_CHANGE_DEL, PROBLEM_CHANGE_MOD};	/* Database tool function parameter */
 
 /* timer */
@@ -103,6 +117,8 @@ ServerFrame::ServerFrame(wxFrame *frame)
 		"accept_count	INTEGER,"
 		"FOREIGN KEY(score_id) REFERENCES user(score_id));";
 	char *errMsg = NULL;
+	
+	mainFrame = this;
 	
 	/* timer variable */
 	m_timeleft = 0;
@@ -214,6 +230,19 @@ void ServerFrame::OnTimerEvent(wxTimerEvent &event){
 			is_contest_stop = true;
 		}
 	}
+}
+
+void ServerFrame::TimerCall(wxCommandEvent &event){
+	if(event.GetInt() == 1){
+		//callback function said that contest is running.
+		//add your code here
+	}
+	else if(event.GetInt() == 0){
+		//callback function said that contest is not running.
+		//add your code here
+	}
+	
+	return;
 }
 
 /* Server callback function definition. */
@@ -347,7 +376,11 @@ void callback_admin_timer_set( char *srcip, unsigned int hours, unsigned int min
 
 void callback_admin_contest_start( char *srcip )
 {
-	m_timer.Start(1000);
+	//m_timer.Start(1000);
+	wxCommandEvent event(wxEVT_CALL_TIMER);
+	event.SetInt(1);
+	wxPostEvent(mainFrame, event);
+	
 	is_contest_stop = false;
 	serverdb_contest( serverproto_contest_start, OPSR_JUDGE );
 	serverdb_contest( serverproto_contest_start, OPSR_TEAM );
@@ -355,7 +388,11 @@ void callback_admin_contest_start( char *srcip )
 
 void callback_admin_contest_stop( char *srcip )
 {
-	m_timer.Stop();
+	//m_timer.Stop();
+	wxCommandEvent event(wxEVT_CALL_TIMER);
+	event.SetInt(1);
+	wxPostEvent(mainFrame, event);
+	
 	is_contest_stop = true;
 	serverdb_contest( serverproto_contest_stop, OPSR_JUDGE );
 	serverdb_contest( serverproto_contest_stop, OPSR_TEAM );
