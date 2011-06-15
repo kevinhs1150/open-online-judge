@@ -280,6 +280,7 @@ class TeamGUI : public wxFrame
 		virtual void OnButtonClickTest( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickSubmit( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickAsk( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnListItemActivatedClar( wxListEvent& event ) { event.Skip(); }
 		
 	
 	public:

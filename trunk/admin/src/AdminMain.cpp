@@ -390,6 +390,7 @@ void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *ac
 		msg << _("...");
 		AdminFrameGlobal->m_listCtrlClars->SetItem(tmp, 1, msg);
 		AdminFrameGlobal->m_listCtrlClars->SetItemData(tmp, clar_id);
+		AdminFrameGlobal->m_listCtrlClars->SortItems(ListCompareFunction, 0);
 	}
 	
 	AdminFrameGlobal->m_mutexClar.Unlock();
@@ -985,7 +986,7 @@ void AdminFrame::OnListItemDeselectedClar( wxListEvent& event ){
 
 void AdminFrame::OnListItemSelectedClar( wxListEvent& event ){
 	ClarEnable(true);
-	m_selectedClar = event.GetIndex();
+	m_selectedClar = m_listCtrlClars->GetItemData(event.GetIndex());
 	m_staticTextClarIDVal->SetLabel(wxString() << list_clar[event.GetIndex()].clar_id);
 	m_textCtrlQuestion->SetLabel(list_clar[event.GetIndex()].clar_msg);
 	m_textCtrlAnswer->SetLabel(list_clar[event.GetIndex()].result_msg);

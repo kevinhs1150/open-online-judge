@@ -1057,7 +1057,7 @@
                                 <object class="notebookpage" expanded="0">
                                     <property name="bitmap"></property>
                                     <property name="label">Accounts</property>
-                                    <property name="select">1</property>
+                                    <property name="select">0</property>
                                     <object class="wxPanel" expanded="0">
                                         <property name="bg"></property>
                                         <property name="context_help"></property>
@@ -5405,7 +5405,7 @@
                                 <object class="notebookpage" expanded="0">
                                     <property name="bitmap"></property>
                                     <property name="label">Scoreborad</property>
-                                    <property name="select">0</property>
+                                    <property name="select">1</property>
                                     <object class="wxPanel" expanded="0">
                                         <property name="bg"></property>
                                         <property name="context_help"></property>
@@ -7691,7 +7691,7 @@
                                         <event name="OnListDeleteItem"></event>
                                         <event name="OnListEndLabelEdit"></event>
                                         <event name="OnListInsertItem"></event>
-                                        <event name="OnListItemActivated"></event>
+                                        <event name="OnListItemActivated">OnListItemActivatedClar</event>
                                         <event name="OnListItemDeselected"></event>
                                         <event name="OnListItemFocused"></event>
                                         <event name="OnListItemMiddleClick"></event>
