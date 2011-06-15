@@ -230,16 +230,16 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	p.problem_id = problem_id;
 	p.name = wxString(problem_name);
 	p.time_limit = time_limit;
-	p.path_description = wxString::Format(_("data\\%d_d.dat"), problem_id);
-	p.path_input = wxString::Format(_("data\\%d_i.dat"), problem_id);
-	p.path_answer = wxString::Format(_("data\\%d_o.dat"), problem_id);
+	p.path_description = wxString::Format(_("data\\%d_d.pdf"), problem_id);
+	p.path_input = wxString::Format(_("data\\%d_i.txt"), problem_id);
+	p.path_answer = wxString::Format(_("data\\%d_o.txt"), problem_id);
 	
 	char path[100];
 	FILE *inFile;
 	FILE *outFile;
 	
 	wchar_t mode[10] = L"rb";
-	sprintf(path, "data\\%d_d.dat", problem_id);
+	sprintf(path, "data\\%d_d.pdf", problem_id);
 	inFile = fopen_sp(path_description, mode);
 	outFile = fopen(path, "wb");
 	while(1){
@@ -252,7 +252,7 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	fclose(outFile);
 	fclose(inFile);
 	
-	sprintf(path, "data\\%d_i.dat", problem_id);
+	sprintf(path, "data\\%d_i.txt", problem_id);
 	inFile = fopen_sp(path_input, mode);
 	outFile = fopen(path, "wb");
 	while(1){
@@ -265,7 +265,7 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	fclose(outFile);
 	fclose(inFile);
 	
-	sprintf(path, "data\\%d_o.dat", problem_id);
+	sprintf(path, "data\\%d_o.txt", problem_id);
 	inFile = fopen_sp(path_answer, mode);
 	outFile = fopen(path, "wb");
 	while(1){
@@ -359,8 +359,9 @@ void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int second
 }
 
 void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg ){
-	AdminFrameGlobal->m_mutexClar.Lock();
+	printf("cb_clar_request\n");
 	
+	AdminFrameGlobal->m_mutexClar.Lock();
 	int i;
 	for(i = 0 ; i < AdminFrameGlobal->list_clar.size() ; i++)
 		if(AdminFrameGlobal->list_clar[i].clar_id == clar_id)
@@ -395,6 +396,8 @@ void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *ac
 }
 
 void cb_clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string ){
+	printf("cb_clar_reply\n");
+
 	AdminFrameGlobal->m_mutexClar.Lock();
 	int i;
 	for(i = 0 ; i < AdminFrameGlobal->list_clar.size() ; i++)
