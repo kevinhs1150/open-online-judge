@@ -431,6 +431,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizerProblemFile = new wxBoxSizer( wxHORIZONTAL );
 	
 	m_checkBoxProblemFile = new wxCheckBox( m_panelProblems, wxID_ANY, wxT("Problem File:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_checkBoxProblemFile->SetValue(true); 
 	bSizerProblemFile->Add( m_checkBoxProblemFile, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_filePickerProblemFile = new wxFilePickerCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxT("Select problem file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
@@ -445,7 +446,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_staticTextTimeLimit->Wrap( -1 );
 	bSizerProblemTimeLimit->Add( m_staticTextTimeLimit, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_spinCtrlTimeLimitVal = new wxSpinCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, 1 );
+	m_spinCtrlTimeLimitVal = new wxSpinCtrl( m_panelProblems, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 30000, 1 );
 	bSizerProblemTimeLimit->Add( m_spinCtrlTimeLimitVal, 0, wxALL, 5 );
 	
 	m_staticTextTimeLimitUnit = new wxStaticText( m_panelProblems, wxID_ANY, wxT("ms"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -544,7 +545,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelProblems->SetSizer( bSizerProblemsPage );
 	m_panelProblems->Layout();
 	bSizerProblemsPage->Fit( m_panelProblems );
-	m_notebook->AddPage( m_panelProblems, wxT("Problems"), false );
+	m_notebook->AddPage( m_panelProblems, wxT("Problems"), true );
 	m_panelClar = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerClarPage;
 	bSizerClarPage = new wxBoxSizer( wxHORIZONTAL );
@@ -622,7 +623,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelClar->SetSizer( bSizerClarPage );
 	m_panelClar->Layout();
 	bSizerClarPage->Fit( m_panelClar );
-	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), true );
+	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), false );
 	m_panelSB = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerSBMain;
 	bSizerSBMain = new wxBoxSizer( wxVERTICAL );
@@ -662,6 +663,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_listCtrlProblems->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedProblem ), NULL, this );
 	m_buttonProblemAdd->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickAddProblem ), NULL, this );
 	m_buttonProblemDel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDelProblem ), NULL, this );
+	m_checkBoxProblemFile->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( AdminGUI::OnCheckBoxProblemFile ), NULL, this );
 	m_buttonProblemApply->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickProblemApply ), NULL, this );
 	m_listCtrlClars->Connect( wxEVT_COMMAND_LIST_ITEM_DESELECTED, wxListEventHandler( AdminGUI::OnListItemDeselectedClar ), NULL, this );
 	m_listCtrlClars->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedClar ), NULL, this );
@@ -687,6 +689,7 @@ AdminGUI::~AdminGUI()
 	m_listCtrlProblems->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedProblem ), NULL, this );
 	m_buttonProblemAdd->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickAddProblem ), NULL, this );
 	m_buttonProblemDel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickDelProblem ), NULL, this );
+	m_checkBoxProblemFile->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( AdminGUI::OnCheckBoxProblemFile ), NULL, this );
 	m_buttonProblemApply->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AdminGUI::OnButtonClickProblemApply ), NULL, this );
 	m_listCtrlClars->Disconnect( wxEVT_COMMAND_LIST_ITEM_DESELECTED, wxListEventHandler( AdminGUI::OnListItemDeselectedClar ), NULL, this );
 	m_listCtrlClars->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( AdminGUI::OnListItemSelectedClar ), NULL, this );
@@ -912,8 +915,6 @@ TeamGUI::TeamGUI( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	bSizerLangSubmit->Add( m_choiceLang, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_buttonTest = new wxButton( this, wxID_ANY, wxT("Test"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_buttonTest->Hide();
-	
 	bSizerLangSubmit->Add( m_buttonTest, 0, wxALL, 5 );
 	
 	m_buttonSubmit = new wxButton( this, wxID_ANY, wxT("Submit"), wxDefaultPosition, wxDefaultSize, 0 );
