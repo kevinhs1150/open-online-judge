@@ -155,8 +155,8 @@ ServerFrame::ServerFrame(wxFrame *frame)
 			return;
 		fclose( fptr );
 	}
-	
-		
+
+
 	/* re-initialize server GUI status indicator (add color) */
 	StaticTextStatus->SetLabel( wxT("Not Running") );
 	StaticTextStatus->SetForegroundColour( *wxRED );
@@ -429,7 +429,7 @@ void callback_submission_request( char *srcip, unsigned int account_id, unsigned
 	char sqlquery[100], **table, *errMsg = NULL;
 	char coding_language_char[10], path_code_char[30];
 	int rows, cols;
-	
+
 	/* set path_code */
 	sprintf(sqlquery, "SELECT * FROM submission;");
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
@@ -437,10 +437,10 @@ void callback_submission_request( char *srcip, unsigned int account_id, unsigned
 	{
 		wcstombs(coding_language_char, coding_language, 10);
 		sprintf(path_code_char, "submits/submit%d.%s", rows + 1, coding_language_char);
-		
+
 		/* path_code allocation */
 		*path_code = (wchar_t *)malloc( ( strlen( path_code_char ) + 1 ) * sizeof( wchar_t ) );
-	
+
 		mbstowcs(*path_code, path_code_char, 30);
 	}
 
@@ -552,7 +552,7 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 		/* update accept_count */
 		sprintf(sqlquery, "UPDATE scoreboard SET accept_count = '%u' WHERE = account_id = '%u';", accept_count + 1, account_id);
 		sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
-		
+
 		/* TODO: update scoreboard globally */
 	}
 
@@ -643,7 +643,7 @@ void callback_account_add( char *srcip, unsigned int type, wchar_t *account, cha
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* updates account listing to administrators */
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h' AND logged_in = 'yes';", OPSR_ADMIN);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_ADMIN);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for( i=1; i<=rows;i++ )
 		serverproto_account_update( table[i * cols + 0], account_id, type, account );
@@ -664,20 +664,20 @@ void callback_account_del( char *srcip, unsigned int account_id )
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* updates account listing to administrator */
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h' AND logged_in = 'yes';", OPSR_ADMIN);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_ADMIN);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for( i=1; i<=rows;i++ )
 		serverproto_account_remove( table[i * cols + 0], account_id );
 	sqlite3_free_table( table );
 
 	/* notify team and admin client about scoreboard updates */
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", OPSR_TEAM);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", OPSR_TEAM);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 		serverproto_sb_remove( table[i * cols + 0], OPSR_TEAM, account_id );
 	sqlite3_free_table(table);
-	
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", OPSR_ADMIN);
+
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", OPSR_ADMIN);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 		serverproto_sb_remove( table[i * cols + 0], OPSR_ADMIN, account_id );
@@ -695,11 +695,11 @@ void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_ac
 	wcstombs(new_account_char, new_account, 25);
 	if(new_password == NULL)	/* update only account */
 	{
-		sprintf(sqlquery, "UPDATE user SET account = '%s' WHERE account_id = '%u';", new_account_char, new_password, account_id);
+		sprintf(sqlquery, "UPDATE user SET account = '%s' WHERE account_id = %u;", new_account_char, new_password, account_id);
 	}
 	else	/* update both account and password */
 	{
-		sprintf(sqlquery, "UPDATE user SET account = '%s', password = '%s' WHERE account_id = '%u';", new_account_char, new_password, account_id);
+		sprintf(sqlquery, "UPDATE user SET account = '%s', password = '%s' WHERE account_id = %u;", new_account_char, new_password, account_id);
 	}
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
@@ -711,15 +711,15 @@ void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_ac
 		sscanf(table[1 * cols + 0], "%u", &account_type);
 	}
 	sqlite3_free_table(table);
-	
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h' AND logged_in = 'yes';", OPSR_ADMIN);
+
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_ADMIN);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for( i=1; i<=rows;i++ )
 		serverproto_account_update( table[i * cols + 0], account_id, account_type, new_account );
 	sqlite3_free_table( table );
 
 	/* notify team and admin client about scoreboard updates */
-	sprintf(sqlquery, "SELECT accept_count, time FROM scoreboard WHERE account_id = '%u';", account_id);
+	sprintf(sqlquery, "SELECT accept_count, time FROM scoreboard WHERE account_id = %u;", account_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	if(rows >= 1)
 	{
@@ -763,25 +763,20 @@ void callback_problem_add( char *srcip, unsigned int problem_id, wchar_t *proble
 	*path_description = (wchar_t *) malloc( 50 * sizeof(wchar_t) );
 	sprintf(path_description_char, "problems/path_descr%u.pdf", problem_id);
 	mbstowcs(*path_description, path_description_char, 50);
-	wprintf(L"path = %ls\n", *path_description);
 
 	*path_input = (wchar_t *) malloc( 50 * sizeof(wchar_t) );
 	sprintf(path_input_char, "problems/p%u_in.txt", problem_id);
 	mbstowcs(*path_input, path_input_char, 50);
-	wprintf(L"input = %ls\n", *path_input);
 
 	*path_answer = (wchar_t *) malloc( 50 * sizeof(wchar_t) );
 	sprintf(path_answer_char, "problems/p%u_out.txt", problem_id);
 	mbstowcs(*path_answer, path_answer_char, 50);
-	wprintf(L"ans = %ls\n", *path_answer);
 }
 
 void callback_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
 	char sqlquery[100], *errMsg = NULL;
 	char problem_name_char[20], path_description_char[50], path_input_char[50], path_answer_char[50];
-
-	printf("download finish start\n");
 
 	/* record the new problem into db */
 	wcstombs(problem_name_char, problem_name, 20);
@@ -792,7 +787,12 @@ void callback_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* reply function */
-	serverproto_problem_update( srcip, OPSR_ADMIN, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_ADMIN);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	for( i=1; i<=rows;i++ )
+		serverproto_problem_update( table[i * cols + 0], OPSR_ADMIN, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
+	sqlite3_free_table( table );
+
 	serverdb_problem_change(PROBLEM_CHANGE_ADD, problem_id, problem_name);
 }
 
@@ -804,7 +804,12 @@ void callback_problem_del( char *srcip, unsigned int problem_id )
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* reply function */
-	serverproto_problem_remove( srcip, OPSR_ADMIN, problem_id );
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_ADMIN);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	for( i=1; i<=rows;i++ )
+		serverproto_problem_remove( table[i * cols + 0], OPSR_ADMIN, problem_id );
+	sqlite3_free_table( table );
+
 	serverdb_problem_change(PROBLEM_CHANGE_DEL, problem_id, NULL);
 }
 
@@ -840,7 +845,12 @@ void callback_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* reply function */
-	serverproto_problem_update( srcip, OPSR_ADMIN, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_ADMIN);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	for( i=1; i<=rows;i++ )
+		serverproto_problem_update( table[i * cols + 0], OPSR_ADMIN, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
+	sqlite3_free_table( table );
+
 	serverdb_problem_change(PROBLEM_CHANGE_MOD, problem_id, problem_name);
 }
 
@@ -881,7 +891,6 @@ void callback_clar_request( char *srcip, unsigned int account_id, int private_by
 	int rows, cols;
 	unsigned int clar_id;
 
-
 	/* record clarification information into db */
 	wcstombs(clarmsg_char, clarmsg, 100);
 	sprintf(sqlquery, "INSERT INTO clarification VALUES(NULL, '%u', '%s', NULL, '%d');", account_id, clarmsg_char, private_byte);
@@ -909,11 +918,11 @@ void callback_clar_result( char *srcip, unsigned int clar_id, int private_byte, 
 
 	/* update clarification information into db */
 	wcstombs(result_string_char, result_string, 100);
-	sprintf(sqlquery, "UPDATE clarification SET result = '%s' WHERE clar_id = '%u';", result_string_char, clar_id);
+	sprintf(sqlquery, "UPDATE clarification SET result = '%s' WHERE clar_id = %u;", result_string_char, clar_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* reply to all or one team, according to how private byte is set */
-	sprintf(sqlquery, "SELECT account_id, msg FROM clarification WHERE clar_id = '%u';", clar_id);
+	sprintf(sqlquery, "SELECT account_id, msg FROM clarification WHERE clar_id = %u;", clar_id);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	if(rows >= 1)
 	{
@@ -924,7 +933,7 @@ void callback_clar_result( char *srcip, unsigned int clar_id, int private_byte, 
 
 	if(private_byte == 1)
 	{
-		sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_id = '%u';", account_id);
+		sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_id = %u;", account_id);
 		sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 		if(rows >= 1)
 		{
@@ -934,7 +943,7 @@ void callback_clar_result( char *srcip, unsigned int clar_id, int private_byte, 
 	}
 	else if(private_byte == 0)
 	{
-		sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%d';", OPSR_TEAM);
+		sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", OPSR_TEAM);
 		sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 		for(i=1;i<=rows;i++)
 			serverproto_clar_reply( table[i * cols + 0], OPSR_TEAM, clar_id, msg_wchar, result_string );
@@ -970,7 +979,7 @@ void serverdb_contest( int (*serverproto)(char *destip, short desttype), short d
 	char destip[20];
 	int rows, cols, i;
 
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", desttype);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %h;", desttype);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
@@ -985,7 +994,7 @@ void serverdb_problem_change( unsigned int FUNC, unsigned int problem_id, wchar_
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%d';", OPSR_TEAM);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d, AND logged_in = 'yes';", OPSR_TEAM);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
@@ -1004,16 +1013,13 @@ void serverdb_problem_change( unsigned int FUNC, unsigned int problem_id, wchar_
 void serverdb_clar_request( short desttype, unsigned int clar_id, int private_byte, wchar_t *clarmsg )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
-	char destip[20];
 	int rows, cols, i;
 
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", desttype);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %h;", desttype);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
-	{
-		sscanf(table[i * cols + 0], "%s",  destip);
-		serverproto_clar_request(destip, desttype, clar_id, private_byte, clarmsg);
-	}
+		serverproto_clar_request(table[i * cols + 0], desttype, clar_id, private_byte, clarmsg);
+
 	sqlite3_free_table(table);
 }
 
@@ -1022,12 +1028,10 @@ void serverdb_sb_update( short desttype, unsigned int upd_acc_id, wchar_t *new_a
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", desttype);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %h;", desttype);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
-	{
 		serverproto_sb_update( table[i * cols + 0], desttype, upd_acc_id, new_account, new_accept_count, new_time );
-	}
 
 	sqlite3_free_table(table);
 }
