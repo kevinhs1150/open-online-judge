@@ -202,7 +202,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelAccounts->SetSizer( bSizerAccountPage );
 	m_panelAccounts->Layout();
 	bSizerAccountPage->Fit( m_panelAccounts );
-	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), true );
+	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), false );
 	m_panelContestInfo = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerContestInfoPage;
 	bSizerContestInfoPage = new wxBoxSizer( wxVERTICAL );
@@ -634,7 +634,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelSB->SetSizer( bSizerSBMain );
 	m_panelSB->Layout();
 	bSizerSBMain->Fit( m_panelSB );
-	m_notebook->AddPage( m_panelSB, wxT("Scoreborad"), false );
+	m_notebook->AddPage( m_panelSB, wxT("Scoreborad"), true );
 	
 	bSizerNotebook->Add( m_notebook, 1, wxEXPAND|wxALL, 5 );
 	
@@ -972,6 +972,7 @@ TeamGUI::TeamGUI( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	m_buttonTest->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickTest ), NULL, this );
 	m_buttonSubmit->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickSubmit ), NULL, this );
 	m_buttonAsk->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickAsk ), NULL, this );
+	m_listCtrlClars->Connect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( TeamGUI::OnListItemActivatedClar ), NULL, this );
 }
 
 TeamGUI::~TeamGUI()
@@ -983,6 +984,7 @@ TeamGUI::~TeamGUI()
 	m_buttonTest->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickTest ), NULL, this );
 	m_buttonSubmit->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickSubmit ), NULL, this );
 	m_buttonAsk->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TeamGUI::OnButtonClickAsk ), NULL, this );
+	m_listCtrlClars->Disconnect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( TeamGUI::OnListItemActivatedClar ), NULL, this );
 	
 }
 
