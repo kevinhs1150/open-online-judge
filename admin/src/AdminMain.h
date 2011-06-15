@@ -49,6 +49,7 @@ class AdminFrame: public AdminGUI
 		bool isProblemInfoEnable;
 		int m_selectedProblem;
 		int m_selectedClar;
+		bool m_contestRunning;
 	
 		//void OnClose( wxCloseEvent& event );
 		void InitAccountList();
