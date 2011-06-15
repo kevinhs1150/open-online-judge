@@ -156,6 +156,7 @@ ServerFrame::ServerFrame(wxFrame *frame)
 	/* re-initialize server GUI status indicator (add color) */
 	StaticTextStatus->SetLabel( wxT("Not Running") );
 	StaticTextStatus->SetForegroundColour( *wxRED );
+	StaticTextStatus->Refresh();
 
 	/* register callback functions */
 	serverproto_cbreg_login_request( callback_login_request );
@@ -215,6 +216,7 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 	/* set wxStaticText label */
 	StaticTextStatus->SetLabel( wxT("NOW Running") );
 	StaticTextStatus->SetForegroundColour( *wxBLUE );
+	StaticTextStatus->Refresh();
 
 	/* if admin01 not exist, add an admin01 account */
 	sprintf(sqlquery, "SELECT * FROM user WHERE account = 'admin01';");
@@ -234,6 +236,7 @@ void ServerFrame::OnButtonClickStop( wxCommandEvent& event )
 
 	StaticTextStatus->SetLabel( wxT("Not Running") );
 	StaticTextStatus->SetForegroundColour( *wxRED );
+	StaticTextStatus->Refresh();
 }
 
 void ServerFrame::OnTimerEvent(wxTimerEvent &event){
@@ -636,7 +639,7 @@ void callback_account_add( char *srcip, unsigned int type, wchar_t *account, cha
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* updates account listing to administrators */
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", OPSR_ADMIN);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h' AND logged_in = 'yes';", OPSR_ADMIN);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for( i=1; i<=rows;i++ )
 		serverproto_account_update( table[i * cols + 0], account_id, type, account );
@@ -657,7 +660,7 @@ void callback_account_del( char *srcip, unsigned int account_id )
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* updates account listing to administrator */
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", OPSR_ADMIN);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h' AND logged_in = 'yes';", OPSR_ADMIN);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for( i=1; i<=rows;i++ )
 		serverproto_account_remove( table[i * cols + 0], account_id );
@@ -705,7 +708,7 @@ void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_ac
 	}
 	sqlite3_free_table(table);
 	
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", OPSR_ADMIN);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h' AND logged_in = 'yes';", OPSR_ADMIN);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for( i=1; i<=rows;i++ )
 		serverproto_account_update( table[i * cols + 0], account_id, account_type, new_account );
