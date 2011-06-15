@@ -775,7 +775,8 @@ void callback_problem_add( char *srcip, unsigned int problem_id, wchar_t *proble
 
 void callback_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
-	char sqlquery[100], *errMsg = NULL;
+	char sqlquery[100], **table, *errMsg = NULL;
+	int i, rows, cols;
 	char problem_name_char[20], path_description_char[50], path_input_char[50], path_answer_char[50];
 
 	/* record the new problem into db */
@@ -798,7 +799,8 @@ void callback_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 
 void callback_problem_del( char *srcip, unsigned int problem_id )
 {
-	char sqlquery[100], *errMsg;
+	char sqlquery[100], **table, *errMsg;
+	int i, rows, cols;
 	/* remove the problem from db and delete correspond data on disk */
 	sprintf(sqlquery, "DELETE FROM problem WHERE problem_id = '%u';", problem_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
@@ -833,7 +835,8 @@ void callback_problem_mod( char *srcip, unsigned int problem_id, wchar_t *proble
 void callback_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
 {
 	/* do the same thing as callback_problem_add_dlfin(), except for serverdb_problem_change parameter */
-	char sqlquery[100], *errMsg = NULL;
+	char sqlquery[100], **table, *errMsg = NULL;
+	int i, rows, cols;
 	char problem_name_char[20], path_description_char[50], path_input_char[50], path_answer_char[50];
 
 	/* record the new problem into db */
