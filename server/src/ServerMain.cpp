@@ -117,29 +117,45 @@ ServerFrame::ServerFrame(wxFrame *frame)
 		"accept_count	INTEGER,"
 		"FOREIGN KEY(score_id) REFERENCES user(score_id));";
 	char *errMsg = NULL;
-	
+
+	FILE *fptr;  // file pointer to test initialization
+
 	mainFrame = this;
-	
+
 	/* timer variable */
 	m_timeleft = 0;
 	is_timer_set = false;
-	
-	/* create subdirectory to store files */
-	system( "mkdir submits" );
-	system( "mkdir problems" );
 
 	/* set contest state */
 	is_contest_stop = true;
-	/* create database file */
-	if ( sqlite3_open_v2( "server_db.db3", &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL ) ) {
-       return;
-    }
-	/* create table SQL */
-	sqlite3_exec( db, create_user, 0, 0, &errMsg );
-	sqlite3_exec( db, create_problem, 0, 0, &errMsg );
-	sqlite3_exec( db, create_submission, 0, 0, &errMsg );
-	sqlite3_exec( db, create_clarification, 0, 0, &errMsg );
-	sqlite3_exec( db, create_scoreboard, 0, 0, &errMsg );
+
+	/* test if server_db.db3 exists
+	 * if not, then the application is not initialized on this machine -- initialize it*/
+	if( ( fptr = fopen("server_db.db3", "r") ) == NULL )
+	{
+		/* create subdirectory to store files */
+		/* FIXME: this should be check on every start */
+		system( "mkdir submits" );
+		system( "mkdir problems" );
+
+		/* create database file */
+		if ( sqlite3_open_v2( "server_db.db3", &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL ) ) {
+		   return;
+		}
+
+		/* create table SQL */
+		sqlite3_exec( db, create_user, 0, 0, &errMsg );
+		sqlite3_exec( db, create_problem, 0, 0, &errMsg );
+		sqlite3_exec( db, create_submission, 0, 0, &errMsg );
+		sqlite3_exec( db, create_clarification, 0, 0, &errMsg );
+		sqlite3_exec( db, create_scoreboard, 0, 0, &errMsg );
+	}
+	else /* else, skip initialization */
+		fclose( fptr );
+		
+	/* re-initialize server GUI status indicator (add color) */
+	StaticTextStatus->SetLabel( wxT("Not Running") );
+	StaticTextStatus->SetForgroundColour( *wxRED );
 
 	/* register callback functions */
 	serverproto_cbreg_login_request( callback_login_request );
@@ -198,6 +214,7 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 
 	/* set wxStaticText label */
 	StaticTextStatus->SetLabel( wxT("NOW Running") );
+	StaticTextStatus->SetColour( *wxBLUE );
 
 	/* if admin01 not exist, add an admin01 account */
 	sprintf(sqlquery, "SELECT * FROM user WHERE account = 'admin01';");
@@ -213,11 +230,10 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 void ServerFrame::OnButtonClickStop( wxCommandEvent& event )
 {
 	if( serverproto_active() )
-	{
 		serverproto_stop_listen();
-	}
-	
+
 	StaticTextStatus->SetLabel( wxT("Not Running") );
+	StaticTextStatus->SetForgroundColour( *wxRED );
 }
 
 void ServerFrame::OnTimerEvent(wxTimerEvent &event){
@@ -241,7 +257,7 @@ void ServerFrame::TimerCall(wxCommandEvent &event){
 		//callback function said that contest is not running.
 		//add your code here
 	}
-	
+
 	return;
 }
 
@@ -278,7 +294,7 @@ void callback_login_request( char *srcip, short srctype, wchar_t *account, char 
 			sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 			serverproto_login_reply( srcip, srctype, LOGIN_VALID, account_id);
 		}
-		else	/* LOGIN_PASS_WRONGs */
+		else	/* LOGIN_PASS_WRONG */
 		{
 			serverproto_login_reply( srcip, srctype, LOGIN_PASS_WRONG, -1);
 		}
@@ -359,11 +375,11 @@ void callback_admin_timer_set( char *srcip, unsigned int hours, unsigned int min
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 	unsigned int account_type;
-	
+
 	/* set timer */
-	
+
 	m_timeleft = hours * 360 + minutes * 60 + seconds;
-	
+
 	sprintf(sqlquery, "SELECT account_type, ipaddress FROM user WHERE logged_in = 'yes';");
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
@@ -380,8 +396,9 @@ void callback_admin_contest_start( char *srcip )
 	wxCommandEvent event(wxEVT_CALL_TIMER);
 	event.SetInt(1);
 	wxPostEvent(mainFrame, event);
-	
+
 	is_contest_stop = false;
+	serverdb_contest( serverproto_contest_start, OPSR_ADMIN );
 	serverdb_contest( serverproto_contest_start, OPSR_JUDGE );
 	serverdb_contest( serverproto_contest_start, OPSR_TEAM );
 }
@@ -392,8 +409,9 @@ void callback_admin_contest_stop( char *srcip )
 	wxCommandEvent event(wxEVT_CALL_TIMER);
 	event.SetInt(0);
 	wxPostEvent(mainFrame, event);
-	
+
 	is_contest_stop = true;
+	serverdb_contest( serverproto_contest_stop, OPSR_ADMIN );
 	serverdb_contest( serverproto_contest_stop, OPSR_JUDGE );
 	serverdb_contest( serverproto_contest_stop, OPSR_TEAM );
 }
@@ -404,7 +422,7 @@ void callback_submission_request( char *srcip, unsigned int account_id, unsigned
 	char sqlquery[100], **table, *errMsg = NULL;
 	char coding_language_char[10], path_code_char[30];
 	int rows, cols;
-
+	
 	/* set path_code */
 	sprintf(sqlquery, "SELECT * FROM submission;");
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
@@ -412,9 +430,13 @@ void callback_submission_request( char *srcip, unsigned int account_id, unsigned
 	{
 		wcstombs(coding_language_char, coding_language, 10);
 		sprintf(path_code_char, "submits/submit%d.%s", rows + 1, coding_language_char);
+		
+		/* path_code allocation */
+		*path_code = (wchar_t *)malloc( ( strlen( path_code_char ) + 1 ) * sizeof( wchar_t ) );
+	
 		mbstowcs(*path_code, path_code_char, 30);
 	}
-	
+
 	sqlite3_free_table(table);
 }
 
@@ -443,6 +465,7 @@ void callback_submission_request_dlfin( char *srcip, unsigned int account_id, un
 	}
 	sqlite3_free_table(table);
 
+	/* reply submitter queue successed */
 	serverproto_run_reply( srcip, run_id, problem_id, L"queued" );
 }
 
@@ -452,7 +475,6 @@ void callback_pd_request( char *srcip, unsigned int account_id, unsigned int pro
 	char path_description_char[50];
 	int rows, cols;
 	wchar_t path_description_wchar[50];
-	
 
 	/* upload the corresponding problem pack to user  */
 	sprintf(sqlquery, "SELECT path_description FROM problem WHERE problem_id = '%u';", problem_id);
@@ -468,29 +490,20 @@ void callback_pd_request( char *srcip, unsigned int account_id, unsigned int pro
 
 void callback_sb_sync( char *srcip, short srctype )
 {
-	char sqlquery[100], **table, **table2, *errMsg = NULL;
-	char account[25];
-	int rows, cols, i, rows2, cols2, j;
-	unsigned int account_id, new_time, new_accept_count, account_type;
+	char sqlquery[100], **table, *errMsg = NULL;
+	int rows, cols, i;
+	unsigned int account_id, new_time, new_accept_count;
 	wchar_t new_account_wchar[25];
-	
-	sprintf(sqlquery, "SELECT account_id, time, accept_count FROM scoreboard;");
+
+	sprintf(sqlquery, "SELECT account_id, account, time, accept_count FROM scoreboard;");
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
 		sscanf(table[i * cols + 0], "%u", &account_id);
-		sscanf(table[i * cols + 1], "%u", &new_time);
-		sscanf(table[i * cols + 2], "%u", &new_accept_count);
-		sprintf(sqlquery, "SELECT account, account_type FROM user WHERE account_id = '%u';", account_id);
-		sqlite3_get_table(db, sqlquery, &table2, &rows2, &cols2, &errMsg);
-		if(rows2 >= 1)
-		{
-			mbstowcs(new_account_wchar, table[1 * cols2 + 0], 25);
-			sscanf(table2[1 * cols2 + 0], "%u", &account_type);
-			serverproto_sb_update( srcip, account_type, account_id, new_account_wchar, new_accept_count, new_time );
-		}
-		sqlite3_free_table(table2);
-
+		mbstowcs(new_account_wchar, table[1 * cols + 1], 25);
+		sscanf(table[i * cols + 2], "%u", &new_time);
+		sscanf(table[i * cols + 3], "%u", &new_accept_count);
+		serverproto_sb_update( srcip, srctype, account_id, new_account_wchar, new_accept_count, new_time );
 	}
 	sqlite3_free_table(table);
 }
@@ -506,7 +519,7 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 	wcstombs(result_char, result, 25);
  	sprintf(sqlquery, "UPDATE submission SET judge_result = '%s' WHERE run_id = '%u';", result_char, run_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
-	
+
 	/* get account_id and problem_id */
 	sprintf(sqlquery, "SELECT account_id, problem_id FROM submission WHERE run_id = '%u';", run_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
@@ -516,9 +529,9 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 		sscanf(table[1 * cols + 1], "%u", &problem_id);
 	}
 	sqlite3_free_table(table);
-	
-	/* update accept_count in scoreboard if result = "YES" */
-	if(strcmp( result_char, "YES" ) == 0)	
+
+	/* update accept_count in scoreboard if result = "yes" */
+	if(strcmp( result_char, "yes" ) == 0)
 	{
 		/* get accept_count */
 		sprintf(sqlquery, "SELECT accept_count FROM scoreboard WHERE account_id = '%u';", account_id);
@@ -528,12 +541,14 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 			sscanf(table[1 * cols + 0], "%u", &accept_count);
 		}
 		sqlite3_free_table(table);
-		
+
 		/* update accept_count */
 		sprintf(sqlquery, "UPDATE scoreboard SET accept_count = '%u' WHERE = account_id = '%u';", accept_count + 1, account_id);
 		sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+		
+		/* TODO: update scoreboard globally */
 	}
-	
+
 	/* redirect the result to corresponding team */
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_id = '%u';", account_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
@@ -550,18 +565,17 @@ void callback_trun_sync( char *srcip, unsigned int account_id )
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 	unsigned int run_id, problem_id;
-	wchar_t lang_wchar[10], path_code_wchar[50];
+	wchar_t judge_result_wchar[50];
 
-	/* update all runs */
-	sprintf(sqlquery, "SELECT run_id, problem_id, lang, path_code FROM submission WHERE account_id = '%u';");
+	/* update all runs related to requesting team */
+	sprintf(sqlquery, "SELECT run_id, problem_id, judge_result FROM submission WHERE account_id = '%u';", account_id );
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
 		sscanf(table[i * cols + 0], "%u", &run_id);
 		sscanf(table[i * cols + 1], "%u", &problem_id);
-		mbstowcs(lang_wchar, table[i * cols + 2], 10);
-		mbstowcs(path_code_wchar, table[i * cols + 3], 50);
-		serverproto_run_request(srcip, run_id, problem_id, lang_wchar, path_code_wchar);
+		mbstowcs(judge_result_wchar, table[i * cols + 2], 50);
+		serverproto_run_reply(srcip, run_id, problem_id, judge_result_wchar);
 	}
 	sqlite3_free_table(table);
 }
@@ -573,8 +587,8 @@ void callback_run_sync( char *srcip)
 	unsigned int run_id, problem_id;
 	wchar_t lang_wchar[10], path_code_wchar[50];
 
-	/* update all runs belong to that team to the reqesting client */
-	sprintf(sqlquery, "SELECT run_id, problem_id, lang, path_code FROM submission;");
+	/* update all un-judged runs to the requesting judge */
+	sprintf(sqlquery, "SELECT run_id, problem_id, lang, path_code FROM submission WHERE judge_result = 'queued';");
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
@@ -620,10 +634,9 @@ void callback_account_add( char *srcip, unsigned int type, wchar_t *account, cha
 	sprintf(sqlquery, "INSERT INTO scoreboard VALUES(NULL, '%u', '0', '0');", account_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
-	
 	/* updates account listing to administrator */
 	serverproto_account_update( srcip, account_id, type, account );
-	
+
 	/* notify team and admin client about scoreboard updates */
 	serverdb_sb_update( OPSR_TEAM, account_id, account, 0, 0 );
 	serverdb_sb_update( OPSR_ADMIN, account_id, account, 0, 0 );
@@ -663,7 +676,7 @@ void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_ac
 		sprintf(sqlquery, "UPDATE user SET account = '%s', password = '%s' WHERE account_id = '%u';", new_account_char, new_password, account_id);
 	}
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
-	
+
 	/* updates account to administrator */
 	sprintf(sqlquery, "SELECT account_type FROM user WHERE account_id = '%u';", account_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
@@ -673,7 +686,7 @@ void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_ac
 		serverproto_account_update( srcip, account_id, account_type, new_account );
 	}
 	sqlite3_free_table(table);
-	
+
 	/* notify team and admin client about scoreboard updates */
 	sprintf(sqlquery, "SELECT accept_count, time FROM scoreboard WHERE account_id = '%u';", account_id);
 	if(rows >= 1)
@@ -712,18 +725,18 @@ void callback_problem_add( char *srcip, unsigned int problem_id, wchar_t *proble
 {
 	char sqlquery[100];
 	char path_description_char[50], path_input_char[50], path_answer_char[50];
-	
+
 	/* edit path names */
 	*path_description = (wchar_t *) malloc( 50 * sizeof(wchar_t) );
 	sprintf(path_description_char, "problems/path_descr%u.pdf", problem_id);
 	mbstowcs(*path_description, path_description_char, 50);
 	wprintf(L"path = %ls\n", *path_description);
-	
+
 	*path_input = (wchar_t *) malloc( 50 * sizeof(wchar_t) );
 	sprintf(path_input_char, "problems/p%u_in.txt", problem_id);
 	mbstowcs(*path_input, path_input_char, 50);
 	wprintf(L"input = %ls\n", *path_input);
-	
+
 	*path_answer = (wchar_t *) malloc( 50 * sizeof(wchar_t) );
 	sprintf(path_answer_char, "problems/p%u_out.txt", problem_id);
 	mbstowcs(*path_answer, path_answer_char, 50);
@@ -734,9 +747,9 @@ void callback_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 {
 	char sqlquery[100], *errMsg = NULL;
 	char problem_name_char[20], path_description_char[50], path_input_char[50], path_answer_char[50];
-	
+
 	printf("download finish start\n");
-	
+
 	/* record the new problem into db */
 	wcstombs(problem_name_char, problem_name, 20);
 	wcstombs(path_description_char, path_description, 50);
@@ -834,7 +847,7 @@ void callback_clar_request( char *srcip, unsigned int account_id, int private_by
 	char clarmsg_char[100];
 	int rows, cols;
 	unsigned int clar_id;
-	
+
 
 	/* record clarification information into db */
 	wcstombs(clarmsg_char, clarmsg, 100);
@@ -848,14 +861,14 @@ void callback_clar_request( char *srcip, unsigned int account_id, int private_by
 
 	/* redirect the request to judges */
 	serverdb_clar_request(OPSR_JUDGE, clar_id, private_byte, clarmsg);
-	
+
 	/* reply team client */
 	serverproto_clar_reply( srcip, OPSR_TEAM, clar_id, clarmsg, L"Clarifying...." );
 }
 
 void callback_clar_result( char *srcip, unsigned int clar_id, int private_byte, wchar_t *result_string )
 {
-	char sqlquery[100], **table, *errMsg = NULL; 
+	char sqlquery[100], **table, *errMsg = NULL;
 	char result_string_char[100];
 	int rows, cols, i;
 	unsigned int account_id;
