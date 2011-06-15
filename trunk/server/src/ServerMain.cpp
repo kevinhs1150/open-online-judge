@@ -442,7 +442,6 @@ void callback_submission_request( char *srcip, unsigned int account_id, unsigned
 
 		/* path_code allocation */
 		*path_code = (wchar_t *)malloc( ( strlen( path_code_char ) + 1 ) * sizeof( wchar_t ) );
-
 		mbstowcs(*path_code, path_code_char, 30);
 	}
 
@@ -602,24 +601,16 @@ void callback_tp_sync( char *srcip )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
-	unsigned int problem_id, account_id;
+	unsigned int problem_id;
 	wchar_t problem_name_wchar[50];
 	
 	/* sync problem list */
-	sprintf(sqlquery, "SELECT account_id FROM user WHERE ipaddress = '%s';", srcip);
-	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
-	if(rows >= 1)
-	{
-		sscanf(table[1 * cols + 0], "%u", &account_id);
-	}
-	sqlite3_free_table(table);
-	
-	sprintf(sqlquery, "SELECT problem_id, problem_name FROM problem WHERE account_id = %u;", account_id);
+	sprintf(sqlquery, "SELECT problem_id, problem_name FROM problem;");
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
 		sscanf(table[i * cols + 0], "%u", &problem_id);
-		mbstowcs(problem_name_wchar, table[i * cols + 1], 20);
+		mbstowcs(problem_name_wchar, table[i * cols + 1], 50);
 		serverproto_problem_change_add( srcip, problem_id, problem_name_wchar );
 	}
 	sqlite3_free_table(table);
