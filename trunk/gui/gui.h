@@ -178,6 +178,7 @@ class AdminGUI : public wxFrame
 		virtual void OnButtonClickProblemApply( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnListItemDeselectedClar( wxListEvent& event ) { event.Skip(); }
 		virtual void OnListItemSelectedClar( wxListEvent& event ) { event.Skip(); }
+		virtual void OnButtonClickClarReply( wxCommandEvent& event ) { event.Skip(); }
 		
 	
 	public:

@@ -58,6 +58,7 @@ class AdminFrame: public AdminGUI
 		void ProblemInfoEnable(bool enable);
 		void ProblemInfoClear();
 		void ClarEnable(bool enable);
+		void ClarClear();
 		
 		void OnButtonClickChangePassword( wxCommandEvent& event );
 		void OnButtonClickLogout( wxCommandEvent& event );
@@ -80,6 +81,7 @@ class AdminFrame: public AdminGUI
 		void OnButtonClickProblemApply( wxCommandEvent& event );
 		void OnListItemDeselectedClar( wxListEvent& event );
 		void OnListItemSelectedClar( wxListEvent& event );
+		void OnButtonClickClarReply( wxCommandEvent& event );
 		
 		void OnTimerEvent(wxTimerEvent &event);
 		void TimerCall(wxCommandEvent &event);
