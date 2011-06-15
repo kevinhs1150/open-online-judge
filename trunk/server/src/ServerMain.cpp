@@ -36,6 +36,7 @@ void callback_sb_sync( char *srcip, short srctype );
 void callback_run_sync( char *srcip );
 void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result );
 void callback_trun_sync( char *srcip, unsigned int account_id );
+void callback_tp_sync( char *srcip );
 
 void callback_take_run( char *srcip, unsigned int run_id );
 void callback_account_add( char *srcip, unsigned int type, wchar_t *account, char *password );
@@ -178,6 +179,7 @@ ServerFrame::ServerFrame(wxFrame *frame)
 	serverproto_cbreg_run_result_notify( callback_run_result_notify );
 	serverproto_cbreg_run_sync( callback_run_sync );
 	serverproto_cbreg_trun_sync( callback_trun_sync );
+	serverproto_cbreg_tp_sync( callback_tp_sync );
 	serverproto_cbreg_take_run( callback_take_run );
 	serverproto_cbreg_account_add( callback_account_add );
 	serverproto_cbreg_account_del( callback_account_del );
@@ -596,6 +598,33 @@ void callback_trun_sync( char *srcip, unsigned int account_id )
 	sqlite3_free_table(table);
 }
 
+void callback_tp_sync( char *srcip )
+{
+	char sqlquery[100], **table, *errMsg = NULL;
+	int rows, cols, i;
+	unsigned int problem_id, account_id;
+	wchar_t problem_name_wchar[50];
+	
+	/* sync problem list */
+	sprintf(sqlquery, "SELECT account_id FROM user WHERE ipaddress = '%s';", srcip);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	if(rows >= 1)
+	{
+		sscanf(table[1 * cols + 0], "%u", &account_id);
+	}
+	sqlite3_free_table(table);
+	
+	sprintf(sqlquery, "SELECT problem_id, problem_name FROM problem WHERE account_id = %u;", account_id);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	for(i=1;i<=rows;i++)
+	{
+		sscanf(table[i * cols + 0], "%u", &problem_id);
+		mbstowcs(problem_name_wchar, table[i * cols + 1], 20);
+		serverproto_problem_change_add( srcip, problem_id, problem_name_wchar );
+	}
+	sqlite3_free_table(table);
+}
+
 void callback_run_sync( char *srcip)
 {
 	char sqlquery[100], **table, *errMsg = NULL;
@@ -978,9 +1007,9 @@ void callback_clar_sync( char *srcip, short srctype )
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i, private_byte;
 	unsigned int clar_id, account_id;
-	wchar_t msg_wchar[100];
+	wchar_t msg_wchar[100], account_wchar[25];
 
-	sprintf(sqlquery, "SELECT clar_id, account_id, msg, private_byte FROM clarification WHERE result IS NULL;");
+	sprintf(sqlquery, "SELECT clar_id, account_id, msg, private_byte, account FROM user NATURAL JOIN clarification WHERE result IS NULL;");
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
@@ -988,7 +1017,8 @@ void callback_clar_sync( char *srcip, short srctype )
 		sscanf(table[i * cols + 1], "%u", &account_id);
 		mbstowcs(msg_wchar, table[i * cols + 2], 100);
 		sscanf(table[i * cols + 3], "%d", &private_byte);
-		serverproto_clar_request( srcip, srctype, clar_id, account_id, private_byte, msg_wchar);
+		mbstowcs(account_wchar, table[i * cols + 4], 25);
+		serverproto_clar_request( srcip, srctype, clar_id, account_id, account_wchar, private_byte, msg_wchar);
 	}
 	sqlite3_free_table(table);
 }
@@ -1037,12 +1067,15 @@ void serverdb_clar_request( short desttype, unsigned int clar_id, unsigned int a
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
+	wchar_t account_wchar[25];
 
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", desttype);
+	sprintf(sqlquery, "SELECT ipaddress, account FROM user WHERE account_type = %d;", desttype);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
-		serverproto_clar_request(table[i * cols + 0], desttype, clar_id, account_id, private_byte, clarmsg);
-
+	{
+		mbstowcs(account_wchar, table[i * cols + 1], 25);
+		serverproto_clar_request(table[i * cols + 0], desttype, clar_id, account_id, account_wchar, private_byte, clarmsg);
+	}
 	sqlite3_free_table(table);
 }
 
