@@ -247,7 +247,7 @@ int serverproto_problem_remove( char *destip, short desttype, unsigned int probl
 
 /* clarification request (to admin and judge)
  * request clarification to admin and judge clients */
-int serverproto_clar_request( char *destip, short desttype, unsigned int clar_id, unsigned int account_id, int private_byte, wchar_t *clarmsg );
+int serverproto_clar_request( char *destip, short desttype, unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg );
 
 /* contest site situation -- not implemented yet */
 
