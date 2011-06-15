@@ -200,12 +200,16 @@ void JudgeFrame::setClarListColumn()
 
 void JudgeFrame::start()
 {
+printf("2:member function start\n");
     state = START;
 	if(m_timer.IsRunning() == false){
+printf("3:in if not start\n");
 		wxCommandEvent event(wxEVT_CALL_TIMER);
 		event.SetInt(1);
 		wxPostEvent(mainFrame, event);
+printf("5:out if not start\n");
 	}
+printf("6:out member function\n");
 }
 
 void JudgeFrame::stop()
@@ -339,10 +343,11 @@ void JudgeFrame::OnTimerEvent(wxTimerEvent &event){
 
 void JudgeFrame::TimerCall(wxCommandEvent &event){
 	if(event.GetInt() == 1){
-		start();
+printf("4:in TimerCall\n");
+		m_timer.Start();
 	}
 	else if(event.GetInt() == 0){
-		stop();
+		m_timer.Stop();
 	}
 	
 	return;
@@ -380,7 +385,9 @@ void timer_set(unsigned int hours, unsigned int minutes, unsigned int seconds)
 
 void contest_start( void )
 {
+	printf("1:cb start\n");
     mainFrame->start();
+	printf("7:cb end\n");
 }
 
 void contest_stop( void )
