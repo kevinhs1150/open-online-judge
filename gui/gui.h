@@ -544,8 +544,6 @@ class ShowClarGUI : public wxFrame
 	private:
 	
 	protected:
-		wxTextCtrl* m_textCtrlQuestion;
-		wxTextCtrl* m_textCtrlAnswer;
 		wxButton* m_buttonClose;
 		
 		// Virtual event handlers, overide them in your derived class
@@ -553,6 +551,8 @@ class ShowClarGUI : public wxFrame
 		
 	
 	public:
+		wxTextCtrl* m_textCtrlQuestion;
+		wxTextCtrl* m_textCtrlAnswer;
 		
 		ShowClarGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 400,400 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		~ShowClarGUI();
