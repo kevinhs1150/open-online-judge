@@ -444,7 +444,7 @@ void callback_submission_request( char *srcip, unsigned int account_id, unsigned
 		*path_code = (wchar_t *)malloc( ( strlen( path_code_char ) + 1 ) * sizeof( wchar_t ) );
 		mbstowcs(*path_code, path_code_char, 30);
 	}
-
+	
 	sqlite3_free_table(table);
 }
 
@@ -465,7 +465,7 @@ void callback_submission_request_dlfin( char *srcip, unsigned int account_id, un
 	run_id = sqlite3_last_insert_rowid(db);
 
 	/* redirect the submission to all judge */
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", OPSR_JUDGE);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_JUDGE);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
@@ -574,7 +574,7 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 		serverproto_run_reply( table[1 * cols + 0], run_id, problem_id, result );
 	}
 	sqlite3_free_table(table);
-	
+
 }
 
 void callback_trun_sync( char *srcip, unsigned int account_id )
@@ -603,7 +603,7 @@ void callback_tp_sync( char *srcip )
 	int rows, cols, i;
 	unsigned int problem_id;
 	wchar_t problem_name_wchar[50];
-	
+
 	/* sync problem list */
 	sprintf(sqlquery, "SELECT problem_id, problem_name FROM problem;");
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
@@ -616,7 +616,7 @@ void callback_tp_sync( char *srcip )
 	sqlite3_free_table(table);
 }
 
-void callback_run_sync( char *srcip)
+void callback_run_sync( char *srcip )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
@@ -679,8 +679,11 @@ void callback_account_add( char *srcip, unsigned int type, wchar_t *account, cha
 	sqlite3_free_table( table );
 
 	/* notify team and admin client about scoreboard updates */
-	serverdb_sb_update( OPSR_TEAM, account_id, account, 0, 0 );
-	serverdb_sb_update( OPSR_ADMIN, account_id, account, 0, 0 );
+	if( type == OPSR_TEAM )
+	{
+		serverdb_sb_update( OPSR_TEAM, account_id, account, 0, 0 );
+		serverdb_sb_update( OPSR_ADMIN, account_id, account, 0, 0 );
+	}
 }
 
 void callback_account_del( char *srcip, unsigned int account_id )
@@ -700,17 +703,20 @@ void callback_account_del( char *srcip, unsigned int account_id )
 	sqlite3_free_table( table );
 
 	/* notify team and admin client about scoreboard updates */
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", OPSR_TEAM);
-	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
-	for(i=1;i<=rows;i++)
-		serverproto_sb_remove( table[i * cols + 0], OPSR_TEAM, account_id );
-	sqlite3_free_table(table);
+	if( type == OPSR_TEAM )
+	{
+		sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", OPSR_TEAM);
+		sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
+		for(i=1;i<=rows;i++)
+			serverproto_sb_remove( table[i * cols + 0], OPSR_TEAM, account_id );
+		sqlite3_free_table(table);
 
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", OPSR_ADMIN);
-	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
-	for(i=1;i<=rows;i++)
-		serverproto_sb_remove( table[i * cols + 0], OPSR_ADMIN, account_id );
-	sqlite3_free_table(table);
+		sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", OPSR_ADMIN);
+		sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
+		for(i=1;i<=rows;i++)
+			serverproto_sb_remove( table[i * cols + 0], OPSR_ADMIN, account_id );
+		sqlite3_free_table(table);
+	}
 }
 
 void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_account, char *new_password )
@@ -748,16 +754,19 @@ void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_ac
 	sqlite3_free_table( table );
 
 	/* notify team and admin client about scoreboard updates */
-	sprintf(sqlquery, "SELECT accept_count, time FROM scoreboard WHERE account_id = %u;", account_id);
-	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
-	if(rows >= 1)
+	if( type == OPSR_TEAM )
 	{
-		sscanf(table[1 * cols + 0], "%u", &accept_count);
-		sscanf(table[1 * cols + 1], "%u", &time);
-		serverdb_sb_update( OPSR_TEAM, account_id, new_account, accept_count, time );
-		serverdb_sb_update( OPSR_ADMIN, account_id, new_account, accept_count, time );
+		sprintf(sqlquery, "SELECT accept_count, time FROM scoreboard WHERE account_id = %u;", account_id);
+		sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+		if(rows >= 1)
+		{
+			sscanf(table[1 * cols + 0], "%u", &accept_count);
+			sscanf(table[1 * cols + 1], "%u", &time);
+			serverdb_sb_update( OPSR_TEAM, account_id, new_account, accept_count, time );
+			serverdb_sb_update( OPSR_ADMIN, account_id, new_account, accept_count, time );
+		}
+		sqlite3_free_table( table );
 	}
-	sqlite3_free_table( table );
 }
 
 void callback_account_sync( char *srcip )
@@ -775,7 +784,7 @@ void callback_account_sync( char *srcip )
 		sscanf(table[i * cols + 0], "%u", &account_id);
 		mbstowcs(acc_wchar, table[i * cols + 1], 25);
 		sscanf(table[i * cols + 2], "%u", &account_type);
-		
+
 		serverproto_account_update(srcip, account_id, account_type, acc_wchar);
 	}
 	sqlite3_free_table(table);
