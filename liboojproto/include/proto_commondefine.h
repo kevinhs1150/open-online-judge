@@ -47,6 +47,7 @@
 #define OPID_CLAR			11	/* clarification */
 #define OPID_PD_REQUEST		12	/* problem download request */
 #define OPID_TRUN_SYNC		13	/* run sync for team */
+#define OPID_TP_SYNC		14	/* problem sync for team */
 #define OPID_SB_SYNC		100	/* request sync scoreboard */
 /* server -> team */
 #define OPID_RUN_REPLY		10	/* run result reply */

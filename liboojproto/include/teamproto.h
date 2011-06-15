@@ -104,4 +104,7 @@ int teamproto_timer_sync( char *destip );
 /* contest state sync request */
 int teamproto_contest_state_sync( char *destip );
 
+/* problem sync request */
+int teamproto_problem_sync( char *destip );
+
 #endif

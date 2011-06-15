@@ -376,3 +376,25 @@ int teamproto_contest_state_sync( char *destip )
 {
 	return proto_contest_state_sync( destip, OPSR_TEAM );
 }
+
+int teamproto_problem_sync( char *destip )
+{
+	int sockfd;
+	char sendbuf[BUFLEN];
+	char *msgptr = NULL;
+	
+	msgptr = proto_srid_comb( sendbuf, OPSR_TEAM, OPID_TP_SYNC );
+
+	if( ( sockfd = tcp_connect( destip, LISTEN_PORT_SERVER ) ) < 0 )
+	{
+#if PROTO_DBG > 0
+		printf("[teamproto_problem_sync()] tcp_connect() call failed.\n");
+#endif
+		return -1;
+	}
+
+	send_sp( sockfd, sendbuf, BUFLEN );
+
+	shutdown_wr_sp( sockfd );
+	return 0;
+}
