@@ -246,11 +246,11 @@ void TeamFrame::OnTimerEvent(wxTimerEvent &event){
 
 void TeamFrame::TimerCall(wxCommandEvent &event){
 	if(event.GetInt() == 1){
-	    if(m_timer.IsRunning == false)
+	    if(m_timer.IsRunning() == false)
             m_timer.Start(1000);
 	}
 	else if(event.GetInt() == 0){
-	    if(m_timer.IsRunning)
+	    if(m_timer.IsRunning())
             m_timer.Stop();
 	}
 
