@@ -209,6 +209,12 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
+	
+	if( serverproto_active() )
+	{
+		wxMessageBox( wxT("Server already running."), wxT("Information"), wxOK|wxICON_INFORMATION, this );
+		return;
+	}
 
 	/* start listen socket */
 	if( serverproto_listen("0.0.0.0") < 0 )
@@ -217,6 +223,7 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 		printf("[ServerFrame::OnButtonClickStart()] serverproto_listen() call failed.\n");
 #endif
 		wxMessageBox( wxT("Server start failed.\nStage: start listen socket."), wxT("Fatal Error"), wxOK|wxICON_ERROR, this );
+		return;
 	}
 
 	/* set wxStaticText label */
