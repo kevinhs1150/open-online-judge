@@ -7,7 +7,7 @@
 /* execution data */
 int proto_listenfd;
 int proto_vsftp_listenfd;
-int proto_stop = 0;
+int proto_stop = 1;
 
 /* listen thread */
 pthread_t proto_listen_tid;
