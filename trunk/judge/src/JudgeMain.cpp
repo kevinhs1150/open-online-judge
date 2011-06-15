@@ -299,8 +299,9 @@ void JudgeFrame::OnListItemActivatedRuns( wxListEvent& event )
 	item.SetColumn(0);
 	item.SetMask(wxLIST_MASK_TEXT);
 	m_listCtrlRuns->GetItem(item);
-	
+
 	run_id = wxAtoi(item.GetText());
+printf("Run down run_id: %u\n",run_id);
 	
 	judgeproto_take_run(this->IP_get(),run_id);
 }
@@ -470,6 +471,7 @@ void problem_remove( unsigned int problem_id )
 
 void take_result( unsigned int run_id, int success )
 {
+printf("in take_result\n");
     run_request_id *rptr = search(run_id);
 	problem_all *proptr = problem_search(rptr->problem_id);
 	unsigned int unJudgeNum;
@@ -517,7 +519,8 @@ void clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *accou
 void clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string )
 {
 	clar_request_id *result_insertPtr = clar_search(clar_id);
-	result_insertPtr->result_string = result_string;
+	result_insertPtr->result_string = (wchar_t *) malloc( (wcslen(result_string) +1 ) * sizeof(wchar_t));
+    wcscpy(result_insertPtr->result_string, result_string);
 }
 
 ///////////////////////////////////////////////////////////
