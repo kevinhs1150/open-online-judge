@@ -237,7 +237,8 @@ void TeamFrame::OnTimerEvent(wxTimerEvent &event){
 	m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), m_timeleft / 60 / 60, (m_timeleft / 60) % 60, m_timeleft % 60));
 	if(m_timeleft <= 0){
 		//contest end
-		m_timer.Stop();
+		if(m_timer.IsRunning)
+            m_timer.Stop();
 	}
 
 	return;
@@ -245,14 +246,14 @@ void TeamFrame::OnTimerEvent(wxTimerEvent &event){
 
 void TeamFrame::TimerCall(wxCommandEvent &event){
 	if(event.GetInt() == 1){
-		//callback function said that contest is running.
-		//add your code here
+	    if(m_timer.IsRunning == false)
+            m_timer.Start(1000);
 	}
 	else if(event.GetInt() == 0){
-		//callback function said that contest is not running.
-		//add your code here
+	    if(m_timer.IsRunning)
+            m_timer.Stop();
 	}
-	
+
 	return;
 }
 
