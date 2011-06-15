@@ -200,16 +200,12 @@ void JudgeFrame::setClarListColumn()
 
 void JudgeFrame::start()
 {
-printf("2:member function start\n");
     state = START;
 	if(m_timer.IsRunning() == false){
-printf("3:in if not start\n");
 		wxCommandEvent event(wxEVT_CALL_TIMER);
 		event.SetInt(1);
 		wxPostEvent(mainFrame, event);
-printf("5:out if not start\n");
 	}
-printf("6:out member function\n");
 }
 
 void JudgeFrame::stop()
@@ -271,15 +267,10 @@ void JudgeFrame::OnChoiceFilter( wxCommandEvent& event )
 	wxString text;
 	int post;
 	
-printf("in event\n");
 	text = event.GetString();
-wxMessageBox( text, wxT("test1"),wxOK|wxICON_EXCLAMATION);
 	post = text.Find(wxT(" "));
-printf("post: %d\n",post);
 	text.Remove(post);
-wxMessageBox( text, wxT("test2"),wxOK|wxICON_EXCLAMATION);
 	problem_id = wxAtoi(text);
-printf("%u\n",problem_id);
 	
 	problem_filter_search(problem_id);
 }
@@ -348,8 +339,7 @@ void JudgeFrame::OnTimerEvent(wxTimerEvent &event){
 
 void JudgeFrame::TimerCall(wxCommandEvent &event){
 	if(event.GetInt() == 1){
-printf("4:in TimerCall\n");
-		m_timer.Start();
+		m_timer.Start(1000);
 	}
 	else if(event.GetInt() == 0){
 		m_timer.Stop();
@@ -390,9 +380,7 @@ void timer_set(unsigned int hours, unsigned int minutes, unsigned int seconds)
 
 void contest_start( void )
 {
-	printf("1:cb start\n");
     mainFrame->start();
-	printf("7:cb end\n");
 }
 
 void contest_stop( void )
@@ -612,22 +600,17 @@ void problem_insert(unsigned int problem_id, wchar_t *problem_name, unsigned int
 
 void problem_filter_search(unsigned int problem_id)
 {
-printf("in search function\n");
 	unsigned int row = 0;
 	run_request_id *pfptr = pptr;
 	wxString insertString;
 	long tmp;
 	
 	mainFrame->m_listCtrlRuns->DeleteAllItems();
-printf("delete list\n");	
 	while(1){
-printf("in while\n");
 		if(pfptr == NULL){
-printf("in break if\n");
 			break;
 		}
 		if(pfptr->problem_id == problem_id){
-printf("in == if\n");
 			row = unJudgeNumCount() + 1 ;
 			insertString.Printf(wxT("%d"),pfptr->run_id);
 			tmp = mainFrame->m_listCtrlRuns->InsertItem(row,insertString);
@@ -637,13 +620,10 @@ printf("in == if\n");
 			mainFrame->m_listCtrlRuns->SetItem(tmp, 2, insertString);
 		}
 		if(pfptr->next == NULL){
-printf("in break if\n");
 			break;
 			}
-printf("error\n");
 		pfptr = pfptr->next; 
 	}
-printf("end of search");
 }
 
 problem_all *problem_search(unsigned int problem_id)
