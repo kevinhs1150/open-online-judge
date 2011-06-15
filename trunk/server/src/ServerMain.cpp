@@ -256,13 +256,15 @@ void ServerFrame::OnTimerEvent(wxTimerEvent &event){
 }
 
 void ServerFrame::TimerCall(wxCommandEvent &event){
-	if(event.GetInt() == 1){
+	if(event.GetInt() == 1 && !m_timer.IsRunning() ){
 		//callback function said that contest is running.
 		//add your code here
+		m_timer.Start(1000);
 	}
 	else if(event.GetInt() == 0){
 		//callback function said that contest is not running.
 		//add your code here
+		m_timer.Stop();
 	}
 
 	return;
@@ -399,7 +401,6 @@ void callback_admin_timer_set( char *srcip, unsigned int hours, unsigned int min
 
 void callback_admin_contest_start( char *srcip )
 {
-	//m_timer.Start(1000);
 	wxCommandEvent event(wxEVT_CALL_TIMER);
 	event.SetInt(1);
 	wxPostEvent(mainFrame, event);
@@ -412,7 +413,6 @@ void callback_admin_contest_start( char *srcip )
 
 void callback_admin_contest_stop( char *srcip )
 {
-	//m_timer.Stop();
 	wxCommandEvent event(wxEVT_CALL_TIMER);
 	event.SetInt(0);
 	wxPostEvent(mainFrame, event);
@@ -803,6 +803,12 @@ void callback_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 	for( i=1; i<=rows;i++ )
 		serverproto_problem_update( table[i * cols + 0], OPSR_ADMIN, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
 	sqlite3_free_table( table );
+	
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_JUDGE);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	for( i=1; i<=rows;i++ )
+		serverproto_problem_update( table[i * cols + 0], OPSR_JUDGE, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
+	sqlite3_free_table( table );
 
 	serverdb_problem_change(PROBLEM_CHANGE_ADD, problem_id, problem_name);
 }
@@ -820,6 +826,12 @@ void callback_problem_del( char *srcip, unsigned int problem_id )
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for( i=1; i<=rows;i++ )
 		serverproto_problem_remove( table[i * cols + 0], OPSR_ADMIN, problem_id );
+	sqlite3_free_table( table );
+	
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_JUDGE);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	for( i=1; i<=rows;i++ )
+		serverproto_problem_remove( table[i * cols + 0], OPSR_JUDGE, problem_id );
 	sqlite3_free_table( table );
 
 	serverdb_problem_change(PROBLEM_CHANGE_DEL, problem_id, NULL);
@@ -862,6 +874,12 @@ void callback_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for( i=1; i<=rows;i++ )
 		serverproto_problem_update( table[i * cols + 0], OPSR_ADMIN, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
+	sqlite3_free_table( table );
+	
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_JUDGE);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	for( i=1; i<=rows;i++ )
+		serverproto_problem_update( table[i * cols + 0], OPSR_JUDGE, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
 	sqlite3_free_table( table );
 
 	serverdb_problem_change(PROBLEM_CHANGE_MOD, problem_id, problem_name);
@@ -1007,7 +1025,7 @@ void serverdb_problem_change( unsigned int FUNC, unsigned int problem_id, wchar_
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d, AND logged_in = 'yes';", OPSR_TEAM);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_TEAM);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
