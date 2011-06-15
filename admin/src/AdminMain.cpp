@@ -25,15 +25,30 @@ BEGIN_EVENT_TABLE(AdminFrame, wxFrame)
 END_EVENT_TABLE()
 
 AdminFrame* AdminFrameGlobal;
-
 char server_ip[20];
 wxString m_loginName;
 unsigned int login_id;
+bool contestRunning;
 LoginDialog *loginDialog = NULL;
 ChangePassDialog *changePassDialog = NULL;
 
+void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *account );
+void cb_account_remove( unsigned int account_id );
+void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer );
+void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+void cb_login_confirm( int confirm_code, unsigned int account_id );
+void cb_logout_confirm( int confirm_code );
+void cb_password_change_confirm( int confirm_code );
+void cb_contest_start( void );
+void cb_contest_stop( void );
+void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int seconds );
+void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg );
+void cb_clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string );
+void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
+void cb_sb_remove( unsigned int rm_account_id );
+void cb_problem_remove( unsigned int problem_id );
+
 int wxCALLBACK ListCompareFunction(long item1, long item2, long sortData){
-    // inverse the order
     if (item1 < item2)
 		if(sortData)
 			return 1;
@@ -274,7 +289,6 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	return;
 }
 
-
 /* callback functions extern-ed from protointernal.c */
 void cb_login_confirm( int confirm_code, unsigned int account_id ){
 	if(confirm_code == LOGIN_VALID){
@@ -313,23 +327,29 @@ void cb_password_change_confirm( int confirm_code ){
 	return;
 }
 
-void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int seconds ){
-	AdminFrameGlobal->m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), hours, minutes, seconds));
-	AdminFrameGlobal->m_timeleft = hours * 60 * 60 + minutes * 60 + seconds;
-	return;
-}
-
 void cb_contest_start( void ){
-	wxCommandEvent event(wxEVT_CALL_TIMER);
-	event.SetInt(1);
-	wxPostEvent(AdminFrameGlobal, event);
+	contestRunning = true;
+	if(AdminFrameGlobal->m_timeleft > 0){
+		wxCommandEvent event(wxEVT_CALL_TIMER);
+		event.SetInt(1);
+		wxPostEvent(AdminFrameGlobal, event);
+	}
 	return;
 }
 
 void cb_contest_stop( void ){
+	contestRunning = false;
 	wxCommandEvent event(wxEVT_CALL_TIMER);
 	event.SetInt(0);
 	wxPostEvent(AdminFrameGlobal, event);
+	return;
+}
+
+void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int seconds ){
+	AdminFrameGlobal->m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), hours, minutes, seconds));
+	AdminFrameGlobal->m_timeleft = hours * 60 * 60 + minutes * 60 + seconds;
+	if(contestRunning = true)
+		cb_contest_start();
 	return;
 }
 
@@ -344,15 +364,6 @@ void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *ac
 		AdminFrameGlobal->list_clar[i].account_id = account_id;
 		AdminFrameGlobal->list_clar[i].clar_msg = wxString(clarmsg);
 		AdminFrameGlobal->list_clar[i].private_byte = private_byte;
-		/*
-		int j;
-		for(int j = 0 ; j < AdminFrameGlobal->m_listCtrlClars->GetItemCount() ; i++){
-			if(AdminFrameGlobal->m_listCtrlClars->GetItemData(j) == clar_id){
-				AdminFrameGlobal->m_listCtrlClars->DeleteItem(j);
-				break;
-			}
-		}
-		*/
 	}
 	else{ // not in list
 		Clar c;
@@ -361,6 +372,7 @@ void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *ac
 		c.name = wxString(account);
 		c.private_byte = private_byte;
 		c.clar_msg = wxString(clarmsg);
+		c.result_msg = wxEmptyString;
 		AdminFrameGlobal->list_clar.push_back(c);
 		
 		long tmp;
@@ -384,22 +396,11 @@ void cb_clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_stri
 		if(AdminFrameGlobal->list_clar[i].clar_id == clar_id)
 			break;
 	if(i < AdminFrameGlobal->list_clar.size()){ // in list
-		//list_clar[i].clar_msg = wxString(clarmsg);
 		AdminFrameGlobal->list_clar[i].result_msg = wxString(result_string);
-		/*
-		int j;
-		for(j = 0 ; j < AdminFrameGlobal->m_listCtrlClars->GetItemCount() ; j++)
-			if(AdminFrameGlobal->m_listCtrlClars->GetItemData(j) == clar_id)
-				break;
-		if(j < AdminFrameGlobal->m_listCtrlClars->GetItemCount()){
-			AdminFrameGlobal->m_listCtrlClars->SetItem(j, 1, wxString(new_account));
-		}
-		*/
 	}
 	else{
 		Clar c;
 		c.clar_id = clar_id;
-		//c.clar_msg = wxString(clarmsg);
 		c.result_msg = wxString(result_string);
 		AdminFrameGlobal->list_clar.push_back(c);
 	}
@@ -472,7 +473,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	InitClarList();
 	InitSBList();
 	m_timeleft = 0;
-	m_contestRunning = false;
+	contestRunning = false;
 	
 	loginDialog = new LoginDialog(this);
 	
@@ -621,13 +622,10 @@ void AdminFrame::InitSBList(){
 	
 	itemCol.SetText(_("Rank"));
 	m_listCtrlSB->InsertColumn(0, itemCol);
-	
 	itemCol.SetText(_("ID-Name"));
 	m_listCtrlSB->InsertColumn(1, itemCol);
-	
 	itemCol.SetText(_("Accept"));
 	m_listCtrlSB->InsertColumn(2, itemCol);
-	
 	itemCol.SetText(_("Penalty"));
 	m_listCtrlSB->InsertColumn(3, itemCol);
 	
@@ -940,6 +938,9 @@ void AdminFrame::OnListItemSelectedClar( wxListEvent& event ){
 	m_textCtrlAnswer->Clear();
 	m_buttonClarReply->Enable(true);
 */
+	m_staticTextClarIDVal->SetLabel(wxString() << list_clar[event.GetSelection()].clar_id);
+	m_textCtrlQuestion->SetLabel(list_clar[event.GetSelection()].clar_msg);
+	m_textCtrlAnswer->SetLabel(list_clar[event.GetSelection()].result_msg);
 }
 
 void AdminFrame::OnTimerEvent(wxTimerEvent &event){

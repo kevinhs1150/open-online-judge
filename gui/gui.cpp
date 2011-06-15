@@ -202,7 +202,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelAccounts->SetSizer( bSizerAccountPage );
 	m_panelAccounts->Layout();
 	bSizerAccountPage->Fit( m_panelAccounts );
-	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), true );
+	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), false );
 	m_panelContestInfo = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerContestInfoPage;
 	bSizerContestInfoPage = new wxBoxSizer( wxVERTICAL );
@@ -622,7 +622,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelClar->SetSizer( bSizerClarPage );
 	m_panelClar->Layout();
 	bSizerClarPage->Fit( m_panelClar );
-	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), false );
+	m_notebook->AddPage( m_panelClar, wxT("Clarifications"), true );
 	m_panelSB = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerSBMain;
 	bSizerSBMain = new wxBoxSizer( wxVERTICAL );
@@ -912,6 +912,8 @@ TeamGUI::TeamGUI( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	bSizerLangSubmit->Add( m_choiceLang, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_buttonTest = new wxButton( this, wxID_ANY, wxT("Test"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_buttonTest->Hide();
+	
 	bSizerLangSubmit->Add( m_buttonTest, 0, wxALL, 5 );
 	
 	m_buttonSubmit = new wxButton( this, wxID_ANY, wxT("Submit"), wxDefaultPosition, wxDefaultSize, 0 );

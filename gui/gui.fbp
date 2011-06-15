@@ -1057,7 +1057,7 @@
                                 <object class="notebookpage" expanded="0">
                                     <property name="bitmap"></property>
                                     <property name="label">Accounts</property>
-                                    <property name="select">1</property>
+                                    <property name="select">0</property>
                                     <object class="wxPanel" expanded="0">
                                         <property name="bg"></property>
                                         <property name="context_help"></property>
@@ -4721,7 +4721,7 @@
                                 <object class="notebookpage" expanded="0">
                                     <property name="bitmap"></property>
                                     <property name="label">Clarifications</property>
-                                    <property name="select">0</property>
+                                    <property name="select">1</property>
                                     <object class="wxPanel" expanded="0">
                                         <property name="bg"></property>
                                         <property name="context_help"></property>
@@ -7365,7 +7365,7 @@
                                                 <property name="enabled">1</property>
                                                 <property name="fg"></property>
                                                 <property name="font"></property>
-                                                <property name="hidden"></property>
+                                                <property name="hidden">1</property>
                                                 <property name="id">wxID_ANY</property>
                                                 <property name="label">Test</property>
                                                 <property name="maximum_size"></property>
