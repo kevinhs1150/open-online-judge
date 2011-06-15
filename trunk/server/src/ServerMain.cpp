@@ -690,6 +690,13 @@ void callback_account_del( char *srcip, unsigned int account_id )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
+	short type;
+	
+	/* get client account type */
+	sprintf(sqlquery, "SELECT account_type FROM user WHERE account_id = %u;", account_id);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	sscanf(table[1*cols+0], "%u", &type );
+	sqlite3_free_table( table );
 
 	/* remove the account from db and remove everything related to that account from the system */
 	sprintf(sqlquery, "DELETE FROM user WHERE account_id = %u;", account_id);
@@ -725,6 +732,13 @@ void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_ac
 	char new_account_char[25];
 	int i, rows, cols;
 	unsigned int account_type, accept_count, time;
+	short type;
+	
+	/* get client account type */
+	sprintf(sqlquery, "SELECT account_type FROM user WHERE account_id = %u;", account_id);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	sscanf(table[1*cols+0], "%u", &type );
+	sqlite3_free_table( table );
 
 	/* modify the record in db */
 	wcstombs(new_account_char, new_account, 25);
