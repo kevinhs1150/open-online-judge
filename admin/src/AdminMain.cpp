@@ -360,6 +360,7 @@ void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int second
 
 void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg ){
 	printf("cb_clar_request\n");
+	wprintf(L"%s\n", clarmsg);
 	
 	AdminFrameGlobal->m_mutexClar.Lock();
 	int i;
@@ -384,6 +385,7 @@ void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *ac
 		long tmp;
 		tmp = AdminFrameGlobal->m_listCtrlClars->InsertItem(0, wxString() << clar_id);
 		wxString msg = wxString(clarmsg);
+		printf("msg = %s\n", msg.c_str());
 		msg = msg.Mid(0, 10);
 		msg << _("...");
 		AdminFrameGlobal->m_listCtrlClars->SetItem(tmp, 1, msg);
@@ -484,6 +486,8 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	isProblemInfoEnable = true;
 	ProblemInfoClear();
 	ProblemInfoEnable(false);
+	ClarClear();
+	ClarEnable(false);
 	
 	loginDialog = new LoginDialog(this);
 	
@@ -675,12 +679,18 @@ void AdminFrame::ProblemInfoClear(){
 }
 
 void AdminFrame::ClarEnable(bool enable){
-	if(!enable){
-		m_staticTextClarIDVal->SetLabel(wxEmptyString);
-		m_textCtrlQuestion->Clear();
-		m_textCtrlAnswer->Clear();
-	}
+	m_textCtrlQuestion->Enable(enable);
+	m_textCtrlAnswer->Enable(enable);
 	m_buttonClarReply->Enable(enable);
+	
+	return;
+}
+
+void AdminFrame::ClarClear(){
+	m_textCtrlQuestion->Clear();
+	m_textCtrlAnswer->Clear();
+	m_staticTextClarIDVal->SetLabel(wxEmptyString);
+
 	return;
 }
 
@@ -967,22 +977,38 @@ void AdminFrame::OnButtonClickProblemApply( wxCommandEvent& event ){
 
 void AdminFrame::OnListItemDeselectedClar( wxListEvent& event ){
 	m_selectedClar = -1;
+	ClarClear();
 	ClarEnable(false);
 	
 	return;
 }
 
 void AdminFrame::OnListItemSelectedClar( wxListEvent& event ){
-/*
+	ClarEnable(true);
 	m_selectedClar = event.GetIndex();
-	m_staticTextClarIDVal->SetLabel(wxEmptyString);
-	m_textCtrlQuestion->Clear();
-	m_textCtrlAnswer->Clear();
-	m_buttonClarReply->Enable(true);
-*/
-	m_staticTextClarIDVal->SetLabel(wxString() << list_clar[event.GetSelection()].clar_id);
-	m_textCtrlQuestion->SetLabel(list_clar[event.GetSelection()].clar_msg);
-	m_textCtrlAnswer->SetLabel(list_clar[event.GetSelection()].result_msg);
+	m_staticTextClarIDVal->SetLabel(wxString() << list_clar[event.GetIndex()].clar_id);
+	m_textCtrlQuestion->SetLabel(list_clar[event.GetIndex()].clar_msg);
+	m_textCtrlAnswer->SetLabel(list_clar[event.GetIndex()].result_msg);
+	
+	return;
+}
+
+void AdminFrame::OnButtonClickClarReply( wxCommandEvent& event ){
+	if(m_selectedClar < 0)
+		return;
+
+	wchar_t *result = new wchar_t [wcslen(m_textCtrlAnswer->GetLabel().c_str()) + 1];
+	wcscpy( result, m_textCtrlAnswer->GetLabel().c_str() );
+	
+	adminproto_clar_result(server_ip, m_selectedClar, 0, result);
+
+	for(int i = 0 ; i < m_listCtrlClars->GetItemCount() ; i++)
+		m_listCtrlClars->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	m_selectedClar = -1;
+	ClarEnable(false);
+	ClarClear();
+	
+	return;
 }
 
 void AdminFrame::OnTimerEvent(wxTimerEvent &event){
