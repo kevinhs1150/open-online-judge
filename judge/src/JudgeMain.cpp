@@ -301,7 +301,6 @@ void JudgeFrame::OnListItemActivatedRuns( wxListEvent& event )
 	m_listCtrlRuns->GetItem(item);
 
 	run_id = wxAtoi(item.GetText());
-printf("Run down run_id: %u\n",run_id);
 	
 	judgeproto_take_run(this->IP_get(),run_id);
 }
@@ -471,7 +470,6 @@ void problem_remove( unsigned int problem_id )
 
 void take_result( unsigned int run_id, int success )
 {
-printf("in take_result\n");
     run_request_id *rptr = search(run_id);
 	problem_all *proptr = problem_search(rptr->problem_id);
 	unsigned int unJudgeNum;

@@ -50,8 +50,10 @@ void JudgeSubmissionFrame::setRunProblemID(unsigned int run_id,unsigned int prob
 	
 	this->run_id = run_id;
 	this->problem_id = problem_id;
-	this->coding_language = coding_language;
-	this->problem_name = problem_name;
+	this->coding_language = (wchar_t *) malloc( (wcslen(coding_language) +1 ) * sizeof(wchar_t));
+    wcscpy(this->coding_language,coding_language);
+	this->problem_name = (wchar_t *) malloc( (wcslen(problem_name) +1 ) * sizeof(wchar_t));
+    wcscpy(this->problem_name,problem_name);
 	this->time_limit = time_limit;
 	
 	submissionNO.Printf(wxT("%u"), run_id);
