@@ -1002,7 +1002,7 @@ void serverdb_contest( int (*serverproto)(char *destip, short desttype), short d
 	char destip[20];
 	int rows, cols, i;
 
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %h;", desttype);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", desttype);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
@@ -1038,7 +1038,7 @@ void serverdb_clar_request( short desttype, unsigned int clar_id, int private_by
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %h;", desttype);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", desttype);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 		serverproto_clar_request(table[i * cols + 0], desttype, clar_id, private_byte, clarmsg);
@@ -1051,7 +1051,7 @@ void serverdb_sb_update( short desttype, unsigned int upd_acc_id, wchar_t *new_a
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %h;", desttype);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", desttype);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 		serverproto_sb_update( table[i * cols + 0], desttype, upd_acc_id, new_account, new_accept_count, new_time );
