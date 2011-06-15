@@ -324,6 +324,7 @@ void JudgeFrame::OnListItemActivatedClar( wxListEvent& event )
 	showClarFrame = new JudgeShowClarFrame(0L);
 	showClarFrame->Show();
 	showClarFrame->setClarQA(cptr->clarmsg ,cptr->result_string);
+	
 }
 
 void JudgeFrame::OnTimerEvent(wxTimerEvent &event){
@@ -551,7 +552,8 @@ void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_lan
     run_request_id *temp_id = new run_request_id;
     temp_id->run_id = run_id;
     temp_id->problem_id = problem_id;
-    temp_id->coding_language = coding_language;
+	temp_id->coding_language = (wchar_t *) malloc( (wcslen(coding_language) +1 ) * sizeof(wchar_t));
+    wcscpy(temp_id->coding_language, coding_language);
 	temp_id->next = NULL;
 
 	if( pptr == NULL )
@@ -581,7 +583,8 @@ void problem_insert(unsigned int problem_id, wchar_t *problem_name, unsigned int
 
     problem_all *temp_id = new problem_all;
     temp_id->problem_id = problem_id;
-	temp_id->problem_name = problem_name;
+	temp_id->problem_name = (wchar_t *) malloc( (wcslen(problem_name) +1 ) * sizeof(wchar_t));
+    wcscpy(temp_id->problem_name, problem_name);
 	temp_id->time_limit = time_limit;
 	temp_id->next = NULL;
 
@@ -752,9 +755,11 @@ void clar_insert(unsigned int clar_id, unsigned int account_id, wchar_t *account
     clar_request_id *temp = new clar_request_id;
     temp->clar_id = clar_id;
 	temp->account_id = account_id;
-	temp->account = account;
+	temp->account = (wchar_t *) malloc( (wcslen(account) +1 ) * sizeof(wchar_t));
+    wcscpy((temp->account), account);
     temp->private_byte = private_byte;
-    temp->clarmsg = clarmsg;
+	temp->clarmsg = (wchar_t *) malloc( (wcslen(clarmsg) +1 ) * sizeof(wchar_t));
+    wcscpy((temp->clarmsg), clarmsg);
 	temp->result_string = NULL;
 	temp->next = NULL;
 	
@@ -778,9 +783,8 @@ void clar_insert(unsigned int clar_id, unsigned int account_id, wchar_t *account
 }
 
 clar_request_id *clar_search(unsigned int clar_id)
-{
+{	
     clar_request_id *tptr = clar_hptr;
-
 	while(1){
 		if(tptr->clar_id == clar_id){
 			return tptr;
