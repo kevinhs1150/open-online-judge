@@ -112,9 +112,9 @@ TeamFrame::TeamFrame(wxFrame *frame)
 
     m_choiceLang->Append(wxString() << _("c"));
     m_choiceLang->Append(wxString() << _("cpp"));
-    m_choiceLang->Append(wxString() << _("cs"));
-    m_choiceLang->Append(wxString() << _("java"));
-    m_choiceLang->Append(wxString() << _("vb"));
+    //m_choiceLang->Append(wxString() << _("cs"));
+    //m_choiceLang->Append(wxString() << _("java"));
+    //m_choiceLang->Append(wxString() << _("vb"));
 
     itemCol.SetText(_("ID"));
 	m_listCtrlRuns->InsertColumn(0, itemCol);
