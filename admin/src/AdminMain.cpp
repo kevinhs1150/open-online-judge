@@ -284,6 +284,8 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	long tmp;
 	tmp = AdminFrameGlobal->m_listCtrlProblems->InsertItem(0, wxString() << p.problem_id);
 	AdminFrameGlobal->m_listCtrlProblems->SetItem(tmp, 1, wxString() << p.name);
+	AdminFrameGlobal->m_listCtrlProblems->SetItemData(tmp, p.problem_id);
+	AdminFrameGlobal->m_listCtrlProblems->SortItems(ListCompareFunction, 0);
 	AdminFrameGlobal->m_mutexProblem.Unlock();
 	
 	return;
@@ -328,6 +330,7 @@ void cb_password_change_confirm( int confirm_code ){
 }
 
 void cb_contest_start( void ){
+	printf("cb_password_change_confirm called\n");
 	contestRunning = true;
 	if(AdminFrameGlobal->m_timeleft > 0){
 		wxCommandEvent event(wxEVT_CALL_TIMER);
@@ -348,8 +351,10 @@ void cb_contest_stop( void ){
 void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int seconds ){
 	AdminFrameGlobal->m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), hours, minutes, seconds));
 	AdminFrameGlobal->m_timeleft = hours * 60 * 60 + minutes * 60 + seconds;
-	if(contestRunning = true)
+	if(contestRunning == true){
+		printf("call cb_contest_start\n");
 		cb_contest_start();
+	}
 	return;
 }
 
@@ -458,7 +463,6 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	int ip1, ip2, ip3, ip4;
 	FILE *ipFile;
 	
-	isProblemInfoEnable = false;
 	AdminFrameGlobal = this;
 	ClarEnable(false);
 	
@@ -473,6 +477,10 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	InitSBList();
 	m_timeleft = 0;
 	contestRunning = false;
+
+	isProblemInfoEnable = true;
+	ProblemInfoClear();
+	ProblemInfoEnable(false);
 	
 	loginDialog = new LoginDialog(this);
 	
@@ -808,6 +816,7 @@ void AdminFrame::OnButtonClickManualTimeSet( wxCommandEvent& event ){
 }
 
 void AdminFrame::OnButtonClickStart( wxCommandEvent& event ){
+	printf("call adminproto_contest_start\n");
 	if(adminproto_contest_start(server_ip) < 0)
 		wxMessageBox(_("Cannot start contest!"));
 	
@@ -815,13 +824,14 @@ void AdminFrame::OnButtonClickStart( wxCommandEvent& event ){
 }
 
 void AdminFrame::OnButtonClickStop( wxCommandEvent& event ){
-	if(adminproto_contest_start(server_ip) < 0)
+printf("call adminproto_contest_stop\n");
+	if(adminproto_contest_stop(server_ip) < 0)
 		wxMessageBox(_("Cannot stop contest!"));
 	
 	return;
 }
 
-void AdminFrame::OnListItemDeselectedProblem( wxListEvent& event ){\
+void AdminFrame::OnListItemDeselectedProblem( wxListEvent& event ){
 	ProblemInfoClear();
 	ProblemInfoEnable(false);
 	m_selectedProblem = -1;
@@ -829,6 +839,14 @@ void AdminFrame::OnListItemDeselectedProblem( wxListEvent& event ){\
 
 void AdminFrame::OnListItemSelectedProblem( wxListEvent& event ){
 	ProblemInfoEnable(true);
+	
+	m_textCtrlProblemID->SetValue(wxString() << list_problem[event.GetIndex()].problem_id);
+	m_textCtrlProblemName->SetLabel(wxString() << list_problem[event.GetIndex()].name);
+	m_filePickerProblemFile->SetPath(wxString() << list_problem[event.GetIndex()].path_description);
+	m_spinCtrlTimeLimitVal->SetValue(list_problem[event.GetIndex()].time_limit);
+	m_filePickerProblemInputData->SetPath(wxString() << list_problem[event.GetIndex()].path_input);
+	m_filePickerProblemOutputData->SetPath(wxString() << list_problem[event.GetIndex()].path_answer);
+	
 	m_selectedProblem = event.GetIndex();
 }
 
@@ -837,8 +855,8 @@ void AdminFrame::OnButtonClickAddProblem( wxCommandEvent& event ){
 	for(i = 0 ; i < m_listCtrlProblems->GetItemCount() ; i++)
 		m_listCtrlProblems->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	m_selectedProblem = -1;
-	//ProblemInfoClear();
-	ProblemInfoEnable(false);
+	ProblemInfoClear();
+	ProblemInfoEnable(true);
 	
 	return;
 }
