@@ -237,7 +237,7 @@ void TeamFrame::OnTimerEvent(wxTimerEvent &event){
 	m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), m_timeleft / 60 / 60, (m_timeleft / 60) % 60, m_timeleft % 60));
 	if(m_timeleft <= 0){
 		//contest end
-		if(m_timer.IsRunning)
+		if(m_timer.IsRunning())
             m_timer.Stop();
 	}
 
