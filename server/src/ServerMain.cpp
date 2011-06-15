@@ -212,7 +212,7 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 	
 	if( serverproto_active() )
 	{
-		wxMessageBox( wxT("Server already running."), wxT("Information"), wxOK|wxICON_INFORMATION, this );
+		wxMessageBox( wxT("Server already running.\nYou cannot start twice."), wxT("Information"), wxOK|wxICON_INFORMATION, this );
 		return;
 	}
 
