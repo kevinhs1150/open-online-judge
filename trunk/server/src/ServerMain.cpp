@@ -139,9 +139,8 @@ ServerFrame::ServerFrame(wxFrame *frame)
 		system( "mkdir problems" );
 
 		/* create database file */
-		if ( sqlite3_open_v2( "server_db.db3", &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL ) ) {
+		if ( sqlite3_open_v2( "server_db.db3", &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL ) )
 		   return;
-		}
 
 		/* create table SQL */
 		sqlite3_exec( db, create_user, 0, 0, &errMsg );
@@ -151,7 +150,12 @@ ServerFrame::ServerFrame(wxFrame *frame)
 		sqlite3_exec( db, create_scoreboard, 0, 0, &errMsg );
 	}
 	else /* else, skip initialization */
+	{
+		if ( sqlite3_open_v2( "server_db.db3", &db, SQLITE_OPEN_READWRITE, NULL ) )
+			return;
 		fclose( fptr );
+	}
+	
 		
 	/* re-initialize server GUI status indicator (add color) */
 	StaticTextStatus->SetLabel( wxT("Not Running") );
