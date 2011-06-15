@@ -22,6 +22,7 @@ void (*cb_clar_sync)( char *srcip, short srctype ) = NULL;
 void (*cb_pd_request)( char *srcip, unsigned int account_id, unsigned int problem_id )              = NULL;
 void (*cb_sb_sync)( char *srcip, short srctype )             = NULL;
 void (*cb_trun_sync)( char *srcip, unsigned int account_id )   = NULL;
+void (*cb_tp_sync)( char *srcip )  = NULL;
 void (*cb_run_result_notify)( char *srcip, unsigned int run_id, wchar_t *result )                   = NULL;
 void (*cb_run_sync)( char *srcip )  = NULL;
 void (*cb_take_run)( char *srcip, unsigned int run_id )        = NULL;
@@ -53,6 +54,7 @@ void serverproto_cbreg_clar_sync( void (*cbfunc)( char*, short ) ) { cb_clar_syn
 void serverproto_cbreg_pd_request( void (*cbfunc)( char*, unsigned int, unsigned int ) )     { cb_pd_request = cbfunc; }
 void serverproto_cbreg_sb_sync( void (*cbfunc)( char*, short ) ) { cb_sb_sync = cbfunc; }
 void serverproto_cbreg_trun_sync( void (*cbfunc)( char*, unsigned int ) ) { cb_trun_sync = cbfunc; }
+void serverproto_cbreg_tp_sync( void (*cbfunc)( char * ) ) { cb_tp_sync = cbfunc; }
 void serverproto_cbreg_run_result_notify( void (*cbfunc)( char*, unsigned int, wchar_t* ) )  { cb_run_result_notify = cbfunc; }
 void serverproto_cbreg_run_sync( void (*cbfunc)( char* ) )  { cb_run_sync = cbfunc; }
 void serverproto_cbreg_take_run( void (*cbfunc)( char*, unsigned int ) ) { cb_take_run = cbfunc; }
@@ -527,6 +529,10 @@ void *serverproto_reqhand_thread( void *args )
 			(*cb_trun_sync)( src_ipaddr, account_id );
 
 			free( account_id_str );
+		}
+		else if( RQID == OPID_TP_SYNC )
+		{
+			(*cb_tp_sync)( src_ipaddr );
 		}
 		else
 		{

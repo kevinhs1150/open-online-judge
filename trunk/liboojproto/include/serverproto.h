@@ -84,6 +84,11 @@ void serverproto_cbreg_sb_sync( void (*cbfunc)( char *srcip, short srctype ) );
  *   reply function: serverproto_run_reply() */
 void serverproto_cbreg_trun_sync( void (*cbfunc)( char *srcip, unsigned int account_id ) );
 
+/* Callback for problem sync request. (from team)
+ * Server should update problem list to that team.
+ *   reply function: serverproto_problem_change_add() */
+void serverproto_cbreg_tp_sync( void (*cbfunc)( char *srcip ) );
+
 /* Callback for run result notification. (from judge)
  * Pass the "run id" and "result string" to server program.
  * Server should record those information into db and redirect the result to corresponding team.
