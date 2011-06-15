@@ -339,12 +339,10 @@ void JudgeFrame::OnTimerEvent(wxTimerEvent &event){
 
 void JudgeFrame::TimerCall(wxCommandEvent &event){
 	if(event.GetInt() == 1){
-		//callback function said that contest is running.
-		//add your code here
+		start();
 	}
 	else if(event.GetInt() == 0){
-		//callback function said that contest is not running.
-		//add your code here
+		stop();
 	}
 	
 	return;
