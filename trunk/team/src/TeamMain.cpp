@@ -422,6 +422,7 @@ void cb_login_confirm( int confirm_code, unsigned int account_id )
         teamproto_run_sync(server_ip, login_id);
         teamproto_timer_sync(server_ip);
         teamproto_contest_state_sync(server_ip);
+        teamproto_problem_sync( server_ip );
 	}
 	else if(confirm_code == LOGIN_ACC_NOTEXIST){
 		wxMessageBox(_("Account not exist!"));
