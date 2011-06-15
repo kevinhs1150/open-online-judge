@@ -430,11 +430,45 @@ void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsign
 		}
 	}
 	long tmp;
-	tmp = AdminFrameGlobal->m_listCtrlSB->InsertItem(0, wxString(new_account));
+	tmp = AdminFrameGlobal->m_listCtrlSB->InsertItem(0, wxString() << updated_account_id);
 	AdminFrameGlobal->m_listCtrlSB->SetItem(tmp, 1, wxString(new_account));
 	AdminFrameGlobal->m_listCtrlSB->SetItem(tmp, 2, wxString() << new_accept_count);
 	AdminFrameGlobal->m_listCtrlSB->SetItem(tmp, 3, wxString() << new_time);
 	AdminFrameGlobal->m_listCtrlSB->SetItemData(tmp, updated_account_id);
+	
+	wxListItem item;
+	
+	for(int i = 0 ; i < AdminFrameGlobal->m_listCtrlSB->GetItemCount() ; i++){
+		unsigned int temp;
+		item.SetId(i);
+		item.SetColumn(2);
+		item.SetMask(wxLIST_MASK_TEXT);
+		AdminFrameGlobal->m_listCtrlSB->GetItem(item);
+		temp = wxAtoi(item.GetText());
+		AdminFrameGlobal->m_listCtrlSB->SetItem(i, 2, wxString() << AdminFrameGlobal->m_listCtrlSB->GetItemData(i));
+		AdminFrameGlobal->m_listCtrlSB->SetItemData(i, temp);
+	}
+	AdminFrameGlobal->m_listCtrlSB->SortItems(ListCompareFunction, 1);
+	int rank = 1, p_rank = 1;
+	int accnum = AdminFrameGlobal->m_listCtrlSB->GetItemData(0);
+	for(int i = 0 ; i < AdminFrameGlobal->m_listCtrlSB->GetItemCount() ; i++){
+		if(accnum != AdminFrameGlobal->m_listCtrlSB->GetItemData(i)){
+			rank = p_rank;
+			accnum = AdminFrameGlobal->m_listCtrlSB->GetItemData(i);
+		}
+		AdminFrameGlobal->m_listCtrlSB->SetItem(i, 0, wxString() << rank);
+		p_rank++;
+		unsigned int temp;
+		item.SetId(i);
+		item.SetColumn(2);
+		item.SetMask(wxLIST_MASK_TEXT);
+		AdminFrameGlobal->m_listCtrlSB->GetItem(item);
+		temp = wxAtoi(item.GetText());
+		AdminFrameGlobal->m_listCtrlSB->SetItem(i, 2, wxString() << AdminFrameGlobal->m_listCtrlSB->GetItemData(i));
+		AdminFrameGlobal->m_listCtrlSB->SetItemData(i, temp);
+	}
+	
+	
 	AdminFrameGlobal->m_mutexScoreboard.Unlock();
 	
 	return;
@@ -1018,6 +1052,7 @@ void AdminFrame::OnTimerEvent(wxTimerEvent &event){
 	if(m_timeleft <= 0){
 		//contest end
 		m_timer.Stop();
+		contestRunning = false;
 	}
 	
 	return;

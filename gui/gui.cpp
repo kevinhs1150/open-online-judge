@@ -134,7 +134,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	bSizerTitle->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	m_staticTextName = new wxStaticText( this, wxID_ANY, wxT("AdminName"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextName = new wxStaticText( this, wxID_ANY, wxT("AdminName"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 	m_staticTextName->Wrap( -1 );
 	bSizerTitle->Add( m_staticTextName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
@@ -202,7 +202,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelAccounts->SetSizer( bSizerAccountPage );
 	m_panelAccounts->Layout();
 	bSizerAccountPage->Fit( m_panelAccounts );
-	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), false );
+	m_notebook->AddPage( m_panelAccounts, wxT("Accounts"), true );
 	m_panelContestInfo = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerContestInfoPage;
 	bSizerContestInfoPage = new wxBoxSizer( wxVERTICAL );
@@ -634,7 +634,7 @@ AdminGUI::AdminGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_panelSB->SetSizer( bSizerSBMain );
 	m_panelSB->Layout();
 	bSizerSBMain->Fit( m_panelSB );
-	m_notebook->AddPage( m_panelSB, wxT("Scoreborad"), true );
+	m_notebook->AddPage( m_panelSB, wxT("Scoreborad"), false );
 	
 	bSizerNotebook->Add( m_notebook, 1, wxEXPAND|wxALL, 5 );
 	
@@ -874,7 +874,7 @@ TeamGUI::TeamGUI( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	
 	bSizerTitle->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	m_staticTextTeamName = new wxStaticText( this, wxID_ANY, wxT("Team Name"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextTeamName = new wxStaticText( this, wxID_ANY, wxT("Team Name"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 	m_staticTextTeamName->Wrap( -1 );
 	bSizerTitle->Add( m_staticTextTeamName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
@@ -1250,7 +1250,7 @@ JudgeGUI::JudgeGUI( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	
 	bSizerTitle->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	m_staticTextName = new wxStaticText( this, wxID_ANY, wxT("Judge Name"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextName = new wxStaticText( this, wxID_ANY, wxT("Judge Name"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 	m_staticTextName->Wrap( -1 );
 	bSizerTitle->Add( m_staticTextName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
