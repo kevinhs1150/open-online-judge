@@ -57,7 +57,7 @@ void callback_clar_sync( char *destip, short srctype );
 /* database tool function */
 void serverdb_contest( int (*serverproto)(char *destip, short desttype), short desttype );
 void serverdb_problem_change( unsigned int FUNC, unsigned int problem_id, wchar_t *problem_name );
-void serverdb_clar_request( short desttype, unsigned int clar_id, int private_byte, wchar_t *clarmsg );
+void serverdb_clar_request( short desttype, unsigned int clar_id, unsigned int account_id, int private_byte, wchar_t *clarmsg );
 void serverdb_sb_update( short desttype, unsigned int upd_acc_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
 
 
@@ -920,12 +920,11 @@ void callback_clar_request( char *srcip, unsigned int account_id, int private_by
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 	clar_id = sqlite3_last_insert_rowid(db);
 
-
 	/* redirect the request to admins */
-	serverdb_clar_request(OPSR_ADMIN, clar_id, private_byte, clarmsg);
+	serverdb_clar_request(OPSR_ADMIN, clar_id, account_id, private_byte, clarmsg);
 
 	/* redirect the request to judges */
-	serverdb_clar_request(OPSR_JUDGE, clar_id, private_byte, clarmsg);
+	serverdb_clar_request(OPSR_JUDGE, clar_id, account_id, private_byte, clarmsg);
 
 	/* reply team client */
 	serverproto_clar_reply( srcip, OPSR_TEAM, clar_id, clarmsg, L"Clarifying...." );
@@ -978,17 +977,18 @@ void callback_clar_sync( char *srcip, short srctype )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i, private_byte;
-	unsigned int clar_id;
+	unsigned int clar_id, account_id;
 	wchar_t msg_wchar[100];
 
-	sprintf(sqlquery, "SELECT clar_id, msg, private_byte FROM clarification WHERE result IS NULL;");
+	sprintf(sqlquery, "SELECT clar_id, account_id, msg, private_byte FROM clarification WHERE result IS NULL;");
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
 		sscanf(table[i * cols + 0], "%u", &clar_id);
-		mbstowcs(msg_wchar, table[i * cols + 1], 100);
-		sscanf(table[i * cols + 2], "%d", &private_byte);
-		serverproto_clar_request( srcip, srctype, clar_id, private_byte, msg_wchar);
+		sscanf(table[i * cols + 1], "%u", &account_id);
+		mbstowcs(msg_wchar, table[i * cols + 2], 100);
+		sscanf(table[i * cols + 3], "%d", &private_byte);
+		serverproto_clar_request( srcip, srctype, clar_id, account_id, private_byte, msg_wchar);
 	}
 	sqlite3_free_table(table);
 }
@@ -1033,7 +1033,7 @@ void serverdb_problem_change( unsigned int FUNC, unsigned int problem_id, wchar_
 }
 
 /* request clarification to admin and judge clients */
-void serverdb_clar_request( short desttype, unsigned int clar_id, int private_byte, wchar_t *clarmsg )
+void serverdb_clar_request( short desttype, unsigned int clar_id, unsigned int account_id, int private_byte, wchar_t *clarmsg )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
@@ -1041,7 +1041,7 @@ void serverdb_clar_request( short desttype, unsigned int clar_id, int private_by
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", desttype);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
-		serverproto_clar_request(table[i * cols + 0], desttype, clar_id, private_byte, clarmsg);
+		serverproto_clar_request(table[i * cols + 0], desttype, clar_id, account_id, private_byte, clarmsg);
 
 	sqlite3_free_table(table);
 }

@@ -1294,18 +1294,20 @@ int serverproto_problem_remove( char *destip, short desttype, unsigned int probl
 	return 0;
 }
 
-int serverproto_clar_request( char *destip, short desttype, unsigned int clar_id, int private_byte, wchar_t *clarmsg )
+int serverproto_clar_request( char *destip, short desttype, unsigned int clar_id, unsigned int account_id, int private_byte, wchar_t *clarmsg )
 {
 	int sockfd;
 	unsigned short listen_port;
 	char sendbuf[BUFLEN];
 	char *msgptr = NULL;
 	char *clar_id_str = uint2str( clar_id );
+	char *account_id_str = uint2str( account_id );
 	char *private_byte_str = int2str( private_byte );
 	char *clarmsg_mb = proto_str_presend( clarmsg );
 
 	msgptr = proto_srid_comb( sendbuf, OPSR_SERVER, OPID_CLAR_REQUEST );
 	msgptr = proto_str_comb( msgptr, clar_id_str );
+	msgptr = proto_str_comb( msgptr, account_id_str );
 	msgptr = proto_str_comb( msgptr, private_byte_str );
 	msgptr = proto_str_comb( msgptr, clarmsg_mb );
 
