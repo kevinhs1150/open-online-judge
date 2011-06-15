@@ -227,7 +227,7 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	if(rows == 0)
 	{
-		sprintf(sqlquery, "INSERT INTO user VALUES(NULL, 'admin01', 'admin01', '%d', NULL, 'no');", OPSR_ADMIN);
+		sprintf(sqlquery, "INSERT INTO user VALUES(NULL, 'admin01', 'admin01', %d, NULL, 'no');", OPSR_ADMIN);
 		sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 	}
 	sqlite3_free_table(table);
@@ -297,7 +297,7 @@ void callback_login_request( char *srcip, short srctype, wchar_t *account, char 
 			sscanf(table[1 * cols + 0], "%u", &account_id);
 
 			/*  mark the account as logged in, set account ip */
-			sprintf(sqlquery, "UPDATE user SET ipaddress = '%s', logged_in = 'yes' WHERE account_id = '%u';", srcip, account_id);
+			sprintf(sqlquery, "UPDATE user SET ipaddress = '%s', logged_in = 'yes' WHERE account_id = %u;", srcip, account_id);
 			sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 			serverproto_login_reply( srcip, srctype, LOGIN_VALID, account_id);
 		}
@@ -315,11 +315,11 @@ void callback_logout_request( char *srcip, short srctype, unsigned int account_i
 	int rows, cols;
 
 	/* mark the account as logged out */
-	sprintf(sqlquery, "SELECT logged_in FROM user WHERE account_id = '%u';", account_id);
+	sprintf(sqlquery, "SELECT logged_in FROM user WHERE account_id = %u;", account_id);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	if(rows >= 1)	/* LOGOUT_OK */
 	{
-		sprintf(sqlquery, "UPDATE user SET logged_in = 'no' WHERE account_id = '%u';", account_id);
+		sprintf(sqlquery, "UPDATE user SET logged_in = 'no' WHERE account_id = %u;", account_id);
 		sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 		serverproto_logout_reply( srcip, srctype, LOGOUT_OK );
 	}
@@ -336,14 +336,14 @@ void callback_password_change( char *srcip, short srctype, unsigned int account_
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols;
 
-	sprintf(sqlquery, "SELECT password FROM user WHERE account_id = '%u';", account_id);
+	sprintf(sqlquery, "SELECT password FROM user WHERE account_id = %u;", account_id);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	if(rows >= 1)	/* PASSWD_SUCCESS */
 	{
 		if(strcmp(table[1 * cols + 0], old_password) == 0)	/* PASSWD_SUCCESS */
 		{
 			/* store the changed password into database and give the client a reply */
-			sprintf(sqlquery, "UPDATE user SET password = '%s' WHERE account_id = '%u';", new_password, account_id);
+			sprintf(sqlquery, "UPDATE user SET password = '%s' WHERE account_id = %u;", new_password, account_id);
 			sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 			serverproto_password_change_reply( srcip, srctype, PASSWD_SUCCESS );
 		}
@@ -457,14 +457,14 @@ void callback_submission_request_dlfin( char *srcip, unsigned int account_id, un
 	/* record those information into db */
 	wcstombs(coding_language_char, coding_language, 10);
 	wcstombs(path_code_char, path_code, 30);
-	sprintf(sqlquery, "INSERT INTO submission VALUES(NULL, '%u', '%u', '%s', '%s', 'no', 'queued');", account_id, problem_id, coding_language_char, path_code_char);
+	sprintf(sqlquery, "INSERT INTO submission VALUES(NULL, %u, %u, '%s', '%s', 'no', 'queued');", account_id, problem_id, coding_language_char, path_code_char);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* get run_id from submission table */
 	run_id = sqlite3_last_insert_rowid(db);
 
 	/* redirect the submission to all judge */
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%d';", OPSR_JUDGE);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", OPSR_JUDGE);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
@@ -484,7 +484,7 @@ void callback_pd_request( char *srcip, unsigned int account_id, unsigned int pro
 	wchar_t path_description_wchar[50];
 
 	/* upload the corresponding problem pack to user  */
-	sprintf(sqlquery, "SELECT path_description FROM problem WHERE problem_id = '%u';", problem_id);
+	sprintf(sqlquery, "SELECT path_description FROM problem WHERE problem_id = %u;", problem_id);
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	if(rows >= 1)
 	{
@@ -521,14 +521,15 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 	char result_char[25], destip[20];
 	int rows, cols;
 	unsigned int problem_id, account_id, accept_count;
+	wchar_t account_wchar[25];
 
 	/* record result information into db */
 	wcstombs(result_char, result, 25);
- 	sprintf(sqlquery, "UPDATE submission SET judge_result = '%s' WHERE run_id = '%u';", result_char, run_id);
+ 	sprintf(sqlquery, "UPDATE submission SET judge_result = '%s' WHERE run_id = %u;", result_char, run_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* get account_id and problem_id */
-	sprintf(sqlquery, "SELECT account_id, problem_id FROM submission WHERE run_id = '%u';", run_id);
+	sprintf(sqlquery, "SELECT account_id, problem_id FROM submission WHERE run_id = %u;", run_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	if(rows >= 1)
 	{
@@ -541,23 +542,32 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 	if(strcmp( result_char, "yes" ) == 0)
 	{
 		/* get accept_count */
-		sprintf(sqlquery, "SELECT accept_count FROM scoreboard WHERE account_id = '%u';", account_id);
+		sprintf(sqlquery, "SELECT accept_count FROM scoreboard WHERE account_id = %u;", account_id);
 		sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 		if(rows >=1)
-		{
 			sscanf(table[1 * cols + 0], "%u", &accept_count);
-		}
 		sqlite3_free_table(table);
 
 		/* update accept_count */
-		sprintf(sqlquery, "UPDATE scoreboard SET accept_count = '%u' WHERE = account_id = '%u';", accept_count + 1, account_id);
+		sprintf(sqlquery, "UPDATE scoreboard SET accept_count = %u WHERE = account_id = %u;", accept_count + 1, account_id);
 		sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
-		/* TODO: update scoreboard globally */
+		/* update scoreboard globally */
+		sprintf(sqlquery, "SELECT account, accept_count FROM user NATURAL JOIN scoreboard WHERE account_id = %u;", account_id);
+		sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+		if(rows >=1)
+		{
+			mbstowcs(account_wchar, table[1 * cols + 0], 25);
+			sscanf(table[1 * cols + 1], "%u", &accept_count);
+		}
+		sqlite3_free_table(table);
+
+		serverdb_sb_update( OPSR_TEAM, account_id, account_wchar, accept_count, 0 );
+		serverdb_sb_update( OPSR_ADMIN, account_id, account_wchar, accept_count, 0 );
 	}
 
 	/* redirect the result to corresponding team */
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_id = '%u';", account_id);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_id = %u;", account_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	if(rows >= 1)
 	{
@@ -575,7 +585,7 @@ void callback_trun_sync( char *srcip, unsigned int account_id )
 	wchar_t judge_result_wchar[50];
 
 	/* update all runs related to requesting team */
-	sprintf(sqlquery, "SELECT run_id, problem_id, judge_result FROM submission WHERE account_id = '%u';", account_id );
+	sprintf(sqlquery, "SELECT run_id, problem_id, judge_result FROM submission WHERE account_id = %u;", account_id );
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
@@ -614,12 +624,12 @@ void callback_take_run( char *srcip, unsigned int run_id )
 	int rows, cols, i;
 
 	/* mark the judge as taken */
-	sprintf(sqlquery, "UPDATE submission SET taken = 'yes' WHERE run_id = '%u';", run_id);
+	sprintf(sqlquery, "UPDATE submission SET taken = 'yes' WHERE run_id = %u;", run_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* notify judges about take result */
 	serverproto_take_result( srcip, run_id, TAKE_SUCCESS );
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%d' and ipaddress <> '%s';", OPSR_JUDGE, srcip);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d and ipaddress <> '%s';", OPSR_JUDGE, srcip);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
@@ -636,10 +646,10 @@ void callback_account_add( char *srcip, unsigned int type, wchar_t *account, cha
 
 	/* record account and scoreboard information into db */
 	wcstombs(account_char, account, 25);
-	sprintf(sqlquery, "INSERT INTO user VALUES(NULL, '%s', '%s', '%u', NULL, 'no');", account_char, password, type);
+	sprintf(sqlquery, "INSERT INTO user VALUES(NULL, '%s', '%s', %u, NULL, 'no');", account_char, password, type);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 	account_id = sqlite3_last_insert_rowid(db);
-	sprintf(sqlquery, "INSERT INTO scoreboard VALUES(NULL, '%u', '0', '0');", account_id);
+	sprintf(sqlquery, "INSERT INTO scoreboard VALUES(NULL, %u, 0, 0);", account_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* updates account listing to administrators */
@@ -660,7 +670,7 @@ void callback_account_del( char *srcip, unsigned int account_id )
 	int rows, cols, i;
 
 	/* remove the account from db and remove everything related to that account from the system */
-	sprintf(sqlquery, "DELETE FROM user WHERE account_id = '%u';", account_id);
+	sprintf(sqlquery, "DELETE FROM user WHERE account_id = %u;", account_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* updates account listing to administrator */
@@ -704,7 +714,7 @@ void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_ac
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* updates account to administrator */
-	sprintf(sqlquery, "SELECT account_type FROM user WHERE account_id = '%u';", account_id);
+	sprintf(sqlquery, "SELECT account_type FROM user WHERE account_id = %u;", account_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	if(rows >= 1)
 	{
@@ -784,7 +794,7 @@ void callback_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 	wcstombs(path_description_char, path_description, 50);
 	wcstombs(path_input_char, path_input, 50);
 	wcstombs(path_answer_char, path_answer, 50);
-	sprintf(sqlquery, "INSERT INTO problem VALUES(NULL, '%s', '%s', '%s', '%s', '%u');", problem_name_char, path_description_char, path_input_char, path_answer_char, time_limit);
+	sprintf(sqlquery, "INSERT INTO problem VALUES(NULL, '%s', '%s', '%s', '%s', %u);", problem_name_char, path_description_char, path_input_char, path_answer_char, time_limit);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* reply function */
@@ -802,7 +812,7 @@ void callback_problem_del( char *srcip, unsigned int problem_id )
 	char sqlquery[100], **table, *errMsg;
 	int i, rows, cols;
 	/* remove the problem from db and delete correspond data on disk */
-	sprintf(sqlquery, "DELETE FROM problem WHERE problem_id = '%u';", problem_id);
+	sprintf(sqlquery, "DELETE FROM problem WHERE problem_id = %u;", problem_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* reply function */
@@ -844,7 +854,7 @@ void callback_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 	wcstombs(path_description_char, path_description, 50);
 	wcstombs(path_input_char, path_input, 50);
 	wcstombs(path_answer_char, path_answer, 50);
-	sprintf(sqlquery, "INSERT INTO problem VALUES(NULL, '%s', '%s', '%s', '%s', '%u');", problem_name_char, path_description_char, path_input_char, path_answer_char, time_limit);
+	sprintf(sqlquery, "INSERT INTO problem VALUES(NULL, '%s', '%s', '%s', '%s', %u);", problem_name_char, path_description_char, path_input_char, path_answer_char, time_limit);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* reply function */
@@ -896,7 +906,7 @@ void callback_clar_request( char *srcip, unsigned int account_id, int private_by
 
 	/* record clarification information into db */
 	wcstombs(clarmsg_char, clarmsg, 100);
-	sprintf(sqlquery, "INSERT INTO clarification VALUES(NULL, '%u', '%s', NULL, '%d');", account_id, clarmsg_char, private_byte);
+	sprintf(sqlquery, "INSERT INTO clarification VALUES(NULL, %u, '%s', NULL, %d);", account_id, clarmsg_char, private_byte);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 	clar_id = sqlite3_last_insert_rowid(db);
 
