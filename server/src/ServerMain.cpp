@@ -488,8 +488,7 @@ void callback_pd_request( char *srcip, unsigned int account_id, unsigned int pro
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	if(rows >= 1)
 	{
-		sscanf(path_description_char, "%s", table[1 * cols + 0]);
-		mbstowcs(path_description_wchar, path_description_char, 50);
+		mbstowcs(path_description_wchar, table[1 * cols + 0], 50);
 		serverproto_problem_upload( srcip, path_description_wchar );
 	}
 	sqlite3_free_table(table);
@@ -518,7 +517,7 @@ void callback_sb_sync( char *srcip, short srctype )
 void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
-	char result_char[25], destip[20];
+	char result_char[25];
 	int rows, cols;
 	unsigned int problem_id, account_id, accept_count;
 	wchar_t account_wchar[25];
@@ -571,10 +570,10 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	if(rows >= 1)
 	{
-		sscanf(table[1 * cols + 0], "%s", destip);
+		serverproto_run_reply( table[1 * cols + 0], run_id, problem_id, result );
 	}
 	sqlite3_free_table(table);
-	serverproto_run_reply( destip, run_id, problem_id, result );
+	
 }
 
 void callback_trun_sync( char *srcip, unsigned int account_id )
@@ -745,7 +744,6 @@ void callback_account_sync( char *srcip )
 {
 	/* updates account listing to administrator */
 	char sqlquery[100], **table, *errMsg = NULL;
-	char acc_char[25];
 	int rows, cols, i;
 	unsigned int account_id, account_type;
 	wchar_t acc_wchar[25];
@@ -755,9 +753,9 @@ void callback_account_sync( char *srcip )
 	for(i=1;i<=rows;i++)
 	{
 		sscanf(table[i * cols + 0], "%u", &account_id);
-		sscanf(table[i * cols + 1], "%s", acc_char);
+		mbstowcs(acc_wchar, table[i * cols + 1], 25);
 		sscanf(table[i * cols + 2], "%u", &account_type);
-		mbstowcs(acc_wchar, acc_char, 25);
+		
 		serverproto_account_update(srcip, account_id, account_type, acc_wchar);
 	}
 	sqlite3_free_table(table);
@@ -803,7 +801,7 @@ void callback_problem_add_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 	for( i=1; i<=rows;i++ )
 		serverproto_problem_update( table[i * cols + 0], OPSR_ADMIN, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
 	sqlite3_free_table( table );
-	
+
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_JUDGE);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for( i=1; i<=rows;i++ )
@@ -827,7 +825,7 @@ void callback_problem_del( char *srcip, unsigned int problem_id )
 	for( i=1; i<=rows;i++ )
 		serverproto_problem_remove( table[i * cols + 0], OPSR_ADMIN, problem_id );
 	sqlite3_free_table( table );
-	
+
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_JUDGE);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for( i=1; i<=rows;i++ )
@@ -875,7 +873,7 @@ void callback_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 	for( i=1; i<=rows;i++ )
 		serverproto_problem_update( table[i * cols + 0], OPSR_ADMIN, problem_id, problem_name, time_limit, path_description, path_input, path_answer );
 	sqlite3_free_table( table );
-	
+
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_JUDGE);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for( i=1; i<=rows;i++ )
@@ -888,7 +886,6 @@ void callback_problem_mod_dlfin( char *srcip, unsigned int problem_id, wchar_t *
 void callback_problem_sync( char *srcip, short srctype )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
-	char problem_name_char[20], path_description_char[50], correct_input_filename_char[50], correct_output_filename_char[50];
 	int rows, cols, i;
 	wchar_t problem_name_wchar[20], path_description_wchar[50], correct_input_filename_wchar[50], correct_output_filename_wchar[50];
 	unsigned int problem_id, time_limit;
@@ -899,16 +896,11 @@ void callback_problem_sync( char *srcip, short srctype )
 	for(i=1;i<=rows;i++)
 	{
 		sscanf(table[i * cols + 0], "%u", &problem_id);
-		sscanf(table[i * cols + 1], "%s", problem_name_char);
-		sscanf(table[i * cols + 2], "%s", path_description_char);
-		sscanf(table[i * cols + 3], "%s", correct_input_filename_char);
-		sscanf(table[i * cols + 4], "%s", correct_output_filename_char);
+		mbstowcs(problem_name_wchar, table[i * cols + 1], 20);
+		mbstowcs(path_description_wchar, table[i * cols + 2], 50);
+		mbstowcs(correct_input_filename_wchar, table[i * cols + 3], 50);
+		mbstowcs(correct_output_filename_wchar, table[i * cols + 4], 50);
 		sscanf(table[i * cols + 5], "%u", &time_limit);
-
-		mbstowcs(problem_name_wchar, problem_name_char, 20);
-		mbstowcs(path_description_wchar, path_description_char, 50);
-		mbstowcs(correct_input_filename_wchar, correct_input_filename_char, 50);
-		mbstowcs(correct_output_filename_wchar, correct_output_filename_char, 50);
 
 		serverproto_problem_update( srcip, srctype, problem_id, problem_name_wchar, time_limit, path_description_wchar, correct_input_filename_wchar, correct_output_filename_wchar );
 	}
