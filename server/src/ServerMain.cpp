@@ -435,15 +435,13 @@ void callback_submission_request( char *srcip, unsigned int account_id, unsigned
 	/* set path_code */
 	sprintf(sqlquery, "SELECT * FROM submission;");
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
-	if(rows >= 1)
-	{
-		wcstombs(coding_language_char, coding_language, 10);
-		sprintf(path_code_char, "submits/submit%d.%s", rows + 1, coding_language_char);
 
-		/* path_code allocation */
-		*path_code = (wchar_t *)malloc( ( strlen( path_code_char ) + 1 ) * sizeof( wchar_t ) );
-		mbstowcs(*path_code, path_code_char, 30);
-	}
+	wcstombs(coding_language_char, coding_language, 10);
+	sprintf(path_code_char, "submits/submit%d.%s", rows + 1, coding_language_char);
+
+	/* path_code allocation */
+	*path_code = (wchar_t *)malloc( ( strlen( path_code_char ) + 1 ) * sizeof( wchar_t ) );
+	mbstowcs(*path_code, path_code_char, 30);
 	
 	sqlite3_free_table(table);
 }
