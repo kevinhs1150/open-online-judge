@@ -271,10 +271,15 @@ void JudgeFrame::OnChoiceFilter( wxCommandEvent& event )
 	wxString text;
 	int post;
 	
+printf("in event\n");
 	text = event.GetString();
+wxMessageBox( text, wxT("test1"),wxOK|wxICON_EXCLAMATION);
 	post = text.Find(wxT(" "));
+printf("post: %d\n",post);
 	text.Remove(post);
+wxMessageBox( text, wxT("test2"),wxOK|wxICON_EXCLAMATION);
 	problem_id = wxAtoi(text);
+printf("%u\n",problem_id);
 	
 	problem_filter_search(problem_id);
 }
@@ -435,18 +440,17 @@ void problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned in
 {/***HERE***/
     wchar_t path[50];
 
-    wsprintf(path, L"problem/%u", problem_id);
-
-    /**TODO: new memory for *path_code**/
+    wsprintf(path, L"problem/%u.pdf", problem_id);
     *path_description = (wchar_t *) malloc( ( wcslen(path)+1 ) * sizeof(wchar_t));
-    *path_input = (wchar_t *)malloc( ( wcslen(path)+1 ) * sizeof(wchar_t));
-    *path_answer = (wchar_t *)malloc( ( wcslen(path)+1 ) * sizeof(wchar_t));
-
-    wsprintf(*path_description, L"%s.pdf", path );
-    wsprintf(*path_input, L"%s_input.txt", path );
-    wsprintf(*path_answer, L"%s_answer.txt", path );
+	wcscpy(*path_description,path);
 	
-	wprintf(L"%s\n", *path_description);
+	wsprintf(path, L"problem/%u_input.txt", problem_id);
+    *path_input = (wchar_t *)malloc( ( wcslen(path)+1 ) * sizeof(wchar_t));
+	wcscpy(*path_input,path);
+	
+	wsprintf(path, L"problem/%u_answer.txt", problem_id);
+    *path_answer = (wchar_t *)malloc( ( wcslen(path)+1 ) * sizeof(wchar_t));
+	wcscpy(*path_answer,path);
 }
 
 void problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
@@ -608,15 +612,22 @@ void problem_insert(unsigned int problem_id, wchar_t *problem_name, unsigned int
 
 void problem_filter_search(unsigned int problem_id)
 {
+printf("in search function\n");
 	unsigned int row = 0;
 	run_request_id *pfptr = pptr;
 	wxString insertString;
 	long tmp;
 	
 	mainFrame->m_listCtrlRuns->DeleteAllItems();
-	
+printf("delete list\n");	
 	while(1){
+printf("in while\n");
+		if(pfptr == NULL){
+printf("in break if\n");
+			break;
+		}
 		if(pfptr->problem_id == problem_id){
+printf("in == if\n");
 			row = unJudgeNumCount() + 1 ;
 			insertString.Printf(wxT("%d"),pfptr->run_id);
 			tmp = mainFrame->m_listCtrlRuns->InsertItem(row,insertString);
@@ -625,11 +636,14 @@ void problem_filter_search(unsigned int problem_id)
 			insertString.Printf(wxT("%s"),pfptr->coding_language);
 			mainFrame->m_listCtrlRuns->SetItem(tmp, 2, insertString);
 		}
-		if(pfptr->next == NULL)
+		if(pfptr->next == NULL){
+printf("in break if\n");
 			break;
+			}
+printf("error\n");
 		pfptr = pfptr->next; 
 	}
-	
+printf("end of search");
 }
 
 problem_all *problem_search(unsigned int problem_id)
