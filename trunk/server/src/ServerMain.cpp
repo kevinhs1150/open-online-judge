@@ -155,7 +155,7 @@ ServerFrame::ServerFrame(wxFrame *frame)
 		
 	/* re-initialize server GUI status indicator (add color) */
 	StaticTextStatus->SetLabel( wxT("Not Running") );
-	StaticTextStatus->SetForgroundColour( *wxRED );
+	StaticTextStatus->SetForegroundColour( *wxRED );
 
 	/* register callback functions */
 	serverproto_cbreg_login_request( callback_login_request );
@@ -214,7 +214,7 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 
 	/* set wxStaticText label */
 	StaticTextStatus->SetLabel( wxT("NOW Running") );
-	StaticTextStatus->SetColour( *wxBLUE );
+	StaticTextStatus->SetForegroundColour( *wxBLUE );
 
 	/* if admin01 not exist, add an admin01 account */
 	sprintf(sqlquery, "SELECT * FROM user WHERE account = 'admin01';");
@@ -233,7 +233,7 @@ void ServerFrame::OnButtonClickStop( wxCommandEvent& event )
 		serverproto_stop_listen();
 
 	StaticTextStatus->SetLabel( wxT("Not Running") );
-	StaticTextStatus->SetForgroundColour( *wxRED );
+	StaticTextStatus->SetForegroundColour( *wxRED );
 }
 
 void ServerFrame::OnTimerEvent(wxTimerEvent &event){
@@ -623,7 +623,8 @@ void callback_take_run( char *srcip, unsigned int run_id )
 
 void callback_account_add( char *srcip, unsigned int type, wchar_t *account, char *password )
 {
-	char sqlquery[100], account_char[25], *errMsg = NULL;
+	char sqlquery[100], account_char[25], **table, *errMsg = NULL;
+	int rows, cols, i;
 	unsigned int account_id;
 
 	/* record account and scoreboard information into db */
@@ -634,8 +635,12 @@ void callback_account_add( char *srcip, unsigned int type, wchar_t *account, cha
 	sprintf(sqlquery, "INSERT INTO scoreboard VALUES(NULL, '%u', '0', '0');", account_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
-	/* updates account listing to administrator */
-	serverproto_account_update( srcip, account_id, type, account );
+	/* updates account listing to administrators */
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", OPSR_ADMIN);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	for( i=1; i<=rows;i++ )
+		serverproto_account_update( table[i * cols + 0], account_id, type, account );
+	sqlite3_free_table( table );
 
 	/* notify team and admin client about scoreboard updates */
 	serverdb_sb_update( OPSR_TEAM, account_id, account, 0, 0 );
@@ -645,24 +650,38 @@ void callback_account_add( char *srcip, unsigned int type, wchar_t *account, cha
 void callback_account_del( char *srcip, unsigned int account_id )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
+	int rows, cols, i;
 
 	/* remove the account from db and remove everything related to that account from the system */
 	sprintf(sqlquery, "DELETE FROM user WHERE account_id = '%u';", account_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* updates account listing to administrator */
-	serverproto_account_remove( srcip, account_id );
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", OPSR_ADMIN);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	for( i=1; i<=rows;i++ )
+		serverproto_account_remove( table[i * cols + 0], account_id );
+	sqlite3_free_table( table );
 
 	/* notify team and admin client about scoreboard updates */
-	//serverdb_sb_update( OPSR_TEAM, account_id, account, 0, 0 );
-	//serverdb_sb_update( OPSR_ADMIN, account_id, account, 0, 0 );
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", OPSR_TEAM);
+	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
+	for(i=1;i<=rows;i++)
+		serverproto_sb_remove( table[i * cols + 0], OPSR_TEAM, account_id );
+	sqlite3_free_table(table);
+	
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", OPSR_ADMIN);
+	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
+	for(i=1;i<=rows;i++)
+		serverproto_sb_remove( table[i * cols + 0], OPSR_ADMIN, account_id );
+	sqlite3_free_table(table);
 }
 
 void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_account, char *new_password )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	char new_account_char[25];
-	int rows, cols;
+	int i, rows, cols;
 	unsigned int account_type, accept_count, time;
 
 	/* modify the record in db */
@@ -683,12 +702,18 @@ void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_ac
 	if(rows >= 1)
 	{
 		sscanf(table[1 * cols + 0], "%u", &account_type);
-		serverproto_account_update( srcip, account_id, account_type, new_account );
 	}
 	sqlite3_free_table(table);
+	
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = '%h';", OPSR_ADMIN);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	for( i=1; i<=rows;i++ )
+		serverproto_account_update( table[i * cols + 0], account_id, account_type, new_account );
+	sqlite3_free_table( table );
 
 	/* notify team and admin client about scoreboard updates */
 	sprintf(sqlquery, "SELECT accept_count, time FROM scoreboard WHERE account_id = '%u';", account_id);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	if(rows >= 1)
 	{
 		sscanf(table[1 * cols + 0], "%u", &accept_count);
@@ -696,6 +721,7 @@ void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_ac
 		serverdb_sb_update( OPSR_TEAM, account_id, new_account, accept_count, time );
 		serverdb_sb_update( OPSR_ADMIN, account_id, new_account, accept_count, time );
 	}
+	sqlite3_free_table( table );
 }
 
 void callback_account_sync( char *srcip )
@@ -993,7 +1019,7 @@ void serverdb_sb_update( short desttype, unsigned int upd_acc_id, wchar_t *new_a
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
-		serverproto_sb_update( table[i * cols + 1], desttype, upd_acc_id, new_account, new_accept_count, new_time );
+		serverproto_sb_update( table[i * cols + 0], desttype, upd_acc_id, new_account, new_accept_count, new_time );
 	}
 
 	sqlite3_free_table(table);
