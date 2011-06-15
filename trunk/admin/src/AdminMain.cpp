@@ -316,11 +316,6 @@ void cb_password_change_confirm( int confirm_code ){
 void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int seconds ){
 	AdminFrameGlobal->m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), hours, minutes, seconds));
 	AdminFrameGlobal->m_timeleft = hours * 60 * 60 + minutes * 60 + seconds;
-	
-	//wxCommandEvent event(wxEVT_CALL_TIMER);
-	//event.SetInt(1);
-	//wxPostEvent(AdminFrameGlobal, event);
-	
 	return;
 }
 
@@ -328,8 +323,6 @@ void cb_contest_start( void ){
 	wxCommandEvent event(wxEVT_CALL_TIMER);
 	event.SetInt(1);
 	wxPostEvent(AdminFrameGlobal, event);
-	
-	printf("Start\n");
 	return;
 }
 
@@ -430,7 +423,6 @@ void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsign
 	AdminFrameGlobal->m_listCtrlSB->SetItem(tmp, 2, wxString() << new_accept_count);
 	AdminFrameGlobal->m_listCtrlSB->SetItem(tmp, 3, wxString() << new_time);
 	AdminFrameGlobal->m_listCtrlSB->SetItemData(tmp, updated_account_id);
-	
 	AdminFrameGlobal->m_mutexScoreboard.Unlock();
 	
 	return;
@@ -469,13 +461,18 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	isProblemInfoEnable = false;
 	AdminFrameGlobal = this;
 	ClarEnable(false);
-	//mkdir("/data");
-	//mkdir("/temp");
+	
+	if(!wxDirExists(_("temp")))
+		wxMkdir(_("temp"));
+	if(!wxDirExists(_("data")))
+		wxMkdir(_("data"));
+	
 	InitAccountList();
 	InitProblemList();
 	InitClarList();
 	InitSBList();
 	m_timeleft = 0;
+	m_contestRunning = false;
 	
 	loginDialog = new LoginDialog(this);
 	
@@ -532,6 +529,23 @@ AdminFrame::AdminFrame(wxFrame *frame)
 
 AdminFrame::~AdminFrame()
 {
+	wxString filename;
+	if(wxDirExists(_("temp"))){
+		filename = wxFindFirstFile(_("temp/*"));
+		while(filename != wxEmptyString){
+			wxRemoveFile(filename);
+			filename = wxFindNextFile();
+		}
+		wxRmdir(_("temp"));
+	}
+	if(wxDirExists(_("data"))){
+		filename = wxFindFirstFile(_("data/*"));
+		while(filename != wxEmptyString){
+			wxRemoveFile(filename);
+			filename = wxFindNextFile();
+		}
+		wxRmdir(_("data"));
+	}
 }
 
 void AdminFrame::InitAccountList(){
