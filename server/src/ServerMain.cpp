@@ -499,13 +499,13 @@ void callback_sb_sync( char *srcip, short srctype )
 	int rows, cols, i;
 	unsigned int account_id, new_time, new_accept_count;
 	wchar_t new_account_wchar[25];
-
-	sprintf(sqlquery, "SELECT account_id, account, time, accept_count FROM scoreboard;");
+	
+	sprintf(sqlquery, "SELECT account_id, account, time, accept_count FROM user NATURAL JOIN scoreboard;");
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
 		sscanf(table[i * cols + 0], "%u", &account_id);
-		mbstowcs(new_account_wchar, table[1 * cols + 1], 25);
+		mbstowcs(new_account_wchar, table[i * cols + 1], 25);
 		sscanf(table[i * cols + 2], "%u", &new_time);
 		sscanf(table[i * cols + 3], "%u", &new_accept_count);
 		serverproto_sb_update( srcip, srctype, account_id, new_account_wchar, new_accept_count, new_time );
@@ -666,8 +666,12 @@ void callback_account_add( char *srcip, unsigned int type, wchar_t *account, cha
 	sprintf(sqlquery, "INSERT INTO user VALUES(NULL, '%s', '%s', %u, NULL, 'no');", account_char, password, type);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 	account_id = sqlite3_last_insert_rowid(db);
-	sprintf(sqlquery, "INSERT INTO scoreboard VALUES(NULL, %u, 0, 0);", account_id);
-	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	
+	if( type == OPSR_TEAM )
+	{
+		sprintf(sqlquery, "INSERT INTO scoreboard VALUES(NULL, %u, 0, 0);", account_id);
+		sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
+	}
 
 	/* updates account listing to administrators */
 	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", OPSR_ADMIN);
