@@ -3160,7 +3160,7 @@
                                 <object class="notebookpage" expanded="0">
                                     <property name="bitmap"></property>
                                     <property name="label">Problems</property>
-                                    <property name="select">0</property>
+                                    <property name="select">1</property>
                                     <object class="wxPanel" expanded="0">
                                         <property name="bg"></property>
                                         <property name="context_help"></property>
@@ -3746,7 +3746,7 @@
                                                                 <property name="proportion">0</property>
                                                                 <object class="wxCheckBox" expanded="0">
                                                                     <property name="bg"></property>
-                                                                    <property name="checked">0</property>
+                                                                    <property name="checked">1</property>
                                                                     <property name="context_help"></property>
                                                                     <property name="context_menu">1</property>
                                                                     <property name="enabled">1</property>
@@ -3772,7 +3772,7 @@
                                                                     <property name="window_name"></property>
                                                                     <property name="window_style"></property>
                                                                     <event name="OnChar"></event>
-                                                                    <event name="OnCheckBox"></event>
+                                                                    <event name="OnCheckBox">OnCheckBoxProblemFile</event>
                                                                     <event name="OnEnterWindow"></event>
                                                                     <event name="OnEraseBackground"></event>
                                                                     <event name="OnKeyDown"></event>
@@ -3936,7 +3936,7 @@
                                                                     <property name="hidden">0</property>
                                                                     <property name="id">wxID_ANY</property>
                                                                     <property name="initial">1</property>
-                                                                    <property name="max">10</property>
+                                                                    <property name="max">30000</property>
                                                                     <property name="maximum_size"></property>
                                                                     <property name="min">1</property>
                                                                     <property name="minimum_size"></property>
@@ -4721,7 +4721,7 @@
                                 <object class="notebookpage" expanded="0">
                                     <property name="bitmap"></property>
                                     <property name="label">Clarifications</property>
-                                    <property name="select">1</property>
+                                    <property name="select">0</property>
                                     <object class="wxPanel" expanded="0">
                                         <property name="bg"></property>
                                         <property name="context_help"></property>
@@ -7365,7 +7365,7 @@
                                                 <property name="enabled">1</property>
                                                 <property name="fg"></property>
                                                 <property name="font"></property>
-                                                <property name="hidden">1</property>
+                                                <property name="hidden">0</property>
                                                 <property name="id">wxID_ANY</property>
                                                 <property name="label">Test</property>
                                                 <property name="maximum_size"></property>

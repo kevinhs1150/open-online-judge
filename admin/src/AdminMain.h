@@ -56,6 +56,7 @@ class AdminFrame: public AdminGUI
 		void InitClarList();
 		void InitSBList();
 		void ProblemInfoEnable(bool enable);
+		void ProblemInfoClear();
 		void ClarEnable(bool enable);
 		
 		void OnButtonClickChangePassword( wxCommandEvent& event );
@@ -75,6 +76,7 @@ class AdminFrame: public AdminGUI
 		void OnListItemSelectedProblem( wxListEvent& event );
 		void OnButtonClickAddProblem( wxCommandEvent& event );
 		void OnButtonClickDelProblem( wxCommandEvent& event );
+		void OnCheckBoxProblemFile( wxCommandEvent& event );
 		void OnButtonClickProblemApply( wxCommandEvent& event );
 		void OnListItemDeselectedClar( wxListEvent& event );
 		void OnListItemSelectedClar( wxListEvent& event );

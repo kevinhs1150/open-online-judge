@@ -453,8 +453,7 @@ void cb_problem_remove( unsigned int problem_id ){
 }
 
 AdminFrame::AdminFrame(wxFrame *frame)
-    : AdminGUI(frame), m_timer(this)
-{
+    : AdminGUI(frame), m_timer(this){
 	char localaddr[20];
 	int ip1, ip2, ip3, ip4;
 	FILE *ipFile;
@@ -528,8 +527,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	
 }
 
-AdminFrame::~AdminFrame()
-{
+AdminFrame::~AdminFrame(){
 	wxString filename;
 	if(wxDirExists(_("temp"))){
 		filename = wxFindFirstFile(_("temp/*"));
@@ -635,7 +633,8 @@ void AdminFrame::InitSBList(){
 void AdminFrame::ProblemInfoEnable(bool enable){
 	if(isProblemInfoEnable == enable)
 		return;
-	
+	m_staticTextProblemID->Enable(enable);
+	m_textCtrlProblemID->Enable(enable);
 	m_staticTextProblemName->Enable(enable);
 	m_textCtrlProblemName->Enable(enable);
 	m_checkBoxProblemFile->Enable(enable);
@@ -649,6 +648,17 @@ void AdminFrame::ProblemInfoEnable(bool enable){
 	m_filePickerProblemOutputData->Enable(enable);
 	m_buttonProblemApply->Enable(enable);
 	isProblemInfoEnable = enable;
+	
+	return;
+}
+
+void AdminFrame::ProblemInfoClear(){
+	m_textCtrlProblemID->Clear();
+	m_textCtrlProblemName->Clear();
+	m_filePickerProblemFile->SetPath(wxEmptyString);
+	m_spinCtrlTimeLimitVal->SetValue(3000);
+	m_filePickerProblemInputData->SetPath(wxEmptyString);
+	m_filePickerProblemOutputData->SetPath(wxEmptyString);
 	
 	return;
 }
@@ -811,7 +821,8 @@ void AdminFrame::OnButtonClickStop( wxCommandEvent& event ){
 	return;
 }
 
-void AdminFrame::OnListItemDeselectedProblem( wxListEvent& event ){
+void AdminFrame::OnListItemDeselectedProblem( wxListEvent& event ){\
+	ProblemInfoClear();
 	ProblemInfoEnable(false);
 	m_selectedProblem = -1;
 }
@@ -826,9 +837,10 @@ void AdminFrame::OnButtonClickAddProblem( wxCommandEvent& event ){
 	for(i = 0 ; i < m_listCtrlProblems->GetItemCount() ; i++)
 		m_listCtrlProblems->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	m_selectedProblem = -1;
-	m_textCtrlProblemName->Clear();
-	m_filePickerProblemFile->SetPath(wxEmptyString);
-	m_spinCtrlTimeLimitVal->SetValue(3000);
+	//ProblemInfoClear();
+	ProblemInfoEnable(false);
+	
+	return;
 }
 
 void AdminFrame::OnButtonClickDelProblem( wxCommandEvent& event ){
@@ -844,6 +856,12 @@ void AdminFrame::OnButtonClickDelProblem( wxCommandEvent& event ){
 		unsigned int id = wxAtoi(item.GetText());
 		adminproto_problem_del(server_ip, id);
 	}
+	
+	return;
+}
+
+void AdminFrame::OnCheckBoxProblemFile( wxCommandEvent& event ){
+	m_checkBoxProblemFile->SetValue(true);
 	
 	return;
 }
@@ -913,13 +931,15 @@ void AdminFrame::OnButtonClickProblemApply( wxCommandEvent& event ){
 		wprintf(L"%s\n", i_path);
 		wprintf(L"%s\n", o_path);
 		
-		printf("call add before\n");
 		adminproto_problem_add(server_ip, id, name, time_limit, p_path, i_path, o_path);
-		printf("call add after\n");
 	}
 	else{
 		//edit
+		m_selectedProblem = -1;
 	}
+	ProblemInfoClear();
+	ProblemInfoEnable(false);
+	
 	
 	return;
 }
@@ -930,6 +950,7 @@ void AdminFrame::OnListItemDeselectedClar( wxListEvent& event ){
 	
 	return;
 }
+
 void AdminFrame::OnListItemSelectedClar( wxListEvent& event ){
 /*
 	m_selectedClar = event.GetIndex();
