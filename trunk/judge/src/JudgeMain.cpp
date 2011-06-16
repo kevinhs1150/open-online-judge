@@ -37,8 +37,10 @@ typedef struct problem_list{
 
 BEGIN_DECLARE_EVENT_TYPES()
 	DECLARE_LOCAL_EVENT_TYPE( wxEVT_CALL_TIMER, 7777 )
+	DECLARE_LOCAL_EVENT_TYPE( wxEVT_SHOW_SUBMISSION_DIALOG, 8888 )
 END_DECLARE_EVENT_TYPES()
 DEFINE_EVENT_TYPE( wxEVT_CALL_TIMER )
+DEFINE_EVENT_TYPE( wxEVT_SHOW_SUBMISSION_DIALOG )
 
 #define EVT_CALL_TIMER( id, fn )\
     DECLARE_EVENT_TABLE_ENTRY( \
@@ -47,9 +49,17 @@ DEFINE_EVENT_TYPE( wxEVT_CALL_TIMER )
         (wxObject*)NULL\
     ),
 
+#define EVT_SHOW_SUBMISSION_DIALOG( id, fn )\
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_SHOW_SUBMISSION_DIALOG, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject*)NULL\
+    ),
+	
 BEGIN_EVENT_TABLE(JudgeFrame, wxFrame)
     EVT_TIMER(-1, JudgeFrame::OnTimerEvent)
 	EVT_CALL_TIMER(wxID_ANY, JudgeFrame::TimerCall)
+	EVT_SHOW_SUBMISSION_DIALOG(wxID_ANY, JudgeFrame::ShowSubmissionDialog)
 END_EVENT_TABLE()
 
 JudgeLoginFrame *loginframe;
@@ -302,7 +312,9 @@ void JudgeFrame::OnListItemActivatedRuns( wxListEvent& event )
 
 	run_id = wxAtoi(item.GetText());
 	
+	printf("Call judgeproto_take_run\n");
 	judgeproto_take_run(this->IP_get(),run_id);
+	printf("return from judgeproto_take_run\n");
 }
 
 void JudgeFrame::OnListItemActivatedClar( wxListEvent& event )
@@ -345,6 +357,27 @@ void JudgeFrame::TimerCall(wxCommandEvent &event){
 	else if(event.GetInt() == 0){
 		m_timer.Stop();
 	}
+	
+	return;
+}
+
+void JudgeFrame::ShowSubmissionDialog(wxCommandEvent &event){
+	unsigned int run_id = event.GetInt();
+    run_request_id *rptr = search(run_id);
+	problem_all *proptr = problem_search(rptr->problem_id);
+	unsigned int unJudgeNum;
+
+	submissionFrame = new JudgeSubmissionFrame(0L);
+	submissionFrame->setRunProblemID(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->problem_name, proptr->time_limit);
+	submissionFrame->showStatus();
+	if(submissionFrame->ShowModal() == 0){
+		mainFrame->m_mutexRunRequest.Lock();
+		id_delete(rptr->run_id);
+		unJudgeNum = unJudgeNumCount();
+		mainFrame->setUnJudgeNum(unJudgeNum);
+		mainFrame->m_mutexRunRequest.Unlock();
+	}
+	submissionFrame->Destroy();
 	
 	return;
 }
@@ -470,15 +503,27 @@ void problem_remove( unsigned int problem_id )
 
 void take_result( unsigned int run_id, int success )
 {
+	printf("cb take_result\n");
+	printf("run_id = %u\n", run_id);
     run_request_id *rptr = search(run_id);
+	printf("after search\n");
 	problem_all *proptr = problem_search(rptr->problem_id);
+	printf("after problem_search\n");
 	unsigned int unJudgeNum;
+	
+	printf("take\n");
 	
 	if(success == TAKE_SUCCESS){
 		if(mainFrame->m_checkBoxAutoJudge->IsChecked()){
 			autoJudge(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->time_limit);
 		}
 		else{
+			printf("before event\n");
+			wxCommandEvent event(wxEVT_SHOW_SUBMISSION_DIALOG);
+			event.SetInt(run_id);
+			wxPostEvent(mainFrame, event);
+			printf("after event\n");
+			/*
 			submissionFrame = new JudgeSubmissionFrame(0L);
 			submissionFrame->setRunProblemID(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->problem_name, proptr->time_limit);
 			submissionFrame->showStatus();
@@ -490,6 +535,7 @@ void take_result( unsigned int run_id, int success )
 				mainFrame->m_mutexRunRequest.Unlock();
 			}
 			submissionFrame->Destroy();
+			*/
 		}
 	}
 	else{

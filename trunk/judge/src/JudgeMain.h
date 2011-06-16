@@ -54,6 +54,7 @@ class JudgeFrame: public JudgeGUI
 		
 		void OnTimerEvent(wxTimerEvent &event);
 		void TimerCall(wxCommandEvent &event);
+		void ShowSubmissionDialog(wxCommandEvent &event);
 		DECLARE_EVENT_TABLE()
 };
 
