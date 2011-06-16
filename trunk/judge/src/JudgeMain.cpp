@@ -288,7 +288,7 @@ void JudgeFrame::OnChoiceFilter( wxCommandEvent& event )
 void JudgeFrame::OnCheckBoxAutoJudge( wxCommandEvent& event )
 {
 	if((m_checkBoxAutoJudge->IsChecked()) == true && unJudgeNumCount() > 0){
-	//	autoJudge_take();
+		autoJudge_take();
 	}
 	//==========================================================
 	/*autoJudge(1,1, L"c", 3);
@@ -936,8 +936,9 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 		wxMessageBox(wxT("Judgement Submission Error.\nPromble: Socket error."),wxT("Judgement Submission Error"),wxOK|wxICON_EXCLAMATION);
 	}
 	else{
+		id_delete(rptr->run_id);
 		unJudgeNum = unJudgeNumCount();
-		if(unJudgeNum == 1 && (mainFrame->m_checkBoxAutoJudge->IsChecked()) == true){
+		if(unJudgeNum >= 1 && (mainFrame->m_checkBoxAutoJudge->IsChecked()) == true){
 			autoJudge_take();
 		}
 	}
@@ -1042,7 +1043,7 @@ int time_auto(unsigned int time_limit){
    pid = wxExecute(wxT("executive.exe"),wxEXEC_NOHIDE,wxP);
 
     for(i = 0;i < time_limit;i++){
-        Sleep(1000);
+        Sleep(1);
         if(wxProcess::Exists(pid) == true){
             break;
         }
