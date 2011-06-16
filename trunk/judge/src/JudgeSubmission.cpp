@@ -295,7 +295,6 @@ int compile(wchar_t file_name[], wchar_t type[])
 			call_mbsize = wcstombs( NULL, call, 0 ) + 1;
 			wcstombs( call_mb, call, call_mbsize );
 			
-			printf("compile line: %s\n", call_mb);
 			system(call_mb);
 			return(complie_result());
 		}
@@ -354,8 +353,7 @@ int time(){
 
 	pid = wxExecute(wxT("executive.exe"),wxEXEC_NOHIDE,wxP);
     for(i = 0; i < (submissionFrame->getTimeLimit()) ;i++){
-//		printf("1sec.\n");
-        Sleep(1);
+		Sleep(1000);
 		if(wxProcess::Exists(pid) == true){
             break;
         }
@@ -377,6 +375,7 @@ int judge(unsigned int problem_id){
     sprintf(problem_ans, "problem/%u_answer.txt", problem_id);
 
     fptr1 = fopen(problem_ans,"r");
+    Sleep(1);
     fptr2 = fopen("ans.txt","r");
     if(fptr1 != NULL){
         if(fptr2 != NULL)

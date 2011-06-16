@@ -312,9 +312,7 @@ void JudgeFrame::OnListItemActivatedRuns( wxListEvent& event )
 
 	run_id = wxAtoi(item.GetText());
 	
-	printf("Call judgeproto_take_run\n");
 	judgeproto_take_run(this->IP_get(),run_id);
-	printf("return from judgeproto_take_run\n");
 }
 
 void JudgeFrame::OnListItemActivatedClar( wxListEvent& event )
@@ -502,40 +500,18 @@ void problem_remove( unsigned int problem_id )
 
 void take_result( unsigned int run_id, int success )
 {
-//	printf("cb take_result\n");
-//	printf("run_id = %u ", run_id);
     run_request_id *rptr = search(run_id);
-//	printf("problem_id = %d\n", rptr->problem_id );
-//	printf("after search\n");
 	problem_all *proptr = problem_search(rptr->problem_id);
-//	printf("after problem_search\n");
 	unsigned int unJudgeNum;
-	
-//	printf("take\n");
 	
 	if(success == TAKE_SUCCESS){
 		if(mainFrame->m_checkBoxAutoJudge->IsChecked()){
 			autoJudge(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->time_limit);
 		}
 		else{
-//			printf("before event\n");
 			wxCommandEvent event(wxEVT_SHOW_SUBMISSION_DIALOG);
 			event.SetInt(run_id);
 			wxPostEvent(mainFrame, event);
-//			printf("after event\n");
-			/*
-			submissionFrame = new JudgeSubmissionFrame(0L);
-			submissionFrame->setRunProblemID(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->problem_name, proptr->time_limit);
-			submissionFrame->showStatus();
-			if(submissionFrame->ShowModal() == 0){
-				mainFrame->m_mutexRunRequest.Lock();
-				id_delete(rptr->run_id);
-				unJudgeNum = unJudgeNumCount();
-				mainFrame->setUnJudgeNum(unJudgeNum);
-				mainFrame->m_mutexRunRequest.Unlock();
-			}
-			submissionFrame->Destroy();
-			*/
 		}
 	}
 	else{
@@ -936,7 +912,7 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 		wxMessageBox(wxT("Judgement Submission Error.\nPromble: Socket error."),wxT("Judgement Submission Error"),wxOK|wxICON_EXCLAMATION);
 	}
 	else{
-		id_delete(rptr->run_id);
+		id_delete(run_id);
 		unJudgeNum = unJudgeNumCount();
 		if(unJudgeNum >= 1 && (mainFrame->m_checkBoxAutoJudge->IsChecked()) == true){
 			autoJudge_take();
@@ -1021,17 +997,7 @@ int complie_result_auto(){
     }
     else{
         result = COMPLIE_ERROR;
-        if(fptr2 != NULL)
-        {
-            while((ch = getc(fptr2))!= EOF){
-            }
-            fclose(fptr2);
-        }
-        else{
-            result = OUTPUT_OPEN_ERROR;
-        }
     }
-
     return(result);
 }
 
@@ -1039,8 +1005,8 @@ int time_auto(unsigned int time_limit){
     int i;
 	long pid;
 	wxProcess *wxP = NULL;
-
-   pid = wxExecute(wxT("executive.exe"),wxEXEC_NOHIDE,wxP);
+	
+    pid = wxExecute(wxT("executive.exe"),wxEXEC_NOHIDE,wxP);
 
     for(i = 0;i < time_limit;i++){
         Sleep(1);
@@ -1066,6 +1032,8 @@ int judge_auto(unsigned int problem_id){
     sprintf(problem_ans, "problem/%u_answer.txt", problem_id);
 
     fptr1 = fopen(problem_ans,"r");
+	/*TODO: fix me*/
+	Sleep(1000);
     fptr2 = fopen("ans.txt","r");
     if(fptr1 != NULL){
         if(fptr2 != NULL)
@@ -1078,7 +1046,7 @@ int judge_auto(unsigned int problem_id){
                         return -1;
                     }
                 }
-                else if(o != EOF || a != EOF){
+                else if((o != EOF && a == EOF) || (o == EOF && a != EOF)){
                     return -1;
                 }
                 else{
