@@ -174,19 +174,19 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 	confirmFrame->setJudgementVal(this->result);
 	if(confirmFrame->ShowModal() == 0){
 		if(this->result == YES){
-			swprintf(result_string,L"YES");
+			swprintf(result_string,L"yes");
 		}
 		else if(this->result == COMPLIE_ERROR){
-			swprintf(result_string,L"Compile Error");
+			swprintf(result_string,L"compile error");
 		}
 		else if(this->result == WRONG_ANSWER){
-			swprintf(result_string,L"Wrong Answer");
+			swprintf(result_string,L"wrong answer");
 		}
 		else if(this->result == TIME_LIMIT_EXCEED){
-			swprintf(result_string,L"Time Limit Exceed");
+			swprintf(result_string,L"time limit exceed");
 		}
 		else if(this->result == RUN_TIME_ERROR){
-			swprintf(result_string,L"Runtime Error");
+			swprintf(result_string,L"runtime error");
 		}
 		else{
 			swprintf(result_string,L"YOU SHALL NOT PASS!!!!"); //this should never occur??
@@ -354,7 +354,8 @@ int time(){
 
 	pid = wxExecute(wxT("executive.exe"),wxEXEC_NOHIDE,wxP);
     for(i = 0; i < (submissionFrame->getTimeLimit()) ;i++){
-        Sleep(1000);
+//		printf("1sec.\n");
+        Sleep(1);
 		if(wxProcess::Exists(pid) == true){
             break;
         }

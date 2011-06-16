@@ -6,7 +6,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(OOJ)
 
 # modify your wxWidgets directory HERE!
-SET(wxWidgets_ROOT_DIR C:\wxMSW-2.8.12)
+SET(wxWidgets_ROOT_DIR C:/Libs/wxWidgets)
 FIND_PACKAGE(wxWidgets COMPONENTS core base REQUIRED)
 INCLUDE(${wxWidgets_USE_FILE})
 
@@ -15,7 +15,7 @@ SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 SET(CMAKE_CXX_FLAGS "-static")
-set(CMAKE_CREATE_WIN32_EXE  "")
+#set(CMAKE_CREATE_WIN32_EXE  "")
 
 ADD_SUBDIRECTORY(gui)
 ADD_SUBDIRECTORY(team)
@@ -26,3 +26,4 @@ ADD_SUBDIRECTORY(liboojproto)
 
 CONFIGURE_FILE(libpthread/pthreadGC2.dll ${CMAKE_BINARY_DIR}/bin/pthreadGC2.dll COPYONLY)
 CONFIGURE_FILE(libpthread/libpthreadGC2.a ${CMAKE_BINARY_DIR}/lib/pthreadGC2.a COPYONLY)
+CONFIGURE_FILE(judge/executive.exe ${CMAKE_BINARY_DIR}/bin/executive.exe COPYONLY)
