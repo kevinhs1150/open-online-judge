@@ -101,8 +101,7 @@ void JudgeSubmissionFrame::OnButtonClickRun( wxCommandEvent& event )
 		if(time() == 0){
 			if(judge(this->problem_id) != 0){
 				errtyp = OUTPUT_ERROR;
-				m_staticTextRunStatus->SetLabel(wxT("Submission file type error."));
-				return;
+				m_staticTextRunStatus->SetLabel(wxT("Wrong answer."));
 			}
 		}
 		else{
