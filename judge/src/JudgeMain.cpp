@@ -336,7 +336,6 @@ void JudgeFrame::OnListItemActivatedClar( wxListEvent& event )
 	showClarFrame = new JudgeShowClarFrame(0L);
 	showClarFrame->Show();
 	showClarFrame->setClarQA(cptr->clarmsg ,cptr->result_string);
-	
 }
 
 void JudgeFrame::OnTimerEvent(wxTimerEvent &event){
