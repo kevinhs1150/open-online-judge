@@ -308,6 +308,7 @@ void cb_login_confirm( int confirm_code, unsigned int account_id ){
 
 void cb_logout_confirm( int confirm_code ){
 	AdminFrameGlobal->Destroy();
+	
 	return;
 }
 
