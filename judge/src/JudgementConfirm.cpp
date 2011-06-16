@@ -40,6 +40,9 @@ void JudgementConfirmFrame::setJudgementVal(int result)
 	else if(result == TIME_LIMIT_EXCEED){
 		judgementVal.Printf(wxT("Time-limit exceed."));
 	}
+	else if(result == RUN_TIME_ERROR){
+		judgementVal.Printf(wxT("Run time error."));
+	}
 	else{
 		judgementVal.Printf(wxT("Other error."));
 	}

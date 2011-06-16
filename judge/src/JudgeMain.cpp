@@ -503,26 +503,27 @@ void problem_remove( unsigned int problem_id )
 
 void take_result( unsigned int run_id, int success )
 {
-	printf("cb take_result\n");
-	printf("run_id = %u\n", run_id);
+//	printf("cb take_result\n");
+//	printf("run_id = %u ", run_id);
     run_request_id *rptr = search(run_id);
-	printf("after search\n");
+//	printf("problem_id = %d\n", rptr->problem_id );
+//	printf("after search\n");
 	problem_all *proptr = problem_search(rptr->problem_id);
-	printf("after problem_search\n");
+//	printf("after problem_search\n");
 	unsigned int unJudgeNum;
 	
-	printf("take\n");
+//	printf("take\n");
 	
 	if(success == TAKE_SUCCESS){
 		if(mainFrame->m_checkBoxAutoJudge->IsChecked()){
 			autoJudge(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->time_limit);
 		}
 		else{
-			printf("before event\n");
+//			printf("before event\n");
 			wxCommandEvent event(wxEVT_SHOW_SUBMISSION_DIALOG);
 			event.SetInt(run_id);
 			wxPostEvent(mainFrame, event);
-			printf("after event\n");
+//			printf("after event\n");
 			/*
 			submissionFrame = new JudgeSubmissionFrame(0L);
 			submissionFrame->setRunProblemID(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->problem_name, proptr->time_limit);
@@ -747,15 +748,10 @@ run_request_id *search(unsigned int run_id)
 {
     run_request_id *tptr = pptr;
 
-    if(tptr->run_id == run_id){
-        return tptr;
-    }
-
-    while( tptr->next != NULL ){
-        if(tptr->run_id == run_id){
+    while( tptr != NULL )
+	{
+        if(tptr->run_id == run_id)
             return tptr;
-            break;
-        }
         tptr = tptr->next;
     }
 }
