@@ -209,7 +209,7 @@ void ServerFrame::OnButtonClickStart( wxCommandEvent& event )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
-	
+
 	if( serverproto_active() )
 	{
 		wxMessageBox( wxT("Server already running.\nYou cannot start twice."), wxT("Information"), wxOK|wxICON_INFORMATION, this );
@@ -396,7 +396,8 @@ void callback_admin_timer_set( char *srcip, unsigned int hours, unsigned int min
 
 	/* set timer */
 
-	m_timeleft = hours * 360 + minutes * 60 + seconds;
+	m_timeleft = hours * 3600 + minutes * 60 + seconds;
+	is_timer_set = true;
 
 	sprintf(sqlquery, "SELECT account_type, ipaddress FROM user WHERE logged_in = 'yes';");
 	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
@@ -449,7 +450,7 @@ void callback_submission_request( char *srcip, unsigned int account_id, unsigned
 	/* path_code allocation */
 	*path_code = (wchar_t *)malloc( ( strlen( path_code_char ) + 1 ) * sizeof( wchar_t ) );
 	mbstowcs(*path_code, path_code_char, 30);
-	
+
 	sqlite3_free_table(table);
 }
 
@@ -506,7 +507,7 @@ void callback_sb_sync( char *srcip, short srctype )
 	int rows, cols, i;
 	unsigned int account_id, new_time, new_accept_count;
 	wchar_t new_account_wchar[25];
-	
+
 	sprintf(sqlquery, "SELECT account_id, account, time, accept_count FROM user NATURAL JOIN scoreboard;");
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
@@ -673,7 +674,7 @@ void callback_account_add( char *srcip, unsigned int type, wchar_t *account, cha
 	sprintf(sqlquery, "INSERT INTO user VALUES(NULL, '%s', '%s', %u, NULL, 'no');", account_char, password, type);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 	account_id = sqlite3_last_insert_rowid(db);
-	
+
 	if( type == OPSR_TEAM )
 	{
 		sprintf(sqlquery, "INSERT INTO scoreboard VALUES(NULL, %u, 0, 0);", account_id);
@@ -700,7 +701,7 @@ void callback_account_del( char *srcip, unsigned int account_id )
 	char sqlquery[100], **table, *errMsg = NULL;
 	int rows, cols, i;
 	short type;
-	
+
 	/* get client account type */
 	sprintf(sqlquery, "SELECT account_type FROM user WHERE account_id = %u;", account_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
@@ -742,7 +743,7 @@ void callback_account_mod( char *srcip, unsigned int account_id, wchar_t *new_ac
 	int i, rows, cols;
 	unsigned int account_type, accept_count, time;
 	short type;
-	
+
 	/* get client account type */
 	sprintf(sqlquery, "SELECT account_type FROM user WHERE account_id = %u;", account_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
