@@ -167,6 +167,9 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 	else if(column == 3){
 		this->result = TIME_LIMIT_EXCEED;
 	}
+	else if(column == 4){
+		this->result = RUN_TIME_ERROR;
+	}
 	
 	confirmFrame = new JudgementConfirmFrame(0L);
 	confirmFrame->setJudgementVal(this->result);
@@ -175,13 +178,19 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 			swprintf(result_string,L"YES");
 		}
 		else if(this->result == COMPLIE_ERROR){
-			swprintf(result_string,L"COMPLIE_ERROR");
+			swprintf(result_string,L"Compile Error");
 		}
 		else if(this->result == WRONG_ANSWER){
-			swprintf(result_string,L"WRONG_ANSWER");
+			swprintf(result_string,L"Wrong Answer");
+		}
+		else if(this->result == TIME_LIMIT_EXCEED){
+			swprintf(result_string,L"Time Limit Exceed");
+		}
+		else if(this->result == RUN_TIME_ERROR){
+			swprintf(result_string,L"Runtime Error");
 		}
 		else{
-			swprintf(result_string,L"TIME_LIMIT_EXCEED");
+			swprintf(result_string,L"YOU SHALL NOT PASS!!!!"); //this should never occur??
 		}
 		
 		if(judgeproto_judge_result(this->IP,this->run_id,result_string) != 0){
@@ -207,9 +216,11 @@ void JudgeSubmissionFrame::setResultChoice()
 	m_choiceJudgement->Append(choice);
 	choice.Printf(wxT("complie error"));
 	m_choiceJudgement->Append(choice);
-	choice.Printf(wxT("output wrong"));
+	choice.Printf(wxT("wrong answer"));
 	m_choiceJudgement->Append(choice);
 	choice.Printf(wxT("time-limit exceed"));
+	m_choiceJudgement->Append(choice);
+	choice.Printf(wxT("run-time error"));
 	m_choiceJudgement->Append(choice);
 }
 
@@ -259,18 +270,21 @@ int compile(wchar_t file_name[], wchar_t type[])
     char call_mb[100];
     size_t call_mbsize;
 
+	/* check if out.exe exist */
     fptr1=fopen("out.exe","r");
     if(fptr1 != NULL){
         fclose(fptr1);
         wxRemoveFile(wxT("out.exe"));
     }
 	
+	/* check if ans.txt exist */
 	fptr1=fopen("ans.txt","r");
     if(fptr1 != NULL){
         fclose(fptr1);
         wxRemoveFile(wxT("ans.txt"));
     }
 	
+	/* test source file existence */
     fptr1=fopen_sp(file_name,L"r");
     if(fptr1!=NULL)
     {
@@ -282,6 +296,7 @@ int compile(wchar_t file_name[], wchar_t type[])
 			call_mbsize = wcstombs( NULL, call, 0 ) + 1;
 			wcstombs( call_mb, call, call_mbsize );
 			
+			printf("compile line: %s\n", call_mb);
 			system(call_mb);
 			return(complie_result());
 		}

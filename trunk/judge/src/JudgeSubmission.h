@@ -18,6 +18,7 @@
 #define COMPLIE_ERROR -1
 #define WRONG_ANSWER -2
 #define TIME_LIMIT_EXCEED -3
+#define RUN_TIME_ERROR -4
 
 class JudgeSubmissionFrame: public JudgeSubmissionGUI
 {
