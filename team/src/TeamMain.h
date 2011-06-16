@@ -8,14 +8,13 @@
 class TeamFrame: public TeamGUI
 {
     private:
-
-
         void OnButtonClickChangePassword( wxCommandEvent& event );
         void OnButtonClickLogout( wxCommandEvent& event );
 		void OnButtonClickDownload( wxCommandEvent& event );
 		void OnButtonClickTest( wxCommandEvent& event );
 		void OnButtonClickSubmit( wxCommandEvent& event );
 		void OnButtonClickAsk( wxCommandEvent& event );
+		void OnListItemActivatedClar( wxListEvent& event );
 
 		void OnTimerEvent(wxTimerEvent &event);
 		void TimerCall(wxCommandEvent &event);
@@ -79,5 +78,16 @@ class ClarConfirmDialog : public ClarConfirmGUI
 		~ClarConfirmDialog();
 
 };
+
+class ShowClarDialog: public ShowClarGUI
+{
+    public:
+        ShowClarDialog(wxFrame *frame);
+        ~ShowClarDialog();
+
+    private:
+		void OnButtonClickClose( wxCommandEvent& event );
+};
+
 
 #endif // _TEAMMAIN_H_

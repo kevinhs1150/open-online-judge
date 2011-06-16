@@ -50,6 +50,7 @@ ChangePassDialog* changepassdialog;
 SubmitConfirmDialog* submitconfirmdialog;
 ClarDialog* clardialog;
 ClarConfirmDialog* clarconfirmdialog;
+ShowClarDialog* showclardialog;
 wxMutex mutexRun;
 wxMutex mutexClar;
 wxMutex mutexScoreboard;
@@ -137,6 +138,8 @@ TeamFrame::TeamFrame(wxFrame *frame)
 	m_listCtrlScore->InsertColumn(2, itemCol);
 	itemCol.SetText(_("Time"));
 	m_listCtrlScore->InsertColumn(3, itemCol);
+
+	m_buttonTest->Hide();
 }
 
 TeamFrame::~TeamFrame()
@@ -160,11 +163,17 @@ void TeamFrame::OnButtonClickLogout( wxCommandEvent& event )
 
 void TeamFrame::OnButtonClickDownload( wxCommandEvent& event )
 {
-    if(m_choiceProblem->GetStringSelection().IsEmpty()){
-        wxMessageBox(_("Plz select problem!"));
+
+    if(m_timer.IsRunning()){
+        if(m_choiceProblem->GetStringSelection().IsEmpty()){
+            wxMessageBox(_("Plz select problem!"));
+        }
+        else{
+            teamproto_problem_download(server_ip, login_id, m_choiceProblem->GetCurrentSelection());
+        }
     }
     else{
-        teamproto_problem_download(server_ip, login_id, m_choiceProblem->GetCurrentSelection());
+        wxMessageBox(_("Contest has not started!"));
     }
     return;
 }
@@ -206,30 +215,41 @@ void TeamFrame::OnButtonClickTest( wxCommandEvent& event )
 
 void TeamFrame::OnButtonClickSubmit( wxCommandEvent& event )
 {
-    if(m_choiceProblem->GetStringSelection().IsEmpty() || m_choiceLang->GetStringSelection().IsEmpty()|| m_filePicker->GetPath().IsEmpty()){
-        if(m_choiceProblem->GetStringSelection().IsEmpty()){
-            wxMessageBox(_("Plz select problem!"));
+
+    if(m_timer.IsRunning()){
+        if(m_choiceProblem->GetStringSelection().IsEmpty() || m_choiceLang->GetStringSelection().IsEmpty()|| m_filePicker->GetPath().IsEmpty()){
+            if(m_choiceProblem->GetStringSelection().IsEmpty()){
+                wxMessageBox(_("Plz select problem!"));
+            }
+            if(m_choiceLang->GetStringSelection().IsEmpty()){
+                wxMessageBox(_("Plz select code lang!"));
+            }
+            if(m_filePicker->GetPath().IsEmpty()){
+                wxMessageBox(_("Plz select path!"));
+            }
         }
-        if(m_choiceLang->GetStringSelection().IsEmpty()){
-            wxMessageBox(_("Plz select code lang!"));
-        }
-        if(m_filePicker->GetPath().IsEmpty()){
-            wxMessageBox(_("Plz select path!"));
+        else{
+            submitconfirmdialog = new SubmitConfirmDialog(this);
+            submitconfirmdialog->ShowModal();
+            submitconfirmdialog->Destroy();
         }
     }
     else{
-        submitconfirmdialog = new SubmitConfirmDialog(this);
-        submitconfirmdialog->ShowModal();
-        submitconfirmdialog->Destroy();
+        wxMessageBox(_("Contest has not started!"));
     }
     return;
 }
 
 void TeamFrame::OnButtonClickAsk( wxCommandEvent& event )
 {
-    clardialog = new ClarDialog(this);
-    clardialog->ShowModal();
-    clardialog->Destroy();
+    if(m_timer.IsRunning()){
+        clardialog = new ClarDialog(this);
+        clardialog->ShowModal();
+        clardialog->Destroy();
+    }
+    else{
+        wxMessageBox(_("Contest has not started!"));
+    }
     return;
 }
 void TeamFrame::OnTimerEvent(wxTimerEvent &event){
@@ -255,6 +275,28 @@ void TeamFrame::TimerCall(wxCommandEvent &event){
 	}
 
 	return;
+}
+
+void TeamFrame::OnListItemActivatedClar( wxListEvent& event ){
+    wxListItem Clar;
+    wxListItem Result;
+
+	Clar.SetId(event.GetIndex());
+	Clar.SetColumn(1);
+	Clar.SetMask(wxLIST_MASK_TEXT);
+	m_listCtrlClars->GetItem(Clar);
+
+	Result.SetId(event.GetIndex());
+	Result.SetColumn(2);
+	Result.SetMask(wxLIST_MASK_TEXT);
+	m_listCtrlClars->GetItem(Result);
+
+    showclardialog = new ShowClarDialog(this);
+    showclardialog->m_textCtrlQuestion->SetValue(Clar.GetText());
+    showclardialog->m_textCtrlAnswer->SetValue(Result.GetText());
+    showclardialog->Show();
+
+    return;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -386,15 +428,15 @@ ClarConfirmDialog::~ClarConfirmDialog()
 
 void ClarConfirmDialog::OnButtonClickYes( wxCommandEvent& event )
 {
-    printf("ClarConfirmDialog::OnButtonClickYes 1\n");
+    //printf("ClarConfirmDialog::OnButtonClickYes 1\n");
     wchar_t *temp = new wchar_t [wcslen(m_textCtrlFileQuestion->GetValue().c_str()) + 1];
-	printf("ClarConfirmDialog::OnButtonClickYes 2\n");
+	//printf("ClarConfirmDialog::OnButtonClickYes 2\n");
 	wcscpy( temp, m_textCtrlFileQuestion->GetValue().c_str() );
-	printf("ClarConfirmDialog::OnButtonClickYes 3\n");
-	wprintf(L"temp = %s\n", temp);
-	printf("ClarConfirmDialog::OnButtonClickYes 4\n");
+	//printf("ClarConfirmDialog::OnButtonClickYes 3\n");
+	//wprintf(L"temp = %s\n", temp);
+	//printf("ClarConfirmDialog::OnButtonClickYes 4\n");
     teamproto_clar(server_ip, login_id, 0, temp);
-    printf("ClarConfirmDialog::OnButtonClickYes 5\n");
+    //printf("ClarConfirmDialog::OnButtonClickYes 5\n");
 
     delete temp;
     EndModal(1);
@@ -405,6 +447,27 @@ void ClarConfirmDialog::OnButtonClickNo( wxCommandEvent& event )
 {
     EndModal(0);
     return;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// ShowClarDialog
+///////////////////////////////////////////////////////////////////////////////
+ShowClarDialog::ShowClarDialog(wxFrame *frame)
+    : ShowClarGUI(frame)
+{
+
+}
+
+ShowClarDialog::~ShowClarDialog()
+{
+
+}
+
+void ShowClarDialog::OnButtonClickClose( wxCommandEvent& event )
+{
+	Destroy();
 }
 
 
@@ -544,11 +607,11 @@ void cb_pu_request( wchar_t **path_description )
     {
         temp = wxFileSelector(_("Download Problem File"), _(""), TeamFrameGlobal->m_choiceProblem->GetStringSelection(), _(".pdf"), _(".pdf"), wxFD_SAVE);
     }while( temp.empty() );
-    wprintf(L"Msg Box will print temp(set by wxFileSelector)\n");
-    wxMessageBox(temp);
+    //wprintf(L"Msg Box will print temp(set by wxFileSelector)\n");
+    //wxMessageBox(temp);
     wchar_t *path = (wchar_t*)malloc( ( wcslen(temp.c_str()) + 1 ) * sizeof( wchar_t ) );
 	wcscpy( path, temp.c_str());
-	wprintf(L"path = %s\n", path);
+	//wprintf(L"path = %s\n", path);
 	*path_description = path;
 	return;
 }
