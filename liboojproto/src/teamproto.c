@@ -65,7 +65,7 @@ static int teamproto_cbcheck( void )
 		return 1;
 }
 
-int teamproto_listen( char *localaddr )
+int teamproto_listen( const char *localaddr )
 {
 	/* don't start listening if callback functions are not fully registered. */
 	if( !teamproto_cbcheck() )
@@ -221,22 +221,22 @@ void *teamproto_reqhand_thread( void *args )
 	pthread_exit( NULL );
 }
 
-int teamproto_login( char *destip, wchar_t *account, char *password )
+int teamproto_login( const char *destip, const wchar_t *account, const char *password )
 {
 	return proto_login( destip, OPSR_TEAM, account, password );
 }
 
-int teamproto_logout( char *destip, unsigned int account_id )
+int teamproto_logout( const char *destip, unsigned int account_id )
 {
 	return proto_logout( destip, OPSR_TEAM, account_id );
 }
 
-int teamproto_password_change( char *destip, unsigned int account_id, char *old_password, char *new_password )
+int teamproto_password_change( const char *destip, unsigned int account_id, const char *old_password, const char *new_password )
 {
 	return proto_password_change( destip, OPSR_TEAM, account_id, old_password, new_password );
 }
 
-int teamproto_submission( char *destip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
+int teamproto_submission( const char *destip, unsigned int account_id, unsigned int problem_id, const wchar_t *coding_language, const wchar_t *path_code )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -275,7 +275,7 @@ int teamproto_submission( char *destip, unsigned int account_id, unsigned int pr
 	return 0;
 }
 
-int teamproto_clar( char *destip, unsigned int account_id, int private_byte, wchar_t *clarmsg )
+int teamproto_clar( const char *destip, unsigned int account_id, int private_byte, const wchar_t *clarmsg )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -307,7 +307,7 @@ int teamproto_clar( char *destip, unsigned int account_id, int private_byte, wch
 	return 0;
 }
 
-int teamproto_problem_download( char *destip, unsigned int account_id, unsigned int problem_id )
+int teamproto_problem_download( const char *destip, unsigned int account_id, unsigned int problem_id )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -336,12 +336,12 @@ int teamproto_problem_download( char *destip, unsigned int account_id, unsigned 
 	return 0;
 }
 
-int teamproto_sb_sync( char *destip )
+int teamproto_sb_sync( const char *destip )
 {
 	return proto_sb_sync( destip, OPSR_TEAM );
 }
 
-int teamproto_run_sync( char *destip, unsigned int account_id )
+int teamproto_run_sync( const char *destip, unsigned int account_id )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -367,17 +367,17 @@ int teamproto_run_sync( char *destip, unsigned int account_id )
 	return 0;
 }
 
-int teamproto_timer_sync( char *destip )
+int teamproto_timer_sync( const char *destip )
 {
 	return proto_timer_sync( destip, OPSR_TEAM );
 }
 
-int teamproto_contest_state_sync( char *destip )
+int teamproto_contest_state_sync( const char *destip )
 {
 	return proto_contest_state_sync( destip, OPSR_TEAM );
 }
 
-int teamproto_problem_sync( char *destip )
+int teamproto_problem_sync( const char *destip )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];

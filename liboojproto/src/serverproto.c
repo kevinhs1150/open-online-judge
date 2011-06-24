@@ -96,7 +96,7 @@ static int serverproto_cbcheck( void )
 		return 1;
 }
 
-int serverproto_listen( char *localaddr )
+int serverproto_listen( const char *localaddr )
 {
 	/* dont start listening if callback functions are not fully registered. */
 	if( !serverproto_cbcheck() )
@@ -554,7 +554,7 @@ void *serverproto_reqhand_thread( void *args )
 	pthread_exit( NULL );
 }
 
-int serverproto_login_reply( char *destip, short srctype, int confirmation, unsigned int account_id )
+int serverproto_login_reply( const char *destip, short srctype, int confirmation, unsigned int account_id )
 {
 	int sockfd;
 	unsigned short listen_port;
@@ -597,7 +597,7 @@ int serverproto_login_reply( char *destip, short srctype, int confirmation, unsi
 	return 0;
 }
 
-int serverproto_logout_reply( char *destip, short srctype, int confirmation )
+int serverproto_logout_reply( const char *destip, short srctype, int confirmation )
 {
 	int sockfd;
 	unsigned short listen_port;
@@ -637,7 +637,7 @@ int serverproto_logout_reply( char *destip, short srctype, int confirmation )
 	return 0;
 }
 
-int serverproto_password_change_reply( char *destip, short desttype, int confirmation )
+int serverproto_password_change_reply( const char *destip, short desttype, int confirmation )
 {
 	int sockfd;
 	unsigned short listen_port;
@@ -677,7 +677,7 @@ int serverproto_password_change_reply( char *destip, short desttype, int confirm
 	return 0;
 }
 
-int serverproto_timer_set( char *destip, short desttype, unsigned int hours, unsigned int minutes, unsigned int seconds )
+int serverproto_timer_set( const char *destip, short desttype, unsigned int hours, unsigned int minutes, unsigned int seconds )
 {
 	int sockfd;
 	unsigned short listen_port;
@@ -723,7 +723,7 @@ int serverproto_timer_set( char *destip, short desttype, unsigned int hours, uns
 	return 0;
 }
 
-int serverproto_contest_start( char *destip, short desttype )
+int serverproto_contest_start( const char *destip, short desttype )
 {
 	int sockfd;
 	unsigned short listen_port;
@@ -760,7 +760,7 @@ int serverproto_contest_start( char *destip, short desttype )
 	return 0;
 }
 
-int serverproto_contest_stop( char *destip, short desttype )
+int serverproto_contest_stop( const char *destip, short desttype )
 {
 	int sockfd;
 	unsigned short listen_port;
@@ -797,7 +797,7 @@ int serverproto_contest_stop( char *destip, short desttype )
 	return 0;
 }
 
-int serverproto_run_reply( char *destip, unsigned int run_id, unsigned int problem_id, wchar_t *result )
+int serverproto_run_reply( const char *destip, unsigned int run_id, unsigned int problem_id, const wchar_t *result )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -828,7 +828,7 @@ int serverproto_run_reply( char *destip, unsigned int run_id, unsigned int probl
 	return 0;
 }
 
-int serverproto_clar_reply( char *destip, short desttype, unsigned int clar_id, wchar_t *clarmsg, wchar_t *result )
+int serverproto_clar_reply( const char *destip, short desttype, unsigned int clar_id, const wchar_t *clarmsg, const wchar_t *result )
 {
 	int sockfd;
 	unsigned short listen_port;
@@ -874,7 +874,7 @@ int serverproto_clar_reply( char *destip, short desttype, unsigned int clar_id, 
 	return 0;
 }
 
-int serverproto_problem_change_add( char *destip, unsigned int problem_id, wchar_t *problem_name )
+int serverproto_problem_change_add( const char *destip, unsigned int problem_id, const wchar_t *problem_name )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -905,7 +905,7 @@ int serverproto_problem_change_add( char *destip, unsigned int problem_id, wchar
 	return 0;
 }
 
-int serverproto_problem_change_del( char *destip, unsigned int problem_id )
+int serverproto_problem_change_del( const char *destip, unsigned int problem_id )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -933,7 +933,7 @@ int serverproto_problem_change_del( char *destip, unsigned int problem_id )
 	return 0;
 }
 
-int serverproto_problem_change_mod( char *destip, unsigned int problem_id, wchar_t *problem_name )
+int serverproto_problem_change_mod( const char *destip, unsigned int problem_id, const wchar_t *problem_name )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -964,7 +964,7 @@ int serverproto_problem_change_mod( char *destip, unsigned int problem_id, wchar
 	return 0;
 }
 
-int serverproto_sb_update( char *destip, short desttype, unsigned int upd_acc_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time )
+int serverproto_sb_update( const char *destip, short desttype, unsigned int upd_acc_id, const wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time )
 {
 	int sockfd;
 	unsigned short listen_port;
@@ -1011,7 +1011,7 @@ int serverproto_sb_update( char *destip, short desttype, unsigned int upd_acc_id
 	return 0;
 }
 
-int serverproto_sb_remove( char *destip, short desttype, unsigned int rm_account_id )
+int serverproto_sb_remove( const char *destip, short desttype, unsigned int rm_account_id )
 {
 	int sockfd;
 	unsigned short listen_port;
@@ -1049,7 +1049,7 @@ int serverproto_sb_remove( char *destip, short desttype, unsigned int rm_account
 	return 0;
 }
 
-int serverproto_problem_upload( char *destip, wchar_t *path_description )
+int serverproto_problem_upload( const char *destip, const wchar_t *path_description )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -1078,7 +1078,7 @@ int serverproto_problem_upload( char *destip, wchar_t *path_description )
 	return 0;
 }
 
-int serverproto_run_request( char *destip, unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
+int serverproto_run_request( const char *destip, unsigned int run_id, unsigned int problem_id, const wchar_t *coding_language, const wchar_t *path_code )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -1116,7 +1116,7 @@ int serverproto_run_request( char *destip, unsigned int run_id, unsigned int pro
 	return 0;
 }
 
-int serverproto_take_result( char *destip, unsigned int run_id, int success )
+int serverproto_take_result( const char *destip, unsigned int run_id, int success )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -1144,7 +1144,7 @@ int serverproto_take_result( char *destip, unsigned int run_id, int success )
 	return 0;
 }
 
-int serverproto_account_update( char *destip, unsigned int account_id, unsigned int type, wchar_t *account )
+int serverproto_account_update( const char *destip, unsigned int account_id, unsigned int type, const wchar_t *account )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -1175,7 +1175,7 @@ int serverproto_account_update( char *destip, unsigned int account_id, unsigned 
 	return 0;
 }
 
-int serverproto_account_remove( char *destip, unsigned int account_id )
+int serverproto_account_remove( const char *destip, unsigned int account_id )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -1200,7 +1200,7 @@ int serverproto_account_remove( char *destip, unsigned int account_id )
 	return 0;
 }
 
-int serverproto_problem_update( char *destip, short desttype, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer )
+int serverproto_problem_update( const char *destip, short desttype, unsigned int problem_id, const wchar_t *problem_name, unsigned int time_limit, const wchar_t *path_description, const wchar_t *path_input, const wchar_t *path_answer )
 {
 	int sockfd;
 	unsigned short listen_port;
@@ -1262,7 +1262,7 @@ int serverproto_problem_update( char *destip, short desttype, unsigned int probl
 	return 0;
 }
 
-int serverproto_problem_remove( char *destip, short desttype, unsigned int problem_id )
+int serverproto_problem_remove( const char *destip, short desttype, unsigned int problem_id )
 {
 	int sockfd;
 	unsigned short listen_port;
@@ -1300,7 +1300,7 @@ int serverproto_problem_remove( char *destip, short desttype, unsigned int probl
 	return 0;
 }
 
-int serverproto_clar_request( char *destip, short desttype, unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg )
+int serverproto_clar_request( const char *destip, short desttype, unsigned int clar_id, unsigned int account_id, const wchar_t *account, int private_byte, const wchar_t *clarmsg )
 {
 	int sockfd;
 	unsigned short listen_port;

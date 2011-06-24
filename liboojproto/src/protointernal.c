@@ -55,7 +55,7 @@ int win32_sock_cleanup( void )
 }
 #endif
 
-int tcp_listen( char *bind_address, unsigned short bind_port )
+int tcp_listen( const char *bind_address, unsigned short bind_port )
 {
 	int listenfd;
 	struct sockaddr_in servaddr;
@@ -96,7 +96,7 @@ int tcp_listen( char *bind_address, unsigned short bind_port )
 	return listenfd;
 }
 
-int tcp_connect( char *conn_address, unsigned short conn_port )
+int tcp_connect( const char *conn_address, unsigned short conn_port )
 {
 	int sockfd;
 	struct sockaddr_in servaddr;
@@ -152,7 +152,7 @@ char *tcp_getaddr( int sockfd )
 /* external vsftp listen socket from protointernal_listen.c */
 extern int proto_vsftp_listenfd;
 
-int filesend( char *destip, short desttype, wchar_t *filepath )
+int filesend( const char *destip, short desttype, const wchar_t *filepath )
 {
 	int sockfd;
 	unsigned short listen_port;
@@ -242,7 +242,7 @@ int filesend( char *destip, short desttype, wchar_t *filepath )
 	return 0;
 }
 
-int filerecv( wchar_t *filepath )
+int filerecv( const wchar_t *filepath )
 {
 	int sockfd;
 	char recvbuf[BUFLEN];
@@ -310,7 +310,7 @@ int filerecv( wchar_t *filepath )
 	return 0;
 }
 
-FILE *fopen_sp( wchar_t *filename, wchar_t *mode )
+FILE *fopen_sp( const wchar_t *filename, const wchar_t *mode )
 {
 #ifdef _WIN32
 	return _wfopen( filename, mode );
@@ -413,7 +413,7 @@ char *proto_srid_comb( char *arr, short SR, short ID )
 	return arr + 2;
 }
 
-char *proto_str_comb( char *arr, char *msg )
+char *proto_str_comb( char *arr, const char *msg )
 {
 	strcpy( arr, msg );
 	return arr + strlen( msg ) + 1;
@@ -645,7 +645,7 @@ void proto_sb_remove( char *msgptr )
 	free( rm_account_id_str );
 }
 
-void proto_problem_update( int sockfd, char *src_ipaddr, char *msgptr )
+void proto_problem_update( int sockfd, char *msgptr )
 {
 	char *problem_id_str = proto_str_split( msgptr, &msgptr );
 	char *problem_name_mb = proto_str_split( msgptr, &msgptr );
@@ -693,7 +693,7 @@ void proto_problem_remove( char *msgptr )
 }
 
 /* common function implementation */
-int proto_login( char *destip, short src, wchar_t *account, char *password )
+int proto_login( const char *destip, short src, const wchar_t *account, const char *password )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -719,7 +719,7 @@ int proto_login( char *destip, short src, wchar_t *account, char *password )
 	return 0;
 }
 
-int proto_logout( char *destip, short src, unsigned int account_id )
+int proto_logout( const char *destip, short src, unsigned int account_id )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -744,7 +744,7 @@ int proto_logout( char *destip, short src, unsigned int account_id )
 	return 0;
 }
 
-int proto_password_change( char *destip, short src, unsigned int account_id, char *old_password, char *new_password )
+int proto_password_change( const char *destip, short src, unsigned int account_id, const char *old_password, const char *new_password )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -771,7 +771,7 @@ int proto_password_change( char *destip, short src, unsigned int account_id, cha
 	return 0;
 }
 
-int proto_clar_result( char *destip, short srctype, unsigned int clar_id, int private_byte, wchar_t *result_string )
+int proto_clar_result( const char *destip, short srctype, unsigned int clar_id, int private_byte, const wchar_t *result_string )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -802,7 +802,7 @@ int proto_clar_result( char *destip, short srctype, unsigned int clar_id, int pr
 	return 0;
 }
 
-int proto_sb_sync( char *destip, short srctype )
+int proto_sb_sync( const char *destip, short srctype )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -824,7 +824,7 @@ int proto_sb_sync( char *destip, short srctype )
 	return 0;
 }
 
-int proto_timer_sync( char *destip, short srctype )
+int proto_timer_sync( const char *destip, short srctype )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -846,7 +846,7 @@ int proto_timer_sync( char *destip, short srctype )
 	return 0;
 }
 
-int proto_contest_state_sync( char *destip, short srctype )
+int proto_contest_state_sync( const char *destip, short srctype )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -868,7 +868,7 @@ int proto_contest_state_sync( char *destip, short srctype )
 	return 0;
 }
 
-int proto_clar_sync( char *destip, short srctype )
+int proto_clar_sync( const char *destip, short srctype )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];

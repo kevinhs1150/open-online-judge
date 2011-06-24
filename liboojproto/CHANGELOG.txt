@@ -1,5 +1,12 @@
 >> Open Online Judge Protocol Implementation Change Log <<
 
+protocol 0 revision 8
+released 2011.06.24
+ * internal: Added a lot of constant qualifier to differentiate between
+ string literal and string pointer.  This suppresses most deprecated string
+ conversion warning appeared in new version of MinGW and (maybe) improved
+ program consistency.
+
 protocol 0 revision 7
 released 2011.06.09   by Infinity
  * server: Added srctype to sb_sync() callback.

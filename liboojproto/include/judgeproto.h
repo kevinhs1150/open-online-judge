@@ -69,42 +69,42 @@ void judgeproto_cbreg_clar_reply( void (*cbfunc)( unsigned int clar_id, wchar_t 
 
 /* This function should be called in initial routine.  It listens for data from clients.
  * Note that all callbacks should be registered before invoking listen(). */
-int judgeproto_listen( char *localaddr );
+int judgeproto_listen( const char *localaddr );
 int judgeproto_stop_listen( void );
 /* This function checks whether the listen socket is currently active or not. */
 int judgeproto_active( void );
 
 /* login */
-int judgeproto_login( char *destip, wchar_t *account, char *password );
+int judgeproto_login( const char *destip, const wchar_t *account, const char *password );
 
 /* logout */
-int judgeproto_logout( char *destip, unsigned int account_id );
+int judgeproto_logout( const char *destip, unsigned int account_id );
 
 /* password change */
-int judgeproto_password_change( char *destip, unsigned int account_id, char *old_password, char *new_password );
+int judgeproto_password_change( const char *destip, unsigned int account_id, const char *old_password, const char *new_password );
 
 /* run result */
-int judgeproto_judge_result( char *destip, unsigned int run_id, wchar_t *result_string );
+int judgeproto_judge_result( const char *destip, unsigned int run_id, const wchar_t *result_string );
 
 /* run update request */
-int judgeproto_run_sync( char *destip );
+int judgeproto_run_sync( const char *destip );
 
 /* run take */
-int judgeproto_take_run( char *destip, unsigned int run_id );
+int judgeproto_take_run( const char *destip, unsigned int run_id );
 
 /* clarification reply */
-int judgeproto_clar_result( char *destip, unsigned int clar_id, int private_byte, wchar_t *result_string );
+int judgeproto_clar_result( const char *destip, unsigned int clar_id, int private_byte, const wchar_t *result_string );
 
 /* timer sync request */
-int judgeproto_timer_sync( char *destip );
+int judgeproto_timer_sync( const char *destip );
 
 /* contest state sync request */
-int judgeproto_contest_state_sync( char *destip );
+int judgeproto_contest_state_sync( const char *destip );
 
 /* clarification sync request */
-int judgeproto_clar_sync( char *destip );
+int judgeproto_clar_sync( const char *destip );
 
 /* problem sync request */
-int judgeproto_problem_sync( char *destip );
+int judgeproto_problem_sync( const char *destip );
 
 #endif

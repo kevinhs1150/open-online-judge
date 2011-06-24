@@ -56,7 +56,7 @@ void callback_clar_result( char *srcip, unsigned int clar_id, int private_byte, 
 void callback_clar_sync( char *destip, short srctype );
 
 /* database tool function */
-void serverdb_contest( int (*serverproto)(char *destip, short desttype), short desttype );
+void serverdb_contest( int (*serverproto)(const char *destip, short desttype), short desttype );
 void serverdb_problem_change( unsigned int FUNC, unsigned int problem_id, wchar_t *problem_name );
 void serverdb_clar_request( short desttype, unsigned int clar_id, unsigned int account_id, int private_byte, wchar_t *clarmsg );
 void serverdb_sb_update( short desttype, unsigned int upd_acc_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
@@ -1050,7 +1050,7 @@ void callback_clar_sync( char *srcip, short srctype )
 
 /* database tool function below */
 /* sets contest state for clients */
-void serverdb_contest( int (*serverproto)(char *destip, short desttype), short desttype )
+void serverdb_contest( int (*serverproto)(const char *destip, short desttype), short desttype )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
 	char destip[20];
