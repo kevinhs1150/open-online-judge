@@ -31,7 +31,7 @@ pthread_mutex_t proto_dlmgr_mutex;
 char proto_bind_address[16];
 unsigned short proto_bind_port;
 
-int proto_listen( char *localaddr, unsigned short listen_bind_port, unsigned short vsftp_bind_port, void *(*cbthread)( void *) )
+int proto_listen( const char *localaddr, unsigned short listen_bind_port, unsigned short vsftp_bind_port, void *(*cbthread)( void *) )
 {
 	/* initialize mutex and condition variable */
 	pthread_mutex_init( &proto_sockfd_pass_mutex, NULL );

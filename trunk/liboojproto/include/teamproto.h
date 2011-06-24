@@ -67,44 +67,44 @@ void teamproto_cbreg_problem_mod( void (*cbfunc)( unsigned int problem_id, wchar
 
 /* This function should be called in initial routine.  It listens for data from clients.
  * Note that all callbacks should be registered before invoking listen(). */
-int teamproto_listen( char *localaddr );
+int teamproto_listen( const char *localaddr );
 int teamproto_stop_listen( void );
 /* This function checks whether listen socket is currently active or not. */
 int teamproto_active( void );
 
 /* login
  * send account and password to server */
-int teamproto_login( char *destip, wchar_t *account, char *password );
+int teamproto_login( const char *destip, const wchar_t *account, const char *password );
 
 /* logout
  * send the id of the logging out account to server */
-int teamproto_logout( char *destip, unsigned int account_id );
+int teamproto_logout( const char *destip, unsigned int account_id );
 
 /* password change */
-int teamproto_password_change( char *destip, unsigned int account_id, char *old_password, char *new_password );
+int teamproto_password_change( const char *destip, unsigned int account_id, const char *old_password, const char *new_password );
 
 /* submit */
-int teamproto_submission( char *destip, unsigned int account_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code );
+int teamproto_submission( const char *destip, unsigned int account_id, unsigned int problem_id, const wchar_t *coding_language, const wchar_t *path_code );
 
 /* clarification request */
-int teamproto_clar( char *destip, unsigned int account_id, int private_byte, wchar_t *clarmsg );
+int teamproto_clar( const char *destip, unsigned int account_id, int private_byte, const wchar_t *clarmsg );
 
 /* problem download */
-int teamproto_problem_download( char *destip, unsigned int account_id, unsigned int problem_id );
+int teamproto_problem_download( const char *destip, unsigned int account_id, unsigned int problem_id );
 
 /* scoreboard sync request */
-int teamproto_sb_sync( char *destip );
+int teamproto_sb_sync( const char *destip );
 
 /* runs sync request */
-int teamproto_run_sync( char *destip, unsigned int account_id );
+int teamproto_run_sync( const char *destip, unsigned int account_id );
 
 /* timer sync request */
-int teamproto_timer_sync( char *destip );
+int teamproto_timer_sync( const char *destip );
 
 /* contest state sync request */
-int teamproto_contest_state_sync( char *destip );
+int teamproto_contest_state_sync( const char *destip );
 
 /* problem sync request */
-int teamproto_problem_sync( char *destip );
+int teamproto_problem_sync( const char *destip );
 
 #endif

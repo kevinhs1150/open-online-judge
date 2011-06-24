@@ -72,54 +72,54 @@ void adminproto_cbreg_sb_remove( void (*cbfunc)( unsigned int rm_account_id ) );
 
 /* This function should be called in initial routine.  It listens for data from clients.
  * Note that all callbacks should be registered before invoking listen(). */
-int adminproto_listen( char *localaddr );
+int adminproto_listen( const char *localaddr );
 int adminproto_stop_listen( void );
 /* This function checks whether listen socket is currently active or not. */
 int adminproto_active( void );
 
 /* login
  * send account and password to server */
-int adminproto_login( char *destip, wchar_t *account, char *password );
+int adminproto_login( const char *destip, const wchar_t *account, const char *password );
 
 /* logout
  * send the id of the logging out account to server */
-int adminproto_logout( char *destip, unsigned int account_id );
+int adminproto_logout( const char *destip, unsigned int account_id );
 
 /* password change */
-int adminproto_password_change( char *destip, unsigned int account_id, char *old_password, char *new_password );
+int adminproto_password_change( const char *destip, unsigned int account_id, const char *old_password, const char *new_password );
 
 /* account management */
-int adminproto_account_add( char *destip, unsigned int type, wchar_t *account, char *password );
-int adminproto_account_del( char *destip, unsigned int account_id );
-int adminproto_account_mod( char *destip, unsigned int account_id, wchar_t *new_account, char *new_password );
-int adminproto_account_sync( char *destip );
+int adminproto_account_add( const char *destip, unsigned int type, const wchar_t *account, const char *password );
+int adminproto_account_del( const char *destip, unsigned int account_id );
+int adminproto_account_mod( const char *destip, unsigned int account_id, const wchar_t *new_account, const char *new_password );
+int adminproto_account_sync( const char *destip );
 
 /* problem management */
-int adminproto_problem_add( char *destip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
-int adminproto_problem_del( char *destip, unsigned int problem_id );
-int adminproto_problem_mod( char *destip, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
-int adminproto_problem_sync( char *destip );
+int adminproto_problem_add( const char *destip, unsigned int problem_id, const wchar_t *problem_name, unsigned int time_limit, const wchar_t *path_description, const wchar_t *path_input, const wchar_t *path_answer );
+int adminproto_problem_del( const char *destip, unsigned int problem_id );
+int adminproto_problem_mod( const char *destip, unsigned int problem_id, const wchar_t *problem_name, unsigned int time_limit, const wchar_t *path_description, const wchar_t *path_input, const wchar_t *path_answer );
+int adminproto_problem_sync( const char *destip );
 
 /* clarification reply */
-int adminproto_clar_result( char *destip, unsigned int clar_id, int private_byte, wchar_t *result_string );
+int adminproto_clar_result( const char *destip, unsigned int clar_id, int private_byte, const wchar_t *result_string );
 
 /* timer set function */
-int adminproto_timer_set( char *destip, unsigned int hours, unsigned int minutes, unsigned int seconds );
+int adminproto_timer_set( const char *destip, unsigned int hours, unsigned int minutes, unsigned int seconds );
 
 /* contest start/stop function */
-int adminproto_contest_start( char *destip );
-int adminproto_contest_stop( char *destip );
+int adminproto_contest_start( const char *destip );
+int adminproto_contest_stop( const char *destip );
 
 /* scoreboard sync function */
-int adminproto_sb_sync( char *destip );
+int adminproto_sb_sync( const char *destip );
 
 /* timer sync request */
-int adminproto_timer_sync( char *destip );
+int adminproto_timer_sync( const char *destip );
 
 /* contest state sync request */
-int adminproto_contest_state_sync( char *destip );
+int adminproto_contest_state_sync( const char *destip );
 
 /* clarification sync request */
-int adminproto_clar_sync( char *destip );
+int adminproto_clar_sync( const char *destip );
 
 #endif

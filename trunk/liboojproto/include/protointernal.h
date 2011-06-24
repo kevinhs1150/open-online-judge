@@ -34,8 +34,8 @@ int win32_sock_cleanup( void );
 
 /* network connection management
  * use ANSI string to retain simplicity (it isn't necessary to pass pure-number and dots using Unicode) */
-int tcp_listen( char *bind_address, unsigned short bind_port );
-int tcp_connect( char *conn_address, unsigned short conn_port );
+int tcp_listen( const char *bind_address, unsigned short bind_port );
+int tcp_connect( const char *conn_address, unsigned short conn_port );
 /*int tcp_close( int sockfd );
   int tcp_disconnect( int sockfd );*/
 /* use this function to get ip address of existing connection */
@@ -43,13 +43,13 @@ char *tcp_getaddr( int sockfd );
 
 /* file transfer -- given connected socket
  * note that file name should be Unicode string */
-int filesend( char *destip, short desttype, wchar_t *filepath );
-int filerecv( wchar_t *filepath );
+int filesend( const char *destip, short desttype, const wchar_t *filepath );
+int filerecv( const wchar_t *filepath );
 //int filerecv( char *ipaddr, wchar_t *filepath );
 //int filesend( int sockfd, wchar_t *filepath );
 //int filerecv( int sockfd, wchar_t *filepath );
 /* file open function with cross platform unicode support*/
-FILE *fopen_sp( wchar_t *filename, wchar_t *mode );
+FILE *fopen_sp( const wchar_t *filename, const wchar_t *mode );
 /* send and recv function wrapper
  * remember to free memory after using the received buffer
  * if recv_sp retrieved a NULL pointer to buffer, size will be returned but the message will not be stored */
@@ -70,7 +70,7 @@ char *proto_srid_comb( char *arr, short SR, short ID );
 /* append a message fragment, with the start position of the message specified
  * function returns pointer to where next message should be appended
  * note that string functions will currently not check array bound, so it will be your task to make sure not to exceed the limitation for now */
-char *proto_str_comb( char *arr, char *msg );
+char *proto_str_comb( char *arr, const char *msg );
 
 /* conversion from integer value into string */
 char *int2str( int input );
@@ -88,7 +88,7 @@ wchar_t *proto_str_postrecv( const char *src );
 
 /* internal common listen functions
  * function defined in protointernal_listen.c */
-int proto_listen( char *localaddr, unsigned short listen_bind_port, unsigned short vsftp_bind_port, void *(*cbthread)( void *) );
+int proto_listen( const char *localaddr, unsigned short listen_bind_port, unsigned short vsftp_bind_port, void *(*cbthread)( void *) );
 int proto_activated( void );
 int proto_stop_listen( void );
 
@@ -109,28 +109,28 @@ void proto_sb_update( char *msgptr );
 void proto_sb_remove( char *msgptr );
 
 /* internal common problem update function -- common to admin and judge client */
-void proto_problem_update( int sockfd, char *src_ipaddr, char *msgptr );
+void proto_problem_update( int sockfd, char *msgptr );
 /* this one is for problem removal */
 void proto_problem_remove( char *msgptr );
 
 /* internal common account management functions */
-int proto_login( char *destip, short src, wchar_t *account, char *password );
-int proto_logout( char *destip, short src, unsigned int account_id );
-int proto_password_change( char *destip, short src, unsigned int account_id, char *old_password, char *new_password );
+int proto_login( const char *destip, short src, const wchar_t *account, const char *password );
+int proto_logout( const char *destip, short src, unsigned int account_id );
+int proto_password_change( const char *destip, short src, unsigned int account_id, const char *old_password, const char *new_password );
 
 /* internal clarification result function common to administrator client and judge client */
-int proto_clar_result( char *destip, short srctype, unsigned int clar_id, int private_byte, wchar_t *result_string );
+int proto_clar_result( const char *destip, short srctype, unsigned int clar_id, int private_byte, const wchar_t *result_string );
 
 /* internal common scoreboard sync function -- common to admin and team client */
-int proto_sb_sync( char *destip, short srctype );
+int proto_sb_sync( const char *destip, short srctype );
 
 /* internal common timer sync function -- common to all clients */
-int proto_timer_sync( char *destip, short srctype );
+int proto_timer_sync( const char *destip, short srctype );
 
 /* internal contest state sync function -- common to all clients */
-int proto_contest_state_sync( char *destip, short srctype );
+int proto_contest_state_sync( const char *destip, short srctype );
 
 /* internal clarification sync function -- common to admin and judge client */
-int proto_clar_sync( char *destip, short srctype );
+int proto_clar_sync( const char *destip, short srctype );
 
 #endif

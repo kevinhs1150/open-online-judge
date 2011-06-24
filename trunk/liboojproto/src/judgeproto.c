@@ -62,7 +62,7 @@ static int judgeproto_cbcheck( void )
 		return 1;
 }
 
-int judgeproto_listen( char *localaddr )
+int judgeproto_listen( const char *localaddr )
 {
 	/* don't start listening if callback functions are not fully registered. */
 	if( !judgeproto_cbcheck() )
@@ -158,7 +158,7 @@ void *judgeproto_reqhand_thread( void *args )
 		}
 		else if( RQID == OPID_PUPDATE )
 		{
-			proto_problem_update( sockfd, src_ipaddr, msgptr );
+			proto_problem_update( sockfd, msgptr );
 		}
 		else if( RQID == OPID_PREMOVE )
 		{
@@ -201,23 +201,23 @@ void *judgeproto_reqhand_thread( void *args )
 }
 
 
-int judgeproto_login( char *destip, wchar_t *account, char *password )
+int judgeproto_login( const char *destip, const wchar_t *account, const char *password )
 {
 	return proto_login( destip, OPSR_JUDGE, account, password );
 }
 
-int judgeproto_logout( char *destip, unsigned int account_id )
+int judgeproto_logout( const char *destip, unsigned int account_id )
 {
 	return proto_logout( destip, OPSR_JUDGE, account_id );
 }
 
-int judgeproto_password_change( char *destip, unsigned int account_id, char *old_password, char *new_password )
+int judgeproto_password_change( const char *destip, unsigned int account_id, const char *old_password, const char *new_password )
 {
 	return proto_password_change( destip, OPSR_JUDGE, account_id, old_password, new_password );
 }
 
 /* run result */
-int judgeproto_judge_result( char *destip, unsigned int run_id, wchar_t *result_string )
+int judgeproto_judge_result( const char *destip, unsigned int run_id, const wchar_t *result_string )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -246,7 +246,7 @@ int judgeproto_judge_result( char *destip, unsigned int run_id, wchar_t *result_
 	return 0;
 }
 
-int judgeproto_run_sync( char *destip )
+int judgeproto_run_sync( const char *destip )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -269,7 +269,7 @@ int judgeproto_run_sync( char *destip )
 	return 0;
 }
 
-int judgeproto_take_run( char *destip, unsigned int run_id )
+int judgeproto_take_run( const char *destip, unsigned int run_id )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];
@@ -295,27 +295,27 @@ int judgeproto_take_run( char *destip, unsigned int run_id )
 }
 
 
-int judgeproto_clar_result( char *destip, unsigned int clar_id, int private_byte, wchar_t *result_string )
+int judgeproto_clar_result( const char *destip, unsigned int clar_id, int private_byte, const wchar_t *result_string )
 {
 	return proto_clar_result( destip, OPSR_JUDGE, clar_id, private_byte, result_string );
 }
 
-int judgeproto_timer_sync( char *destip )
+int judgeproto_timer_sync( const char *destip )
 {
 	return proto_timer_sync( destip, OPSR_JUDGE );
 }
 
-int judgeproto_contest_state_sync( char *destip )
+int judgeproto_contest_state_sync( const char *destip )
 {
 	return proto_contest_state_sync( destip, OPSR_JUDGE );
 }
 
-int judgeproto_clar_sync( char *destip )
+int judgeproto_clar_sync( const char *destip )
 {
 	return proto_clar_sync( destip, OPSR_JUDGE );
 }
 
-int judgeproto_problem_sync( char *destip )
+int judgeproto_problem_sync( const char *destip )
 {
 	int sockfd;
 	char sendbuf[BUFLEN];

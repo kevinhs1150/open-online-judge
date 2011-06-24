@@ -178,76 +178,76 @@ void serverproto_cbreg_clar_sync( void (*cbfunc)( char *srcip, short srctype ) )
 
 /* This function should be called in initial routine.  It listens for data from clients.
  * Note that all callbacks should be registered before invoking listen(). */
-int serverproto_listen( char *localaddr );
+int serverproto_listen( const char *localaddr );
 int serverproto_stop_listen( void );
 /* This function checks whether listen socket is currently active or not. */
 int serverproto_active( void );
 
 /* login/logout reply
  * used to reply client login requests */
-int serverproto_login_reply( char *destip, short srctype, int confirmation, unsigned int account_id );
-int serverproto_logout_reply( char *destip, short srctype, int confirmation );
+int serverproto_login_reply( const char *destip, short srctype, int confirmation, unsigned int account_id );
+int serverproto_logout_reply( const char *destip, short srctype, int confirmation );
 
 /* password change reply
  * used to reply client password changing requests */
-int serverproto_password_change_reply( char *destip, short desttype, int confirmation );
+int serverproto_password_change_reply( const char *destip, short desttype, int confirmation );
 
 /* timer set function (to clients)
  * sets timer for clients */
-int serverproto_timer_set( char *destip, short desttype, unsigned int hours, unsigned int minutes, unsigned int seconds );
+int serverproto_timer_set( const char *destip, short desttype, unsigned int hours, unsigned int minutes, unsigned int seconds );
 
 /* contest start/stop functions (to clients)
  * sets contest state for clients */
-int serverproto_contest_start( char *destip, short desttype );
-int serverproto_contest_stop( char *destip, short desttype );
+int serverproto_contest_start( const char *destip, short desttype );
+int serverproto_contest_stop( const char *destip, short desttype );
 
 /* run result reply (to team)
  * reply run result to team clients */
-int serverproto_run_reply( char *destip, unsigned int run_id, unsigned int problem_id, wchar_t *result );
+int serverproto_run_reply( const char *destip, unsigned int run_id, unsigned int problem_id, const wchar_t *result );
 
 /* clarification reply (to all clients)
  * reply clarification result to all clients */
-int serverproto_clar_reply( char *destip, short desttype, unsigned int clar_id, wchar_t *clarmsg, wchar_t *result );
+int serverproto_clar_reply( const char *destip, short desttype, unsigned int clar_id, const wchar_t *clarmsg, const wchar_t *result );
 
 /* problem modification notify (to team)
  * notify team client about changes on problem listing */
-int serverproto_problem_change_add( char *destip, unsigned int problem_id, wchar_t *problem_name );
-int serverproto_problem_change_del( char *destip, unsigned int problem_id );
-int serverproto_problem_change_mod( char *destip, unsigned int problem_id, wchar_t *problem_name );
+int serverproto_problem_change_add( const char *destip, unsigned int problem_id, const wchar_t *problem_name );
+int serverproto_problem_change_del( const char *destip, unsigned int problem_id );
+int serverproto_problem_change_mod( const char *destip, unsigned int problem_id, const wchar_t *problem_name );
 
 /* scoreboard update (to team and admin)
  * notify team and admin client about scoreboard updates */
-int serverproto_sb_update( char *destip, short desttype, unsigned int upd_acc_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
+int serverproto_sb_update( const char *destip, short desttype, unsigned int upd_acc_id, const wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time );
 /* this one notifies about the removal of record on scoreboard (possibly triggered by a removal of account) */
-int serverproto_sb_remove( char *destip, short desttype, unsigned int rm_account_id );
+int serverproto_sb_remove( const char *destip, short desttype, unsigned int rm_account_id );
 
 /* problem upload (to team)
  * upload problem description to team client (due to a previous problem download request) */
-int serverproto_problem_upload( char *destip, wchar_t *path_description );
+int serverproto_problem_upload( const char *destip, const wchar_t *path_description );
 
 /* run request (to judge)
  * run request to judge client */
-int serverproto_run_request( char *destip, unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code );
+int serverproto_run_request( const char *destip, unsigned int run_id, unsigned int problem_id, const wchar_t *coding_language, const wchar_t *path_code );
 
 /* take result (to judge)
  * notify judges about take result */
-int serverproto_take_result( char *destip, unsigned int run_id, int success );
+int serverproto_take_result( const char *destip, unsigned int run_id, int success );
 
 /* account information update (to admin)
  * updates account listing to administrator */
-int serverproto_account_update( char *destip, unsigned int account_id, unsigned int type, wchar_t *account );
+int serverproto_account_update( const char *destip, unsigned int account_id, unsigned int type, const wchar_t *account );
 /* this one notifies about account removal */
-int serverproto_account_remove( char *destip, unsigned int account_id );
+int serverproto_account_remove( const char *destip, unsigned int account_id );
 
 /* problem information update (to admin and judge)
  * updates problem listing to admin and judge clients */
-int serverproto_problem_update( char *destip, short desttype, unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer );
+int serverproto_problem_update( const char *destip, short desttype, unsigned int problem_id, const wchar_t *problem_name, unsigned int time_limit, const wchar_t *path_description, const wchar_t *path_input, const wchar_t *path_answer );
 /* this one notifies about problem removal */
-int serverproto_problem_remove( char *destip, short desttype, unsigned int problem_id );
+int serverproto_problem_remove( const char *destip, short desttype, unsigned int problem_id );
 
 /* clarification request (to admin and judge)
  * request clarification to admin and judge clients */
-int serverproto_clar_request( char *destip, short desttype, unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg );
+int serverproto_clar_request( const char *destip, short desttype, unsigned int clar_id, unsigned int account_id, const wchar_t *account, int private_byte, const wchar_t *clarmsg );
 
 /* contest site situation -- not implemented yet */
 
