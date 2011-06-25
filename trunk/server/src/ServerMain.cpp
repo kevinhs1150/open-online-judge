@@ -993,7 +993,7 @@ void callback_clar_result( char *srcip, unsigned int clar_id, int private_byte, 
 
 	/* update clarification information into db */
 	wcstombs(result_string_char, result_string, 100);
-	sprintf(sqlquery, "UPDATE clarification SET result = '%s' WHERE clar_id = %d;", result_string_char, clar_id);
+	sprintf(sqlquery, "UPDATE clarification SET result = '%s' WHERE clar_id = %u;", result_string_char, clar_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* reply to all or one team, according to how private byte is set */
