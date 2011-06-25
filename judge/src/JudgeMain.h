@@ -8,15 +8,6 @@
 #define STOP  0
 #define START 1
 
-#define SUCCESS 0
-#define SUCCESS_WITH_WARNING 1
-#define COMPLIE_ERROR -1
-#define OUTPUT_ERROR -2
-#define TYPE_ERROR -3
-#define FILE_OPEN_ERROR -4
-#define OUTPUT_OPEN_ERROR -5
-#define TIME_OUT -6
-
 class JudgeFrame: public JudgeGUI
 {
     public:
@@ -55,6 +46,7 @@ class JudgeFrame: public JudgeGUI
 		void OnTimerEvent(wxTimerEvent &event);
 		void TimerCall(wxCommandEvent &event);
 		void ShowSubmissionDialog(wxCommandEvent &event);
+		void AutoJudge(wxCommandEvent &event);
 		DECLARE_EVENT_TABLE()
 };
 

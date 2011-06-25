@@ -5,15 +5,6 @@
 #include "JudgeApp.h"
 #include "gui.h"
 
-#define SUCCESS 0
-#define SUCCESS_WITH_WARNING 1
-#define COMPLIE_ERROR -1
-#define OUTPUT_ERROR -2
-#define TYPE_ERROR -3
-#define FILE_OPEN_ERROR -4
-#define OUTPUT_OPEN_ERROR -5
-#define TIME_OUT -6
-
 #define YES 0
 #define COMPLIE_ERROR -1
 #define WRONG_ANSWER -2
