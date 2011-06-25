@@ -93,7 +93,7 @@ void JudgeSubmissionFrame::OnButtonClickRun( wxCommandEvent& event )
 	errtyp = compile(file_name, type);
 	if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
 		m_staticTextRunStatus->SetLabel(wxT("File execute..."));
-		if(time( getTimeLimit() ) == 0){
+		if(execute( getTimeLimit() ) == 0){
 			if(judge(this->problem_id) != 0){
 				errtyp = OUTPUT_ERROR;
 				m_staticTextRunStatus->SetLabel(wxT("Wrong answer."));
@@ -110,7 +110,7 @@ void JudgeSubmissionFrame::OnButtonClickRun( wxCommandEvent& event )
 	else if(errtyp == SUCCESS_WITH_WARNING){
 		m_staticTextRunStatus->SetLabel(wxT("Compile success, but has warning."));
 	}
-	else if(errtyp == COMPLIE_ERROR){
+	else if(errtyp == COMPILE_ERROR){
 		m_staticTextRunStatus->SetLabel(wxT("Compile error."));
 	}
 	else if(errtyp == OUTPUT_ERROR){
@@ -123,7 +123,7 @@ void JudgeSubmissionFrame::OnButtonClickRun( wxCommandEvent& event )
 		m_staticTextRunStatus->SetLabel(wxT("Submission file open error."));
 	}
 	else if(errtyp == OUTPUT_OPEN_ERROR){
-		m_staticTextRunStatus->SetLabel(wxT("Complie result file open error."));
+		m_staticTextRunStatus->SetLabel(wxT("Compile result file open error."));
 	}
 	else if(errtyp == TIME_OUT){
 		m_staticTextRunStatus->SetLabel(wxT("Execute time out."));
@@ -153,7 +153,7 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 		this->result = YES;
 	}
 	else if(column == 1){
-		this->result = COMPLIE_ERROR;
+		this->result = COMPILE_ERROR;
 	}
 	else if(column == 2){
 		this->result = WRONG_ANSWER;
@@ -171,7 +171,7 @@ void JudgeSubmissionFrame::OnButtonClickJudge( wxCommandEvent& event )
 		if(this->result == YES){
 			swprintf(result_string,L"yes");
 		}
-		else if(this->result == COMPLIE_ERROR){
+		else if(this->result == COMPILE_ERROR){
 			swprintf(result_string,L"compile error");
 		}
 		else if(this->result == WRONG_ANSWER){
@@ -208,7 +208,7 @@ void JudgeSubmissionFrame::setResultChoice()
 	
 	choice.Printf(wxT("yes"));
 	m_choiceJudgement->Append(choice);
-	choice.Printf(wxT("complie error"));
+	choice.Printf(wxT("compile error"));
 	m_choiceJudgement->Append(choice);
 	choice.Printf(wxT("wrong answer"));
 	m_choiceJudgement->Append(choice);
