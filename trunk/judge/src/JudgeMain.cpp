@@ -3,6 +3,9 @@
 #include "JudgeChangePass.h"
 #include "JudgeShowClar.h"
 #include "JudgeSubmission.h"
+
+#include "judge_tool.h"
+
 #include <wx/process.h>
 #include <wx/filefn.h>
 
@@ -21,7 +24,7 @@ typedef struct run_problem_id{
 typedef struct clar{
     unsigned int clar_id;
 	unsigned int account_id;
-	wchar_t *account; 
+	wchar_t *account;
     int private_byte;
     wchar_t *clarmsg;
 	wchar_t *result_string;
@@ -38,9 +41,11 @@ typedef struct problem_list{
 BEGIN_DECLARE_EVENT_TYPES()
 	DECLARE_LOCAL_EVENT_TYPE( wxEVT_CALL_TIMER, 7777 )
 	DECLARE_LOCAL_EVENT_TYPE( wxEVT_SHOW_SUBMISSION_DIALOG, 8888 )
+	DECLARE_LOCAL_EVENT_TYPE( wxEVT_AUTO_JUDGE, 9000 )
 END_DECLARE_EVENT_TYPES()
 DEFINE_EVENT_TYPE( wxEVT_CALL_TIMER )
 DEFINE_EVENT_TYPE( wxEVT_SHOW_SUBMISSION_DIALOG )
+DEFINE_EVENT_TYPE( wxEVT_AUTO_JUDGE )
 
 #define EVT_CALL_TIMER( id, fn )\
     DECLARE_EVENT_TABLE_ENTRY( \
@@ -55,11 +60,19 @@ DEFINE_EVENT_TYPE( wxEVT_SHOW_SUBMISSION_DIALOG )
         (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent( wxCommandEventFunction, &fn ), \
         (wxObject*)NULL\
     ),
-	
+
+#define EVT_AUTO_JUDGE( id, fn )\
+	DECLARE_EVENT_TABLE_ENTRY( \
+		wxEVT_AUTO_JUDGE, id, wxID_ANY, \
+		(wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+		(wxObject*)NULL\
+	),
+
 BEGIN_EVENT_TABLE(JudgeFrame, wxFrame)
     EVT_TIMER(-1, JudgeFrame::OnTimerEvent)
 	EVT_CALL_TIMER(wxID_ANY, JudgeFrame::TimerCall)
 	EVT_SHOW_SUBMISSION_DIALOG(wxID_ANY, JudgeFrame::ShowSubmissionDialog)
+	EVT_AUTO_JUDGE(wxID_ANY, JudgeFrame::AutoJudge)
 END_EVENT_TABLE()
 
 JudgeLoginFrame *loginframe;
@@ -96,10 +109,6 @@ run_request_id *search(unsigned int run_id);
 void id_delete(unsigned int run_id);
 void autoJudge_take(void);
 void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language, unsigned int time_limit);
-int compile_auto(wchar_t [], wchar_t []);
-int complie_result_auto(void);
-int judge_auto(unsigned int problem_id);
-int time_auto(unsigned int time_limit);
 void clar_insert(unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg);
 clar_request_id *clar_search(unsigned int clar_id);
 unsigned int clarNumCount(void);
@@ -135,12 +144,12 @@ JudgeFrame::JudgeFrame(wxFrame *frame)
         Destroy();
 		return;
     }
-	
+
     system("mkdir problem");
     IP_set();
     mainFrame = this;
 	mainFrame->setUnJudgeNum(0);
-	
+
 	judgeproto_run_sync( IP );
 	judgeproto_timer_sync( IP );
 	judgeproto_clar_sync( IP );
@@ -154,9 +163,9 @@ JudgeFrame::~JudgeFrame()
 void JudgeFrame::account_id_set(unsigned int account_id)
 {
 	wxString id;
-	
+
 	this->account_id = account_id;
-	
+
 	id.Printf(_("%u"),this->account_id);
 }
 
@@ -168,7 +177,7 @@ void JudgeFrame::account_set(wxString account)
 void JudgeFrame::setPtoblemFilterChoice(unsigned int problem_id, wchar_t *problem_name)
 {
 	wxString choice;
-	
+
 	choice.Printf(wxT("%u %s"), problem_id, problem_name);
 	m_choiceFilter->Append(choice);
 }
@@ -181,7 +190,7 @@ void JudgeFrame::deleteProblemFilterChoice(unsigned int problem_count)
 void JudgeFrame::setUnJudgeNum(unsigned int unJudgeNum)
 {
 	wxString unJudgeNumStr;
-	
+
 	unJudgeNumStr.Printf(_("%u"),unJudgeNum);
 	m_staticTextNewUnjudgeCount->SetLabel(unJudgeNumStr);
 }
@@ -189,7 +198,7 @@ void JudgeFrame::setUnJudgeNum(unsigned int unJudgeNum)
 void JudgeFrame::setRunListColumn()
 {
 	wxListItem columnListItem;
-	
+
 	columnListItem.SetText(wxT("run_id"));
 	m_listCtrlRuns->InsertColumn(0,columnListItem);
 	columnListItem.SetText(wxT("problem_id"));
@@ -200,8 +209,8 @@ void JudgeFrame::setRunListColumn()
 
 void JudgeFrame::setClarListColumn()
 {
-	wxListItem columnListItem;	
-	
+	wxListItem columnListItem;
+
 	columnListItem.SetText(wxT("clar_id"));
 	m_listCtrlClars->InsertColumn(0,columnListItem);
 	columnListItem.SetText(wxT("clarmsg"));
@@ -253,13 +262,13 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 	//=====================================================================================
 	/*problem_update_dlfin( 1, L"one", 3, L"problem/1.pdf", L"problem/1_input.txt", L"problem/1_ans.txt" );
 	problem_update_dlfin( 2, L"two", 3, L"problem/2.pdf", L"problem/2_input.txt", L"problem/2_ans.txt" );
-	
+
 	run_request_dlfin( 0, 1, L"c", L"0.c" );
 	run_request_dlfin( 1, 1, L"c", L"1.c" );
 	run_request_dlfin( 2, 1, L"c", L"2.c" );
 	run_request_dlfin( 3, 1, L"c", L"3.c" );
 	run_request_dlfin( 4, 1, L"c", L"4.c" );
-	
+
 	take_result(0,TAKE_SUCCESS);*/
 	//autoJudge(0,1, L"c", 3);
 	//======================================================================================
@@ -276,12 +285,12 @@ void JudgeFrame::OnChoiceFilter( wxCommandEvent& event )
 	unsigned int problem_id;
 	wxString text;
 	int post;
-	
+
 	text = event.GetString();
 	post = text.Find(wxT(" "));
 	text.Remove(post);
 	problem_id = wxAtoi(text);
-	
+
 	problem_filter_search(problem_id);
 }
 
@@ -304,14 +313,14 @@ void JudgeFrame::OnListItemActivatedRuns( wxListEvent& event )
 {
 	wxListItem item;
 	unsigned int run_id;
-	
+
 	item.SetId(event.GetIndex());
 	item.SetColumn(0);
 	item.SetMask(wxLIST_MASK_TEXT);
 	m_listCtrlRuns->GetItem(item);
 
 	run_id = wxAtoi(item.GetText());
-	
+
 	judgeproto_take_run(this->IP_get(),run_id);
 }
 
@@ -320,16 +329,16 @@ void JudgeFrame::OnListItemActivatedClar( wxListEvent& event )
 	wxListItem item0;
 	wxListItem item1;
 	clar_request_id *cptr;
-	
+
 	item0.SetId(event.GetIndex());
 	item0.SetColumn(0);
 	item0.SetMask(wxLIST_MASK_TEXT);
 	m_listCtrlClars->GetItem(item0);
-	
+
 	item1.SetId(event.GetIndex());
 	item1.SetMask(wxLIST_MASK_TEXT);
 	m_listCtrlClars->GetItem(item1);
-	
+
 	cptr = clar_search(wxAtoi(item0.GetText()));
 	showClarFrame = new JudgeShowClarFrame(0L);
 	showClarFrame->Show();
@@ -343,7 +352,7 @@ void JudgeFrame::OnTimerEvent(wxTimerEvent &event){
 		//contest end
 		m_timer.Stop();
 	}
-	
+
 	return;
 }
 
@@ -354,7 +363,7 @@ void JudgeFrame::TimerCall(wxCommandEvent &event){
 	else if(event.GetInt() == 0){
 		m_timer.Stop();
 	}
-	
+
 	return;
 }
 
@@ -375,7 +384,7 @@ void JudgeFrame::ShowSubmissionDialog(wxCommandEvent &event){
 		mainFrame->m_mutexRunRequest.Unlock();
 	}
 	submissionFrame->Destroy();
-	
+
 	return;
 }
 
@@ -443,13 +452,13 @@ void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_
 void run_request_dlfin( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t *path_code )
 {
 	unsigned int unJudgeNum;
-	
+
 	mainFrame->m_mutexRunRequest.Lock();
     id_insert(run_id,problem_id,coding_language);
 	unJudgeNum = unJudgeNumCount();
 	mainFrame->setUnJudgeNum(unJudgeNum);
 	mainFrame->m_mutexRunRequest.Unlock();
-	
+
 	if(unJudgeNum == 1 && (mainFrame->m_checkBoxAutoJudge->IsChecked()) == true){
 		autoJudge_take();
 	}
@@ -462,11 +471,11 @@ void problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned in
     wsprintf(path, L"problem/%u.pdf", problem_id);
     *path_description = (wchar_t *) malloc( ( wcslen(path)+1 ) * sizeof(wchar_t));
 	wcscpy(*path_description,path);
-	
+
 	wsprintf(path, L"problem/%u_input.txt", problem_id);
     *path_input = (wchar_t *)malloc( ( wcslen(path)+1 ) * sizeof(wchar_t));
 	wcscpy(*path_input,path);
-	
+
 	wsprintf(path, L"problem/%u_answer.txt", problem_id);
     *path_answer = (wchar_t *)malloc( ( wcslen(path)+1 ) * sizeof(wchar_t));
 	wcscpy(*path_answer,path);
@@ -484,14 +493,14 @@ void problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsig
 void problem_remove( unsigned int problem_id )
 {
 	wchar_t file[20];
-	
+
 	swprintf(file,L"problem/%u.pdf",problem_id);
 	DeleteFile(file);
 	swprintf(file,L"problem/%u_input.txt",problem_id);
 	DeleteFile(file);
 	swprintf(file,L"problem/%u_answer.txt",problem_id);
 	DeleteFile(file);
-	
+
 	mainFrame->m_mutexProblem.Lock();
 	run_search_delete(problem_id);
 	problem_search_delete(problem_id);
@@ -500,13 +509,13 @@ void problem_remove( unsigned int problem_id )
 
 void take_result( unsigned int run_id, int success )
 {
-    run_request_id *rptr = search(run_id);
-	problem_all *proptr = problem_search(rptr->problem_id);
 	unsigned int unJudgeNum;
-	
+
 	if(success == TAKE_SUCCESS){
 		if(mainFrame->m_checkBoxAutoJudge->IsChecked()){
-			autoJudge(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->time_limit);
+			wxCommandEvent event(wxEVT_AUTO_JUDGE);
+			event.SetInt(run_id);
+			wxPostEvent(mainFrame, event);
 		}
 		else{
 			wxCommandEvent event(wxEVT_SHOW_SUBMISSION_DIALOG);
@@ -549,7 +558,7 @@ void clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_string 
 unsigned int unJudgeNumCount(void)
 {
 	unsigned int unJudgeNum = 0;
-	
+
 	run_request_id *cptr = pptr;
 
     if(cptr == NULL){
@@ -561,7 +570,7 @@ unsigned int unJudgeNumCount(void)
 		unJudgeNum++;
         cptr = cptr->next;
     }
-	
+
 	return unJudgeNum;
 }
 
@@ -590,7 +599,7 @@ void id_insert(unsigned int run_id, unsigned int problem_id, wchar_t *coding_lan
 
 		currentPtr->next = temp_id;
 	}
-	
+
 	row = unJudgeNumCount() + 1 ;
 	insertString.Printf(wxT("%d"),run_id);
 	tmp = mainFrame->m_listCtrlRuns->InsertItem(row,insertString);
@@ -630,7 +639,7 @@ void problem_filter_search(unsigned int problem_id)
 	run_request_id *pfptr = pptr;
 	wxString insertString;
 	long tmp;
-	
+
 	mainFrame->m_listCtrlRuns->DeleteAllItems();
 	while(1){
 		if(pfptr == NULL){
@@ -648,19 +657,19 @@ void problem_filter_search(unsigned int problem_id)
 		if(pfptr->next == NULL){
 			break;
 			}
-		pfptr = pfptr->next; 
+		pfptr = pfptr->next;
 	}
 }
 
 problem_all *problem_search(unsigned int problem_id)
 {
 	problem_all *problem_all_hptr = problem_hptr;
-	
+
 	while(1){
 		if(problem_all_hptr->problem_id == problem_id){
 			return problem_all_hptr;
 		}
-		problem_all_hptr = problem_all_hptr->next; 
+		problem_all_hptr = problem_all_hptr->next;
 	}
 }
 
@@ -734,7 +743,7 @@ run_request_id *search(unsigned int run_id)
 void id_delete(unsigned int run_id)
 {
 	long itemCount = 0;
-	
+
     run_request_id *cptr = pptr;
     run_request_id *dptr = pptr;
     run_request_id *nptr = pptr;
@@ -780,7 +789,7 @@ void clar_insert(unsigned int clar_id, unsigned int account_id, wchar_t *account
     wcscpy((temp->clarmsg), clarmsg);
 	temp->result_string = NULL;
 	temp->next = NULL;
-	
+
 	if( clar_hptr == NULL )
 	{
 		clar_hptr = temp;
@@ -792,7 +801,7 @@ void clar_insert(unsigned int clar_id, unsigned int account_id, wchar_t *account
 
 		currentPtr->next = temp;
 	}
-	
+
 	row = clarNumCount() + 1 ;
 	insertString.Printf(wxT("%d"),clar_id);
 	tmp = mainFrame->m_listCtrlClars->InsertItem(row,insertString);
@@ -801,7 +810,7 @@ void clar_insert(unsigned int clar_id, unsigned int account_id, wchar_t *account
 }
 
 clar_request_id *clar_search(unsigned int clar_id)
-{	
+{
     clar_request_id *tptr = clar_hptr;
 	while(1){
 		if(tptr->clar_id == clar_id){
@@ -814,7 +823,7 @@ clar_request_id *clar_search(unsigned int clar_id)
 unsigned int clarNumCount(void)
 {
 	unsigned int clarNum = 0;
-	
+
 	clar_request_id *cptr = clar_hptr;
 
     if(cptr == NULL){
@@ -826,7 +835,7 @@ unsigned int clarNumCount(void)
 		clarNum++;
         cptr = cptr->next;
     }
-	
+
 	return clarNum;
 }
 
@@ -862,6 +871,15 @@ void autoJudge_take(void)
 	judgeproto_take_run(mainFrame->IP_get(),pptr->run_id);
 }
 
+void JudgeFrame::AutoJudge(wxCommandEvent &event)
+{
+	unsigned int run_id = event.GetInt();
+    run_request_id *rptr = search(run_id);
+	problem_all *proptr = problem_search(rptr->problem_id);
+
+	autoJudge(rptr->run_id,rptr->problem_id, rptr->coding_language, proptr->time_limit);
+}
+
 void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_language, unsigned int time_limit)
 {
 	wchar_t file_name[50];
@@ -880,10 +898,10 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 	else{
 		errtyp = TYPE_ERROR;
 	}
-    errtyp = compile_auto(file_name, type);
+    errtyp = compile(file_name, type);
     if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
-		if(time_auto(time_limit) == 0){
-            if(judge_auto(problem_id) != 0){
+		if(time(time_limit) == 0){
+            if(judge(problem_id) != 0){
                 errtyp = OUTPUT_ERROR;
 			}
         }
@@ -891,7 +909,7 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 			errtyp = TIME_OUT;
 		}
     }
-	
+
 	if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
 		swprintf(result_string,L"yes");
 	}
@@ -907,7 +925,7 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 	else{
 		swprintf(result_string,L"complie error");
 	}
-	
+
 	if(judgeproto_judge_result(mainFrame->IP_get(),run_id,result_string) != 0){
 		wxMessageBox(wxT("Judgement Submission Error.\nPromble: Socket error."),wxT("Judgement Submission Error"),wxOK|wxICON_EXCLAMATION);
 	}
@@ -918,151 +936,4 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 			autoJudge_take();
 		}
 	}
-}
-
-int compile_auto(wchar_t file_name[], wchar_t type[])
-{
-    FILE *fptr1;
-    wchar_t call[100];
-    char call_mb[100];
-    size_t call_mbsize;
-
-    fptr1=fopen("out.exe","r");
-    if(fptr1 != NULL){
-        fclose(fptr1);
-        wxRemoveFile(wxT("out.exe"));
-    }
-	
-	fptr1=fopen("ans.txt","r");
-    if(fptr1 != NULL){
-        fclose(fptr1);
-        wxRemoveFile(wxT("ans.txt"));
-    }
-
-    fptr1=fopen_sp(file_name,L"r");
-    if(fptr1!=NULL)
-    {
-        if(!(wcscmp(type, L"c"))){
-            wcscpy(call, L"gcc -o out.exe ");
-            wcscat(call, file_name);
-            wcscat(call, L" > output.txt 2>&1");
-
-            call_mbsize = wcstombs( NULL, call, 0 ) + 1;
-            wcstombs( call_mb, call, call_mbsize );
-
-            system(call_mb);
-            return(complie_result_auto());
-
-        }
-        else if(!(wcscmp(type, L"c++"))){
-            wcscpy(call, L"g++ -o out.exe ");
-            wcscat(call, file_name);
-            wcscat(call, L" > output.txt 2>&1");
-
-            call_mbsize = wcstombs( NULL, call, 0 ) + 1;
-            wcstombs( call_mb, call, call_mbsize );
-
-            system(call_mb);
-            return(complie_result_auto());
-        }
-        else{
-            return TYPE_ERROR;
-        }
-        fclose(fptr1);
-    }
-    else{
-        return FILE_OPEN_ERROR;
-    }
-}
-
-int complie_result_auto(){
-    FILE *fptr1,*fptr2;
-    char ch;
-    int result = SUCCESS;
-
-    fptr1 = fopen("out.exe","r");
-    fptr2 = fopen("output.txt","r");
-    if(fptr1 != NULL){
-        if(fptr2 != NULL)
-        {
-            while((ch = getc(fptr2))!= EOF){
-                result = SUCCESS_WITH_WARNING;
-            }
-            fclose(fptr2);
-        }
-        else{
-            result = OUTPUT_OPEN_ERROR;
-        }
-        fclose(fptr1);
-    }
-    else{
-        result = COMPLIE_ERROR;
-    }
-    return(result);
-}
-
-int time_auto(unsigned int time_limit){
-    int i;
-	long pid;
-	wxProcess *wxP = NULL;
-	
-    pid = wxExecute(wxT("executive.exe"),wxEXEC_NOHIDE,wxP);
-
-    for(i = 0;i < time_limit;i++){
-        Sleep(1);
-        if(wxProcess::Exists(pid) == true){
-            break;
-        }
-    }
-
-    if(wxProcess::Exists(pid) == false){
-        system("taskkill /F /IM out.exe");
-        return -1;
-    }
-	
-    return 0;
-}
-
-int judge_auto(unsigned int problem_id){
-    FILE *fptr1,*fptr2;
-    char a;
-    char o;
-	char problem_ans[50];
-
-    sprintf(problem_ans, "problem/%u_answer.txt", problem_id);
-
-    fptr1 = fopen(problem_ans,"r");
-	/*TODO: fix me*/
-	Sleep(1000);
-    fptr2 = fopen("ans.txt","r");
-    if(fptr1 != NULL){
-        if(fptr2 != NULL)
-        {
-            while(1){
-                o = getc(fptr2);
-                a = getc(fptr1);
-                if(o != EOF && a != EOF){
-                    if(o != a){
-                        return -1;
-                    }
-                }
-                else if((o != EOF && a == EOF) || (o == EOF && a != EOF)){
-                    return -1;
-                }
-                else{
-                    break;
-                }
-            }
-            fclose(fptr2);
-        }
-        else{
-            return -1;
-        }
-        fclose(fptr1);
-    }
-    else{
-        return -1;
-    }
-	
-    return 0;
 }
