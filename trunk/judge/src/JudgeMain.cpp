@@ -900,7 +900,7 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 	}
     errtyp = compile(file_name, type);
     if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
-		if(time(time_limit) == 0){
+		if(execute(time_limit) == 0){
             if(judge(problem_id) != 0){
                 errtyp = OUTPUT_ERROR;
 			}
@@ -913,8 +913,8 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 	if(errtyp == SUCCESS || errtyp == SUCCESS_WITH_WARNING){
 		swprintf(result_string,L"yes");
 	}
-	else if(errtyp == COMPLIE_ERROR || errtyp == TYPE_ERROR || errtyp == FILE_OPEN_ERROR){
-		swprintf(result_string,L"complie error");
+	else if(errtyp == COMPILE_ERROR || errtyp == TYPE_ERROR || errtyp == FILE_OPEN_ERROR){
+		swprintf(result_string,L"compile error");
 	}
 	else if(errtyp == OUTPUT_ERROR || errtyp == OUTPUT_OPEN_ERROR){
 		swprintf(result_string,L"wrong answer");
@@ -923,7 +923,7 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 		swprintf(result_string,L"time-limit exceed");
 	}
 	else{
-		swprintf(result_string,L"complie error");
+		swprintf(result_string,L"compile error");
 	}
 
 	if(judgeproto_judge_result(mainFrame->IP_get(),run_id,result_string) != 0){
