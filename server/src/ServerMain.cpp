@@ -988,12 +988,12 @@ void callback_clar_result( char *srcip, unsigned int clar_id, int private_byte, 
 	char sqlquery[100], **table, *errMsg = NULL;
 	char result_string_char[100];
 	int rows, cols, i;
-	unsigned int account_id;
+	unsigned int account_id, account_type;
 	wchar_t msg_wchar[100];
 
 	/* update clarification information into db */
 	wcstombs(result_string_char, result_string, 100);
-	sprintf(sqlquery, "UPDATE clarification SET result = '%s' WHERE clar_id = %u;", result_string_char, clar_id);
+	sprintf(sqlquery, "UPDATE clarification SET result = '%s' WHERE clar_id = %d;", result_string_char, clar_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 	/* reply to all or one team, according to how private byte is set */
@@ -1023,6 +1023,15 @@ void callback_clar_result( char *srcip, unsigned int clar_id, int private_byte, 
 		for(i=1;i<=rows;i++)
 			serverproto_clar_reply( table[i * cols + 0], OPSR_TEAM, clar_id, msg_wchar, result_string );
 		sqlite3_free_table(table);
+	}
+	
+	/* reply to judge and admin */
+	sprintf(sqlquery, "SELECT ipaddress, account_type FROM user WHERE account_type = %d OR account_type = %d;", SRC_ADMIN, SRC_JUDGE);
+	sqlite3_get_table(db , sqlquery, &table , &rows, &cols, &errMsg);
+	for(i=1;i<=rows;i++)
+	{
+		sscanf(table[i * cols + 1], "%u", &account_type);
+		serverproto_clar_reply( table[i * cols + 0], account_type, clar_id, msg_wchar, result_string );
 	}
 }
 
