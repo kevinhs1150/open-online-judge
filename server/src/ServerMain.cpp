@@ -536,13 +536,7 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 	int rows, cols;
 	unsigned int problem_id, account_id, accept_count;
 	wchar_t *account_wchar;
-	bool is_duplicate = false, is_correct = true;
-
-	/* record result information into db */
-	result_char = u16_to_u8( result );
- 	sprintf(sqlquery, "UPDATE submission SET judge_result = '%s' WHERE run_id = %u;", result_char, run_id);
-	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
-
+	
 	/* get account_id, problem_id, and ipaddress */
 	sprintf(sqlquery, "SELECT account_id, problem_id, ipaddress FROM submission NATURAL JOIN user WHERE run_id = %u;", run_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
@@ -553,22 +547,24 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 		strncpy(dstip, table[1 * cols + 2], 20);
 	}
 	sqlite3_free_table(table);
-
-	/* if the team get the point of the same problem before, the score will not add by one */
+	
+	/* If the team get the point of the same problem before, the score will not add by one. Modify the result. */
 	sprintf(sqlquery, "SELECT * FROM submission WHERE account_id = %u AND problem_id = %u AND judge_result = 'yes';", account_id, problem_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
-	if(rows == 0)
+	if(rows >= 1)
 	{
-		is_correct = false;
-	}
-	else if(rows >= 2)
-	{
-		is_duplicate = true;
+		if(wcscmp(result, L"yes") == 0)
+			wcscpy(result, L"Duplicated");
 	}
 	sqlite3_free_table(table);
+	
+	/* record result information into db */
+	result_char = u16_to_u8( result );
+ 	sprintf(sqlquery, "UPDATE submission SET judge_result = '%s' WHERE run_id = %u;", result_char, run_id);
+	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
-	/* update accept_count in scoreboard if result = "yes" and no duplicate "yes" */
-	if( is_correct == true && is_duplicate == false )
+	/* update accept_count in scoreboard if result = "yes" */
+	if( strcmp(result_char, "yes") == 0 )
 	{
 		/* get accept_count */
 		sprintf(sqlquery, "SELECT accept_count FROM scoreboard WHERE account_id = %u;", account_id);
@@ -598,10 +594,7 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 	}
 
 	/* redirect the result to corresponding team */
-	if(is_duplicate == true)
-		serverproto_run_reply( dstip, run_id, problem_id, L"duplicate" );
-	else
-		serverproto_run_reply( dstip, run_id, problem_id, result );
+	serverproto_run_reply( dstip, run_id, problem_id, result );
 
 	free( result_char );
 }
