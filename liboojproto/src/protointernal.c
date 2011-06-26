@@ -292,7 +292,7 @@ int filerecv( const wchar_t *filepath )
 		recvbyte = recv( sockfd, recvbuf, recvbyte, 0 );
 		fwrite( recvbuf, 1, recvbyte, fptr );
 		a_recvbyte += recvbyte;
-	
+
 #if PROTO_DBG >1
 		printf("%d, %d        \r", a_recvbyte, recvbyte );
 #endif
@@ -476,11 +476,8 @@ char *proto_str_presend( const wchar_t *src )
 {
 	int mbsize;
 	char *str;
-
-	mbsize = wcstombs( NULL, src, 0 ) + 1;
-	str = malloc( mbsize * sizeof( char ) );
-	wcstombs( str, src, mbsize );
-
+	
+	str = u16_to_u8( src );
 	return str;
 }
 
@@ -488,12 +485,135 @@ wchar_t *proto_str_postrecv( const char *src )
 {
 	int wcsize;
 	wchar_t *str;
-
-	wcsize = mbstowcs( NULL, src, 0 ) + 1;
-	str = malloc( wcsize * sizeof( wchar_t ) );
-	mbstowcs( str, src, wcsize );
-
+	
+	str = u8_to_u16( src );
 	return str;
+}
+
+char *u16_to_u8( const wchar_t *src )
+{
+	char *u8str = NULL;
+	char *u8str_ptr;
+	char *src_ptr;
+	size_t insize = ( wcslen(src) + 1 ) * sizeof( wchar_t );
+	size_t outsize = 0, total_outsize = 0;
+	int offset;
+	size_t iconv_rc;
+	iconv_t iconv_cd;
+
+	/* set pointer */
+	u8str_ptr = (char *)u8str;
+	src_ptr = (char *)src;
+
+	iconv_cd = iconv_open("UTF-8", "UTF-16LE");
+
+	/* Because we can't estimate output string size, we instead increment 50 units each time
+	 * until iconv() report string converted. */
+	while( 1 )
+	{
+		offset = u8str_ptr - u8str;
+
+		outsize = 50 * sizeof( char );
+		total_outsize = total_outsize + outsize;
+		u8str = realloc( u8str, total_outsize );
+		u8str_ptr = u8str + offset;
+
+		iconv_rc = iconv( iconv_cd, (const char **)&src_ptr, &insize, &u8str_ptr, &outsize );
+
+		if( iconv_rc == 0 || ( iconv_rc == -1 && errno != E2BIG ) )
+			break;
+	}
+	
+	iconv_close( iconv_cd );
+
+#if PROTO_DBG > 0
+	if( iconv_rc == -1 )
+	{
+		switch( errno )
+		{
+			case E2BIG:
+				printf("[u16_to_u8()] There is not sufficient room at *outbuf.\n");
+				break;
+			case EILSEQ:
+				printf("[u16_to_u8()] An invalid multibyte sequence has been encountered in the input.\n");
+				break;
+			case EINVAL:
+				printf("[u16_to_u8()] An incomplete multibyte sequence has been encountered in the input.\n");
+				break;
+			default:
+				printf("[u16_to_u8()] Strange error happened.\n");
+				break;
+		}
+	}
+#endif
+
+	return u8str;
+}
+
+wchar_t *u8_to_u16( const char *src )
+{
+	wchar_t *u16str = NULL;
+	char *u16str_ptr_head;
+	char *u16str_ptr;
+	char *src_ptr;
+	size_t insize = ( strlen(src) + 1 ) * sizeof( char );
+	size_t outsize = 0, total_outsize = 0;
+	int offset;
+	size_t iconv_rc;
+	iconv_t iconv_cd;
+
+	/* allocate UTF-16 string */
+	u16str = malloc( outsize );
+
+	/* set pointer */
+	u16str_ptr = (char *)u16str;
+	u16str_ptr_head = (char *)u16str;
+	src_ptr = (char *)src;
+
+	iconv_cd = iconv_open("UTF-16LE", "UTF-8");
+
+	/* Because we can't estimate output string size, we instead increment 50 units each time
+	 * until iconv() report string converted. */
+	while( 1 )
+	{
+		offset = u16str_ptr - u16str_ptr_head;
+
+		outsize = 50 * sizeof( wchar_t );
+		total_outsize = total_outsize + outsize;
+		u16str = realloc( u16str, total_outsize );
+		u16str_ptr_head = (char *)u16str;
+		u16str_ptr = u16str_ptr_head + offset;
+
+		iconv_rc = iconv( iconv_cd, (const char **)&src_ptr, &insize, &u16str_ptr, &outsize );
+
+		if( iconv_rc == 0 || ( iconv_rc == -1 && errno != E2BIG ) )
+			break;
+	}
+	
+	iconv_close( iconv_cd );
+
+#if PROTO_DBG > 0
+	if( iconv_rc == -1 )
+	{
+		switch( errno )
+		{
+			case E2BIG:
+				printf("[u8_to_u16()] There is not sufficient room at *outbuf.\n");
+				break;
+			case EILSEQ:
+				printf("[u8_to_u16()] An invalid multibyte sequence has been encountered in the input.\n");
+				break;
+			case EINVAL:
+				printf("[u8_to_u16()] An incomplete multibyte sequence has been encountered in the input.\n");
+				break;
+			default:
+				printf("[u8_to_u16()] Strange error happened.\n");
+				break;
+		}
+	}
+#endif
+
+	return u16str;
 }
 
 int proto_commonreq( int RQSR, int RQID, char *msgptr )

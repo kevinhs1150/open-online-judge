@@ -12,6 +12,7 @@
 #include <stdarg.h>
 
 #include <pthread.h>
+#include <iconv.h>
 
 #define BUFLEN 1024
 #define LISTEN_PORT_SERVER 27015
@@ -85,6 +86,10 @@ int between( int test_value, int low_value, int high_value );
  * postreceive: mbs -> wcs */
 char *proto_str_presend( const wchar_t *src );
 wchar_t *proto_str_postrecv( const char *src );
+
+/* UTF-8 <--> UTF-16 conversion functions */
+char *u16_to_u8( const wchar_t *src );
+wchar_t *u8_to_u16( const char *src );
 
 /* internal common listen functions
  * function defined in protointernal_listen.c */

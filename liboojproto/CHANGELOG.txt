@@ -1,5 +1,11 @@
 >> Open Online Judge Protocol Implementation Change Log <<
 
+protocol 0 revision 9
+released 2011.06.26
+ * internal: Finally complete Unicode support with libiconv.
+ + common: u8_to_u16() and u16_to_u8() opened for use.  These functions
+ can convert between UTF-8 and UTF-16 string independent of language.
+
 protocol 0 revision 8
 released 2011.06.24
  * internal: Added a lot of constant qualifier to differentiate between
