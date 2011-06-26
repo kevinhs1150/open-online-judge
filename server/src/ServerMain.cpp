@@ -555,7 +555,7 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 		sqlite3_free_table(table);
 
 		/* update accept_count */
-		sprintf(sqlquery, "UPDATE scoreboard SET accept_count = %u WHERE = account_id = %u;", accept_count + 1, account_id);
+		sprintf(sqlquery, "UPDATE scoreboard SET accept_count = %u WHERE account_id = %u;", accept_count + 1, account_id);
 		sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
 		/* update scoreboard globally */
@@ -1065,7 +1065,7 @@ void serverdb_contest( int (*serverproto)(const char *destip, short desttype), s
 	char destip[20];
 	int rows, cols, i;
 
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d;", desttype);
+	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_type = %d AND logged_in = 'yes';", desttype);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	for(i=1;i<=rows;i++)
 	{
