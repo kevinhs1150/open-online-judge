@@ -524,28 +524,43 @@ void callback_sb_sync( char *srcip, short srctype )
 void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *result )
 {
 	char sqlquery[100], **table, *errMsg = NULL;
-	char result_char[25];
+	char result_char[25], dstip[20];
 	int rows, cols;
 	unsigned int problem_id, account_id, accept_count;
 	wchar_t account_wchar[25];
+	bool is_duplicate = false, is_correct = true;
 
 	/* record result information into db */
 	wcstombs(result_char, result, 25);
  	sprintf(sqlquery, "UPDATE submission SET judge_result = '%s' WHERE run_id = %u;", result_char, run_id);
 	sqlite3_exec(db, sqlquery, 0, 0, &errMsg);
 
-	/* get account_id and problem_id */
-	sprintf(sqlquery, "SELECT account_id, problem_id FROM submission WHERE run_id = %u;", run_id);
+	/* get account_id, problem_id, and ipaddress */
+	sprintf(sqlquery, "SELECT account_id, problem_id, ipaddress FROM submission NATURAL JOIN user WHERE run_id = %u;", run_id);
 	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
 	if(rows >= 1)
 	{
 		sscanf(table[1 * cols + 0], "%u", &account_id);
 		sscanf(table[1 * cols + 1], "%u", &problem_id);
+		strncpy(dstip, table[1 * cols + 2], 20);
 	}
 	sqlite3_free_table(table);
-
-	/* update accept_count in scoreboard if result = "yes" */
-	if(strcmp( result_char, "yes" ) == 0)
+	
+	/* if the team get the point of the same problem before, the score will not add by one */
+	sprintf(sqlquery, "SELECT * FROM submission WHERE account_id = %u AND problem_id = %u AND judge_result = 'yes';", account_id, problem_id);
+	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
+	if(rows == 0)
+	{
+		is_correct = false;
+	}
+	else if(rows >= 2)
+	{
+		is_duplicate = true;
+	}
+	sqlite3_free_table(table);
+	
+	/* update accept_count in scoreboard if result = "yes" and no duplicate "yes" */
+	if( is_correct == true && is_duplicate == false )
 	{
 		/* get accept_count */
 		sprintf(sqlquery, "SELECT accept_count FROM scoreboard WHERE account_id = %u;", account_id);
@@ -573,14 +588,10 @@ void callback_run_result_notify( char *srcip, unsigned int run_id, wchar_t *resu
 	}
 
 	/* redirect the result to corresponding team */
-	sprintf(sqlquery, "SELECT ipaddress FROM user WHERE account_id = %u;", account_id);
-	sqlite3_get_table(db, sqlquery, &table, &rows, &cols, &errMsg);
-	if(rows >= 1)
-	{
-		serverproto_run_reply( table[1 * cols + 0], run_id, problem_id, result );
-	}
-	sqlite3_free_table(table);
-
+	if(is_duplicate == true)
+		serverproto_run_reply( dstip, run_id, problem_id, L"duplicate" );
+	else
+		serverproto_run_reply( dstip, run_id, problem_id, result );
 }
 
 void callback_trun_sync( char *srcip, unsigned int account_id )
