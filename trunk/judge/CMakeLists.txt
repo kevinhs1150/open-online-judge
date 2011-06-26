@@ -6,4 +6,4 @@ INCLUDE_DIRECTORIES("../libpthread")
 
 SET(srcs src/JudgeApp.cpp src/JudgeMain.cpp src/JudgeChangePass.cpp src/JudgeCompare.cpp src/JudgeLogin.cpp src/JudgementConfirm.cpp src/JudgeShowClar.cpp src/JudgeSubmission.cpp src/judge_tool.cpp)
 ADD_EXECUTABLE(Judge WIN32 ${srcs})
-TARGET_LINK_LIBRARIES(Judge ${wxWidgets_LIBRARIES} gui oojproto ${CMAKE_BINARY_DIR}/lib/pthreadGC2.a)
+TARGET_LINK_LIBRARIES(Judge ${wxWidgets_LIBRARIES} gui oojproto ${CMAKE_BINARY_DIR}/lib/pthreadGC2.a iconv)
