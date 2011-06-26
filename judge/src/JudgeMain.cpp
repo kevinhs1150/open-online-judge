@@ -930,8 +930,11 @@ void autoJudge(unsigned int run_id,unsigned int problem_id, wchar_t *coding_lang
 		wxMessageBox(wxT("Judgement Submission Error.\nPromble: Socket error."),wxT("Judgement Submission Error"),wxOK|wxICON_EXCLAMATION);
 	}
 	else{
+		mainFrame->m_mutexRunRequest.Lock();
 		id_delete(run_id);
 		unJudgeNum = unJudgeNumCount();
+		mainFrame->setUnJudgeNum(unJudgeNum);
+		mainFrame->m_mutexRunRequest.Unlock();
 		if(unJudgeNum >= 1 && (mainFrame->m_checkBoxAutoJudge->IsChecked()) == true){
 			autoJudge_take();
 		}
