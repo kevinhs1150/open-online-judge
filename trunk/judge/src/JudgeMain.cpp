@@ -259,19 +259,6 @@ void JudgeFrame::OnButtonClickChangePassword( wxCommandEvent& event )
 	changePassFrame = new JudgeChangePassFrame(0L);
 	changePassFrame->Show();
 	changePassFrame->set_account_id(this->account_id);
-	//=====================================================================================
-	/*problem_update_dlfin( 1, L"one", 3, L"problem/1.pdf", L"problem/1_input.txt", L"problem/1_ans.txt" );
-	problem_update_dlfin( 2, L"two", 3, L"problem/2.pdf", L"problem/2_input.txt", L"problem/2_ans.txt" );
-
-	run_request_dlfin( 0, 1, L"c", L"0.c" );
-	run_request_dlfin( 1, 1, L"c", L"1.c" );
-	run_request_dlfin( 2, 1, L"c", L"2.c" );
-	run_request_dlfin( 3, 1, L"c", L"3.c" );
-	run_request_dlfin( 4, 1, L"c", L"4.c" );
-
-	take_result(0,TAKE_SUCCESS);*/
-	//autoJudge(0,1, L"c", 3);
-	//======================================================================================
 }
 
 void JudgeFrame::OnButtonClickLogout( wxCommandEvent& event )
@@ -299,14 +286,6 @@ void JudgeFrame::OnCheckBoxAutoJudge( wxCommandEvent& event )
 	if((m_checkBoxAutoJudge->IsChecked()) == true && unJudgeNumCount() > 0){
 		autoJudge_take();
 	}
-	//==========================================================
-	/*autoJudge(1,1, L"c", 3);
-	mainFrame->m_mutexRunRequest.Lock();
-	id_delete(1);
-	unsigned int unJudgeNum = unJudgeNumCount();
-	mainFrame->setUnJudgeNum(unJudgeNum);
-	mainFrame->m_mutexRunRequest.Unlock();*/
-	//==========================================================
 }
 
 void JudgeFrame::OnListItemActivatedRuns( wxListEvent& event )
@@ -349,7 +328,6 @@ void JudgeFrame::OnTimerEvent(wxTimerEvent &event){
 	m_timeleft--;
 	m_staticTextTime->SetLabel(wxString::Format(_("%d:%02d:%02d"), m_timeleft / 60 / 60, (m_timeleft / 60) % 60, m_timeleft % 60));
 	if(m_timeleft <= 0){
-		//contest end
 		m_timer.Stop();
 	}
 
@@ -429,7 +407,7 @@ void contest_stop( void )
 }
 
 void run_request( unsigned int run_id, unsigned int problem_id, wchar_t *coding_language, wchar_t **path_code )
-{/***HERE***/
+{
     wchar_t filename[50];
 
     if( !wcscmp(coding_language, L"c") )
@@ -465,7 +443,7 @@ void run_request_dlfin( unsigned int run_id, unsigned int problem_id, wchar_t *c
 }
 
 void problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t **path_description, wchar_t **path_input, wchar_t **path_answer)
-{/***HERE***/
+{
     wchar_t path[50];
 
     wsprintf(path, L"problem/%u.pdf", problem_id);
