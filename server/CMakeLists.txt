@@ -5,6 +5,6 @@ INCLUDE_DIRECTORIES("../liboojproto/include")
 INCLUDE_DIRECTORIES("../libpthread")
 INCLUDE_DIRECTORIES("../libiconv")
 
-SET(srcs src/ServerApp.cpp src/ServerMain.cpp src/sqlite3.c)
+SET(srcs src/ServerApp.cpp src/ServerMain.cpp src/sqlite3.c src/db_tool.cpp)
 ADD_EXECUTABLE(Server WIN32 ${srcs})
 TARGET_LINK_LIBRARIES(Server ${wxWidgets_LIBRARIES} gui oojproto ${CMAKE_BINARY_DIR}/lib/pthreadGC2.a ${CMAKE_BINARY_DIR}/lib/libiconv.a)
