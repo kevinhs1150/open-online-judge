@@ -122,7 +122,7 @@ TeamFrame::TeamFrame(wxFrame *frame)
 	m_listCtrlClars->InsertColumn(0, itemCol);
 	m_listCtrlScore->InsertColumn(0, itemCol);
 
-	itemCol.SetText(_("Problem"));
+	itemCol.SetText(_("Problem ID"));
     m_listCtrlRuns->InsertColumn(1, itemCol);
 
     itemCol.SetText(_("Clarmsg"));
@@ -556,7 +556,7 @@ void cb_run_reply( unsigned int run_id, unsigned int problem_id, wchar_t *result
     if(temp == wxNOT_FOUND){
         temp = TeamFrameGlobal->m_listCtrlRuns->InsertItem(0, wxString() << run_id);
     }
-    TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 1, TeamFrameGlobal->m_choiceProblem->GetString(problem_id));
+    TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 1, wxString() << problem_id);
     TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 2, wxString() << result_string);
     mutexRun.Unlock();
     return;
@@ -628,7 +628,7 @@ void cb_problem_add( unsigned int problem_id, wchar_t *problem_name )
     for(;max_problem_id <= problem_id; max_problem_id++)
         TeamFrameGlobal->m_choiceProblem->Append(wxString() << _(""));
     mutexProblem.Unlock();
-    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << problem_name);
+    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << _("[") << problem_id << _("] ") << problem_name);
     return;
 }
 
@@ -640,6 +640,6 @@ void cb_problem_del( unsigned int problem_id )
 
 void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name )
 {
-    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << problem_name);
+    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << _("[") << problem_id << _("] ") << problem_name);
     return;
 }
