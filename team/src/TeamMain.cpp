@@ -57,6 +57,107 @@ wxMutex mutexScoreboard;
 wxMutex mutexProblem;
 
 
+///////////////////////////////////////////////////////////////////////////////
+/// RunLinkedList
+///////////////////////////////////////////////////////////////////////////////
+
+RunLinkedList::RunLinkedList( void )
+{
+	headPtr = tailPtr = NULL;
+	searchPtr = NULL;
+
+	items = 0;
+	tgt_pid = 0;
+	searchPtr = NULL;
+	searchIndex = 0;
+
+	return;
+}
+
+RunLinkedList::~RunLinkedList( void )
+{
+	if( headPtr != NULL )
+		delete headPtr;
+
+	return;
+}
+
+void RunLinkedList::Insert( unsigned int run_id, unsigned int problem_id )
+{
+	RunListNodePtr newPtr;
+
+	/* create new node */
+	newPtr = new RunListNode;
+	newPtr->run_id = run_id;
+	newPtr->problem_id = problem_id;
+	newPtr->nextPtr = NULL;
+
+	if( headPtr == NULL )
+	{
+		/* list is empty */
+		headPtr = tailPtr = newPtr;
+	}
+	else
+	{
+		/* link to tail directly (regardless of sorting problem) */
+		tailPtr->nextPtr = newPtr;
+		tailPtr = newPtr;
+	}
+
+	items++;
+
+	return;
+}
+
+/* search function */
+void RunLinkedList::SetSearchProblemID( unsigned int problem_id )
+{
+	tgt_pid = problem_id;
+	searchPtr = headPtr;
+	searchIndex = 0;
+
+	return;
+}
+
+void RunLinkedList::ResetSearch( void )
+{
+	searchPtr = NULL;
+}
+
+int RunLinkedList::SearchNext( void )
+{
+	int thisIndex = searchIndex;
+
+	if( searchPtr == NULL )
+		return -1;
+
+	while( searchPtr != NULL && searchPtr->problem_id != tgt_pid )
+	{
+		searchPtr = searchPtr->nextPtr;
+		thisIndex = thisIndex + 1;
+	}
+
+	if( searchPtr != NULL )
+	{
+		searchPtr = searchPtr->nextPtr;
+		searchIndex = thisIndex + 1;
+		return thisIndex;
+	}
+	else
+		return -1;
+}
+
+unsigned int &RunLinkedList::operator[]( unsigned int index )
+{
+	unsigned int counter = 0;
+	RunListNodePtr currentPtr = headPtr;
+
+	for( counter = 0; counter < index; counter++ )
+		currentPtr = currentPtr->nextPtr;
+
+	return currentPtr->run_id;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 /// TeamFrame
@@ -122,7 +223,7 @@ TeamFrame::TeamFrame(wxFrame *frame)
 	m_listCtrlClars->InsertColumn(0, itemCol);
 	m_listCtrlScore->InsertColumn(0, itemCol);
 
-	itemCol.SetText(_("Problem ID"));
+	itemCol.SetText(_("Problem"));
     m_listCtrlRuns->InsertColumn(1, itemCol);
 
     itemCol.SetText(_("Clarmsg"));
@@ -180,37 +281,44 @@ void TeamFrame::OnButtonClickDownload( wxCommandEvent& event )
 
 void TeamFrame::OnButtonClickTest( wxCommandEvent& event )
 {
-    wchar_t temp[10];
+/*	wchar_t temp[10];
 
-    swprintf(temp, L"test");
+	swprintf(temp, L"test");
 
-    cb_problem_add( 5, temp );
-    cb_problem_add( 3, temp );
-    cb_problem_add( 15, temp );
-    cb_problem_add( 0, temp );
+	cb_problem_add( 5, temp );
+	cb_problem_add( 3, temp );
+	cb_problem_add( 15, temp );
+	cb_problem_add( 0, temp );
 
-    cb_run_reply( 1, 3, temp );
-    cb_run_reply( 3, 5, temp );
-    cb_clar_reply( 1, temp, temp );
-    cb_clar_reply( 2, temp, temp );
+	cb_run_reply( 1, 3, temp );
+	cb_run_reply( 3, 5, temp );
+	cb_clar_reply( 1, temp, temp );
+	cb_clar_reply( 2, temp, temp );
 
-    cb_sb_update( 2, temp, 1, 1 );
-    cb_sb_update( 1, temp, 2, 2 );
-    cb_sb_update( 3, temp, 3, 3 );
+	cb_sb_update( 2, temp, 1, 1 );
+	cb_sb_update( 1, temp, 2, 2 );
+	cb_sb_update( 3, temp, 3, 3 );
 
 
-    swprintf(temp, L"test2");
-    cb_problem_add( 3, temp );
-    cb_problem_del( 5 );
-    cb_problem_del( 1 );
-    cb_problem_mod( 15, temp );
+	swprintf(temp, L"test2");
+	cb_problem_add( 3, temp );
+	cb_problem_del( 5 );
+	cb_problem_del( 1 );
+	cb_problem_mod( 15, temp );
 
-    cb_run_reply( 2, 3, temp );
-    cb_run_reply( 3, 5, temp );
-    cb_clar_reply( 1, temp, temp );
+	cb_run_reply( 2, 3, temp );
+	cb_run_reply( 3, 5, temp );
+	cb_clar_reply( 1, temp, temp );
 
-    cb_sb_update( 1, temp, 4, 4 );
-    cb_sb_remove( 3 );
+	cb_sb_update( 1, temp, 4, 4 );
+	cb_sb_remove( 3 );*/
+
+	/* test: search all runs with problem id 1 */
+	int index;
+
+	runlist.SetSearchProblemID( 1 );
+	while( ( index = runlist.SearchNext() ) != -1 )
+		printf("run: %d\n", runlist[index] );
 }
 
 void TeamFrame::OnButtonClickSubmit( wxCommandEvent& event )
@@ -499,7 +607,7 @@ void cb_login_confirm( int confirm_code, unsigned int account_id )
 void cb_logout_confirm( int confirm_code )
 {
     if(confirm_code == LOGOUT_OK){
-		wxMessageBox(_("Logout success!"));
+//		wxMessageBox(_("Logout success!"));
 		TeamFrameGlobal->Destroy();
 	}
 	else if(confirm_code == LOGOUT_FAIL){
@@ -555,8 +663,9 @@ void cb_run_reply( unsigned int run_id, unsigned int problem_id, wchar_t *result
     long temp = TeamFrameGlobal->m_listCtrlRuns->FindItem(-1, wxString() << run_id);
     if(temp == wxNOT_FOUND){
         temp = TeamFrameGlobal->m_listCtrlRuns->InsertItem(0, wxString() << run_id);
+		TeamFrameGlobal->runlist.Insert( run_id, problem_id );
     }
-    TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 1, wxString() << problem_id);
+    TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 1, TeamFrameGlobal->m_choiceProblem->GetString(problem_id));
     TeamFrameGlobal->m_listCtrlRuns->SetItem(temp, 2, wxString() << result_string);
     mutexRun.Unlock();
     return;
@@ -624,22 +733,58 @@ void cb_pu_request_dlfin( wchar_t *path_description )
 
 void cb_problem_add( unsigned int problem_id, wchar_t *problem_name )
 {
+	int index, run_id;
+	long listCtrlIndex;
+
     mutexProblem.Lock();
     for(;max_problem_id <= problem_id; max_problem_id++)
         TeamFrameGlobal->m_choiceProblem->Append(wxString() << _(""));
     mutexProblem.Unlock();
-    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << _("[") << problem_id << _("] ") << problem_name);
+    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << problem_name);
+
+	/* we must also check run list here to work around a bug where
+	 * run list may arrive earlier than problem list*/
+	mutexRun.Lock();
+	TeamFrameGlobal->runlist.SetSearchProblemID( problem_id );
+	while( ( index = TeamFrameGlobal->runlist.SearchNext() ) != -1 )
+	{
+		run_id = TeamFrameGlobal->runlist[index];
+		listCtrlIndex = TeamFrameGlobal->m_listCtrlRuns->FindItem( -1, wxString() << run_id );
+		TeamFrameGlobal->m_listCtrlRuns->SetItem(listCtrlIndex, 1, TeamFrameGlobal->m_choiceProblem->GetString(problem_id));
+	}
+	TeamFrameGlobal->runlist.ResetSearch();
+	mutexRun.Unlock();
+
     return;
 }
 
 void cb_problem_del( unsigned int problem_id )
 {
+	mutexProblem.Lock();
     TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << _(""));
+	mutexProblem.Unlock();
     return;
 }
 
 void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name )
 {
-    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << _("[") << problem_id << _("] ") << problem_name);
+	int index, run_id;
+	long listCtrlIndex;
+
+	mutexProblem.Lock();
+    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << problem_name);
+	mutexProblem.Unlock();
+
+	/* check run list change */
+	mutexRun.Lock();
+	TeamFrameGlobal->runlist.SetSearchProblemID( problem_id );
+	while( ( index = TeamFrameGlobal->runlist.SearchNext() ) != -1 )
+	{
+		run_id = TeamFrameGlobal->runlist[index];
+		listCtrlIndex = TeamFrameGlobal->m_listCtrlRuns->FindItem( -1, wxString() << run_id );
+		TeamFrameGlobal->m_listCtrlRuns->SetItem(listCtrlIndex, 1, TeamFrameGlobal->m_choiceProblem->GetString(problem_id));
+	}
+	TeamFrameGlobal->runlist.ResetSearch();
+	mutexRun.Unlock();
     return;
 }
