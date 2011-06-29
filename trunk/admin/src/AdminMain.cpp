@@ -69,9 +69,9 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 	wxString id = wxString() << account_id;
 	long tmp;
 	int i;
-	
+
 	AdminFrameGlobal->m_mutexAccount.Lock();
-	
+
 	//find in the lists
 	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlAdmin->GetItemCount() ; i++){
 		if(AdminFrameGlobal->m_listCtrlAdmin->GetItemData(i) == account_id){
@@ -91,34 +91,34 @@ void cb_account_update( unsigned int account_id, unsigned int type, wchar_t *acc
 			break;
 		}
 	}
-	
+
 	if(type == SRC_ADMIN){ // new type is admin
 		tmp = AdminFrameGlobal->m_listCtrlAdmin->InsertItem(AdminFrameGlobal->m_listCtrlAdmin->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlAdmin->SetItem(tmp, 1, name);
 		AdminFrameGlobal->m_listCtrlAdmin->SetItemData(tmp, account_id);
-		
+
 		AdminFrameGlobal->m_listCtrlAdmin->SortItems(ListCompareFunction, 0);
 	}
 	else if(type == SRC_JUDGE){
 		tmp = AdminFrameGlobal->m_listCtrlJudge->InsertItem(AdminFrameGlobal->m_listCtrlJudge->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlJudge->SetItem(tmp, 1, name);
 		AdminFrameGlobal->m_listCtrlJudge->SetItemData(tmp, account_id);
-		
+
 		AdminFrameGlobal->m_listCtrlJudge->SortItems(ListCompareFunction, 0);
 	}
 	else if(type == SRC_TEAM){
 		tmp = AdminFrameGlobal->m_listCtrlTeam->InsertItem(AdminFrameGlobal->m_listCtrlTeam->GetItemCount(), id);
 		AdminFrameGlobal->m_listCtrlTeam->SetItem(tmp, 1, name);
 		AdminFrameGlobal->m_listCtrlTeam->SetItemData(tmp, account_id);
-		
+
 		AdminFrameGlobal->m_listCtrlTeam->SortItems(ListCompareFunction, 0);
 	}
 	else{
 		// no definition, it must a mistake!
 	}
-	
+
 	AdminFrameGlobal->m_mutexAccount.Unlock();
-	
+
 	return;
 }
 
@@ -127,9 +127,9 @@ void cb_account_remove( unsigned int account_id ){
 	wxListItem item;
 	item.SetColumn(0);
 	item.SetMask(wxLIST_MASK_TEXT);
-	
+
 	AdminFrameGlobal->m_mutexAccount.Lock();
-	
+
 	for(i = 0 ; i < AdminFrameGlobal->m_listCtrlAdmin->GetItemCount() ; i++){
 		item.SetId(i);
 		AdminFrameGlobal->m_listCtrlAdmin->GetItem(item);
@@ -157,9 +157,9 @@ void cb_account_remove( unsigned int account_id ){
 			return;
 		}
 	}
-	
+
 	AdminFrameGlobal->m_mutexAccount.Unlock();
-	
+
 	return;
 }
 
@@ -169,7 +169,7 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 
 	FILE *file_d, *file_i, *file_o;
 	int i = 0;
-	
+
 	AdminFrameGlobal->m_mutexProblem.Lock();
 	while(1){
 		FILE *temp;
@@ -198,11 +198,11 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 	path = wxString::Format(_("temp\\%d_d.tmp"), i);
 	wchar_t *path_d = (wchar_t*)malloc( (wcslen(path.c_str()) + 1) * sizeof(wchar_t) );
 	wcscpy(path_d, path.c_str());
-	
+
 	path = wxString::Format(_("temp\\%d_i.tmp"), i);
 	wchar_t *path_i = (wchar_t*)malloc( (wcslen(path.c_str()) + 1) * sizeof(wchar_t) );
 	wcscpy(path_i, path.c_str());
-	
+
 	path = wxString::Format(_("temp\\%d_o.tmp"), i);
 	wchar_t *path_o = (wchar_t*)malloc( (wcslen(path.c_str()) + 1) * sizeof(wchar_t) );
 	wcscpy(path_o, path.c_str());
@@ -210,22 +210,33 @@ void cb_problem_update( unsigned int problem_id, wchar_t *problem_name, unsigned
 	*path_description = path_d;
 	*path_input = path_i;
 	*path_answer = path_o;
-	
+
 	return;
 }
 
 void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, unsigned int time_limit, wchar_t *path_description, wchar_t *path_input, wchar_t *path_answer ){
 	printf("DLFIN\n");
-	
+
 	AdminFrameGlobal->m_mutexProblem.Lock();
 	int i;
+	/* duplication check */
 	for(i = 0 ; i < AdminFrameGlobal->list_problem.size() ; i++)
 		if(AdminFrameGlobal->list_problem[i].problem_id == problem_id)
 			break;
 	if(i < AdminFrameGlobal->list_problem.size())
+	{
+		long delItemIndex;
+
+		/* erase from problem list */
 		AdminFrameGlobal->list_problem.erase(AdminFrameGlobal->list_problem.begin() + i);
+
+		/* delete from list control */
+		delItemIndex = AdminFrameGlobal->m_listCtrlProblems->FindItem( -1, wxString() << problem_id );
+		AdminFrameGlobal->m_listCtrlProblems->DeleteItem( delItemIndex );
+	}
+
 	AdminFrameGlobal->m_mutexProblem.Unlock();
-	
+
 	Problem p;
 	p.problem_id = problem_id;
 	p.name = wxString(problem_name);
@@ -233,11 +244,11 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	p.path_description = wxString::Format(_("data\\%d_d.pdf"), problem_id);
 	p.path_input = wxString::Format(_("data\\%d_i.txt"), problem_id);
 	p.path_answer = wxString::Format(_("data\\%d_o.txt"), problem_id);
-	
+
 	char path[100];
 	FILE *inFile;
 	FILE *outFile;
-	
+
 	wchar_t mode[10] = L"rb";
 	sprintf(path, "data\\%d_d.pdf", problem_id);
 	inFile = fopen_sp(path_description, mode);
@@ -251,7 +262,7 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	}
 	fclose(outFile);
 	fclose(inFile);
-	
+
 	sprintf(path, "data\\%d_i.txt", problem_id);
 	inFile = fopen_sp(path_input, mode);
 	outFile = fopen(path, "wb");
@@ -264,7 +275,7 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	}
 	fclose(outFile);
 	fclose(inFile);
-	
+
 	sprintf(path, "data\\%d_o.txt", problem_id);
 	inFile = fopen_sp(path_answer, mode);
 	outFile = fopen(path, "wb");
@@ -277,9 +288,9 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	}
 	fclose(outFile);
 	fclose(inFile);
-	
+
 	AdminFrameGlobal->list_problem.push_back(p);
-	
+
 	AdminFrameGlobal->m_mutexProblem.Lock();
 	long tmp;
 	tmp = AdminFrameGlobal->m_listCtrlProblems->InsertItem(0, wxString() << p.problem_id);
@@ -287,7 +298,7 @@ void cb_problem_update_dlfin( unsigned int problem_id, wchar_t *problem_name, un
 	AdminFrameGlobal->m_listCtrlProblems->SetItemData(tmp, p.problem_id);
 	AdminFrameGlobal->m_listCtrlProblems->SortItems(ListCompareFunction, 0);
 	AdminFrameGlobal->m_mutexProblem.Unlock();
-	
+
 	return;
 }
 
@@ -308,7 +319,7 @@ void cb_login_confirm( int confirm_code, unsigned int account_id ){
 
 void cb_logout_confirm( int confirm_code ){
 	AdminFrameGlobal->Destroy();
-	
+
 	return;
 }
 
@@ -362,7 +373,7 @@ void cb_timer_set( unsigned int hours, unsigned int minutes, unsigned int second
 void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *account, int private_byte, wchar_t *clarmsg ){
 	printf("cb_clar_request\n");
 	wprintf(L"%s\n", clarmsg);
-	
+
 	AdminFrameGlobal->m_mutexClar.Lock();
 	int i;
 	for(i = 0 ; i < AdminFrameGlobal->list_clar.size() ; i++)
@@ -382,7 +393,7 @@ void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *ac
 		c.clar_msg = wxString(clarmsg);
 		c.result_msg = wxEmptyString;
 		AdminFrameGlobal->list_clar.push_back(c);
-		
+
 		long tmp;
 		tmp = AdminFrameGlobal->m_listCtrlClars->InsertItem(0, wxString() << clar_id);
 		wxString msg = wxString(clarmsg);
@@ -393,9 +404,9 @@ void cb_clar_request( unsigned int clar_id, unsigned int account_id, wchar_t *ac
 		AdminFrameGlobal->m_listCtrlClars->SetItemData(tmp, clar_id);
 		AdminFrameGlobal->m_listCtrlClars->SortItems(ListCompareFunction, 0);
 	}
-	
+
 	AdminFrameGlobal->m_mutexClar.Unlock();
-	
+
 	return;
 }
 
@@ -417,13 +428,13 @@ void cb_clar_reply( unsigned int clar_id, wchar_t *clarmsg, wchar_t *result_stri
 		AdminFrameGlobal->list_clar.push_back(c);
 	}
 	AdminFrameGlobal->m_mutexClar.Unlock();
-	
+
 	return;
 }
 
 void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsigned int new_accept_count, unsigned int new_time ){
 	AdminFrameGlobal->m_mutexScoreboard.Lock();
-	
+
 	for(int i = 0 ; i < AdminFrameGlobal->m_listCtrlSB->GetItemCount() ; i++){
 		if(AdminFrameGlobal->m_listCtrlSB->GetItemData(i) == updated_account_id){
 			AdminFrameGlobal->m_listCtrlSB->DeleteItem(i);
@@ -436,9 +447,9 @@ void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsign
 	AdminFrameGlobal->m_listCtrlSB->SetItem(tmp, 2, wxString() << new_accept_count);
 	AdminFrameGlobal->m_listCtrlSB->SetItem(tmp, 3, wxString() << new_time);
 	AdminFrameGlobal->m_listCtrlSB->SetItemData(tmp, updated_account_id);
-	
+
 	wxListItem item;
-	
+
 	for(int i = 0 ; i < AdminFrameGlobal->m_listCtrlSB->GetItemCount() ; i++){
 		unsigned int temp;
 		item.SetId(i);
@@ -468,10 +479,10 @@ void cb_sb_update( unsigned int updated_account_id, wchar_t *new_account, unsign
 		AdminFrameGlobal->m_listCtrlSB->SetItem(i, 2, wxString() << AdminFrameGlobal->m_listCtrlSB->GetItemData(i));
 		AdminFrameGlobal->m_listCtrlSB->SetItemData(i, temp);
 	}
-	
-	
+
+
 	AdminFrameGlobal->m_mutexScoreboard.Unlock();
-	
+
 	return;
 }
 
@@ -481,7 +492,7 @@ void cb_sb_remove( unsigned int rm_account_id ){
 		if(AdminFrameGlobal->m_listCtrlSB->GetItemData(i) == rm_account_id)
 			AdminFrameGlobal->m_listCtrlSB->DeleteItem(i);
 	AdminFrameGlobal->m_mutexScoreboard.Unlock();
-	
+
 	return;
 }
 
@@ -494,7 +505,7 @@ void cb_problem_remove( unsigned int problem_id ){
 		}
 	}
 	AdminFrameGlobal->m_mutexProblem.Unlock();
-	
+
 	return;
 }
 
@@ -503,15 +514,15 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	char localaddr[20];
 	int ip1, ip2, ip3, ip4;
 	FILE *ipFile;
-	
+
 	AdminFrameGlobal = this;
 	ClarEnable(false);
-	
+
 	if(!wxDirExists(_("temp")))
 		wxMkdir(_("temp"));
 	if(!wxDirExists(_("data")))
 		wxMkdir(_("data"));
-	
+
 	InitAccountList();
 	InitProblemList();
 	InitClarList();
@@ -524,9 +535,9 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	ProblemInfoEnable(false);
 	ClarClear();
 	ClarEnable(false);
-	
+
 	loginDialog = new LoginDialog(this);
-	
+
 	adminproto_cbreg_login_confirm( cb_login_confirm );
 	adminproto_cbreg_logout_confirm( cb_logout_confirm );
 	adminproto_cbreg_password_change_confirm( cb_password_change_confirm );
@@ -542,7 +553,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 	adminproto_cbreg_problem_remove( cb_problem_remove );
 	adminproto_cbreg_sb_update( cb_sb_update );
 	adminproto_cbreg_sb_remove( cb_sb_remove );
-	
+
 	sprintf(localaddr, "0.0.0.0");
 	ipFile = fopen("ip.txt", "r");
 	if(ipFile == NULL){
@@ -565,7 +576,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 			isLogin = true;
 	}
 	loginDialog->Destroy();
-	
+
 	if(isLogin){
 		m_staticTextName->SetLabel(m_loginName);
 		adminproto_account_sync(server_ip);
@@ -575,7 +586,7 @@ AdminFrame::AdminFrame(wxFrame *frame)
 		adminproto_contest_state_sync(server_ip);
 		adminproto_clar_sync(server_ip);
 	}
-	
+
 }
 
 AdminFrame::~AdminFrame(){
@@ -600,75 +611,75 @@ AdminFrame::~AdminFrame(){
 
 void AdminFrame::InitAccountList(){
 	wxListItem itemCol;
-	
+
 	m_listCtrlAdmin->DeleteAllItems();
 	while(m_listCtrlAdmin->GetColumnCount())
 		m_listCtrlAdmin->DeleteColumn(0);
-	
+
 	m_listCtrlJudge->DeleteAllItems();
 	while(m_listCtrlJudge->GetColumnCount())
 		m_listCtrlJudge->DeleteColumn(0);
-	
+
 	m_listCtrlTeam->DeleteAllItems();
 	while(m_listCtrlTeam->GetColumnCount())
 		m_listCtrlTeam->DeleteColumn(0);
-	
+
 	itemCol.SetText(_("ID"));
 	m_listCtrlAdmin->InsertColumn(0, itemCol);
 	m_listCtrlJudge->InsertColumn(0, itemCol);
 	m_listCtrlTeam->InsertColumn(0, itemCol);
-	
+
 	itemCol.SetText(_("Name"));
 	m_listCtrlAdmin->InsertColumn(1, itemCol);
 	m_listCtrlJudge->InsertColumn(1, itemCol);
 	m_listCtrlTeam->InsertColumn(1, itemCol);
-	
+
 	return;
 }
 
 void AdminFrame::InitProblemList(){
 	wxListItem itemCol;
-	
+
 	m_listCtrlProblems->DeleteAllItems();
 	while(m_listCtrlProblems->GetColumnCount())
 		m_listCtrlProblems->DeleteColumn(0);
-	
+
 	itemCol.SetText(_("ID"));
 	m_listCtrlProblems->InsertColumn(0, itemCol);
-	
+
 	itemCol.SetText(_("Name"));
 	m_listCtrlProblems->InsertColumn(1, itemCol);
-	
+
 	m_selectedProblem = -1;
-	
+
 	return;
 }
 
 void AdminFrame::InitClarList(){
 	wxListItem itemCol;
-	
+
 	m_listCtrlClars->DeleteAllItems();
 	while(m_listCtrlClars->GetColumnCount())
 		m_listCtrlClars->DeleteColumn(0);
-	
+
 	itemCol.SetText(_("ID"));
 	m_listCtrlClars->InsertColumn(0, itemCol);
-	
+
 	itemCol.SetText(_("Message"));
 	m_listCtrlClars->InsertColumn(1, itemCol);
-	
+
 	m_selectedClar = -1;
-	
+
 	return;
 }
 
 void AdminFrame::InitSBList(){
 	wxListItem itemCol;
-	
+
 	m_listCtrlSB->DeleteAllItems();
 	while(m_listCtrlSB->GetColumnCount())
 		m_listCtrlSB->DeleteColumn(0);
-	
+
 	itemCol.SetText(_("Rank"));
 	m_listCtrlSB->InsertColumn(0, itemCol);
 	itemCol.SetText(_("ID-Name"));
@@ -677,7 +688,7 @@ void AdminFrame::InitSBList(){
 	m_listCtrlSB->InsertColumn(2, itemCol);
 	itemCol.SetText(_("Penalty"));
 	m_listCtrlSB->InsertColumn(3, itemCol);
-	
+
 	return;
 }
 
@@ -699,7 +710,7 @@ void AdminFrame::ProblemInfoEnable(bool enable){
 	m_filePickerProblemOutputData->Enable(enable);
 	m_buttonProblemApply->Enable(enable);
 	isProblemInfoEnable = enable;
-	
+
 	return;
 }
 
@@ -710,7 +721,7 @@ void AdminFrame::ProblemInfoClear(){
 	m_spinCtrlTimeLimitVal->SetValue(3000);
 	m_filePickerProblemInputData->SetPath(wxEmptyString);
 	m_filePickerProblemOutputData->SetPath(wxEmptyString);
-	
+
 	return;
 }
 
@@ -718,7 +729,7 @@ void AdminFrame::ClarEnable(bool enable){
 	m_textCtrlQuestion->Enable(enable);
 	m_textCtrlAnswer->Enable(enable);
 	m_buttonClarReply->Enable(enable);
-	
+
 	return;
 }
 
@@ -733,14 +744,14 @@ void AdminFrame::ClarClear(){
 void AdminFrame::OnButtonClickChangePassword( wxCommandEvent& event ){
 	changePassDialog = new ChangePassDialog(this);
 	changePassDialog->ShowModal();
-	
+
 	return;
 }
 
 void AdminFrame::OnButtonClickLogout( wxCommandEvent& event ){
 	if(adminproto_logout(server_ip, login_id) < 0)
 		wxMessageBox(_("Server not responding"));
-	
+
 	return;
 }
 
@@ -753,7 +764,7 @@ void AdminFrame::OnListItemActivatedAdmin( wxListEvent& event ){
 	AccountDialog *accountDialog = new AccountDialog(this, item.GetText(), SRC_ADMIN, event.GetIndex());
 	accountDialog->ShowModal();
 	accountDialog->Destroy();
-	
+
 	return;
 }
 
@@ -763,7 +774,7 @@ void AdminFrame::OnListItemSelectedAdmin( wxListEvent& event ){
 		m_listCtrlJudge->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	for(i = 0 ; i < m_listCtrlTeam->GetItemCount() ; i++)
 		m_listCtrlTeam->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	
+
 	return;
 }
 
@@ -776,7 +787,7 @@ void AdminFrame::OnListItemActivatedJudge( wxListEvent& event ){
 	AccountDialog *accountDialog = new AccountDialog(this, item.GetText(), SRC_JUDGE, event.GetIndex());
 	accountDialog->ShowModal();
 	accountDialog->Destroy();
-	
+
 	return;
 }
 
@@ -786,7 +797,7 @@ void AdminFrame::OnListItemSelectedJudge( wxListEvent& event ){
 		m_listCtrlAdmin->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	for(i = 0 ; i < m_listCtrlTeam->GetItemCount() ; i++)
 		m_listCtrlTeam->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	
+
 	return;
 }
 
@@ -799,7 +810,7 @@ void AdminFrame::OnListItemActivatedTeam( wxListEvent& event ){
 	AccountDialog *accountDialog = new AccountDialog(this, item.GetText(), SRC_TEAM, event.GetIndex());
 	accountDialog->ShowModal();
 	accountDialog->Destroy();
-	
+
 	return;
 }
 
@@ -809,7 +820,7 @@ void AdminFrame::OnListItemSelectedTeam( wxListEvent& event ){
 		m_listCtrlAdmin->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	for(i = 0 ; i < m_listCtrlJudge->GetItemCount() ; i++)
 		m_listCtrlJudge->SetItemState(i, !wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-	
+
 	return;
 }
 
@@ -841,7 +852,7 @@ void AdminFrame::OnButtonClickDeleteAccount( wxCommandEvent& event ){
 		adminproto_account_del(server_ip, account_id);
 		m_listCtrlJudge->DeleteItem(i);
 	}
-	
+
 	i = -1;
 	while(1){
 		i = m_listCtrlTeam->GetNextItem(i, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
@@ -851,7 +862,7 @@ void AdminFrame::OnButtonClickDeleteAccount( wxCommandEvent& event ){
 		adminproto_account_del(server_ip, account_id);
 		m_listCtrlTeam->DeleteItem(i);
 	}
-	
+
 	return;
 }
 
@@ -860,7 +871,7 @@ void AdminFrame::OnButtonClickManualTimeSet( wxCommandEvent& event ){
 	hr = m_spinCtrlTimeManualTotalHr->GetValue();
 	min = m_spinCtrlTimeManualTotalMin->GetValue();
 	adminproto_timer_set(server_ip, hr, min, sec);
-	
+
 	return;
 }
 
@@ -868,7 +879,7 @@ void AdminFrame::OnButtonClickStart( wxCommandEvent& event ){
 	printf("call adminproto_contest_start\n");
 	if(adminproto_contest_start(server_ip) < 0)
 		wxMessageBox(_("Cannot start contest!"));
-	
+
 	return;
 }
 
@@ -876,7 +887,7 @@ void AdminFrame::OnButtonClickStop( wxCommandEvent& event ){
 printf("call adminproto_contest_stop\n");
 	if(adminproto_contest_stop(server_ip) < 0)
 		wxMessageBox(_("Cannot stop contest!"));
-	
+
 	return;
 }
 
@@ -888,14 +899,16 @@ void AdminFrame::OnListItemDeselectedProblem( wxListEvent& event ){
 
 void AdminFrame::OnListItemSelectedProblem( wxListEvent& event ){
 	ProblemInfoEnable(true);
-	
+	m_staticTextProblemID->Disable();
+	m_textCtrlProblemID->Disable();
+
 	m_textCtrlProblemID->SetValue(wxString() << list_problem[event.GetIndex()].problem_id);
 	m_textCtrlProblemName->SetLabel(wxString() << list_problem[event.GetIndex()].name);
 	m_filePickerProblemFile->SetPath(wxString() << list_problem[event.GetIndex()].path_description);
 	m_spinCtrlTimeLimitVal->SetValue(list_problem[event.GetIndex()].time_limit);
 	m_filePickerProblemInputData->SetPath(wxString() << list_problem[event.GetIndex()].path_input);
 	m_filePickerProblemOutputData->SetPath(wxString() << list_problem[event.GetIndex()].path_answer);
-	
+
 	m_selectedProblem = event.GetIndex();
 }
 
@@ -906,7 +919,7 @@ void AdminFrame::OnButtonClickAddProblem( wxCommandEvent& event ){
 	m_selectedProblem = -1;
 	ProblemInfoClear();
 	ProblemInfoEnable(true);
-	
+
 	return;
 }
 
@@ -923,13 +936,13 @@ void AdminFrame::OnButtonClickDelProblem( wxCommandEvent& event ){
 		unsigned int id = wxAtoi(item.GetText());
 		adminproto_problem_del(server_ip, id);
 	}
-	
+
 	return;
 }
 
 void AdminFrame::OnCheckBoxProblemFile( wxCommandEvent& event ){
 	m_checkBoxProblemFile->SetValue(true);
-	
+
 	return;
 }
 
@@ -955,17 +968,17 @@ void AdminFrame::OnButtonClickProblemApply( wxCommandEvent& event ){
 				return;
 			}
 		}
-		
+
 		if(m_textCtrlProblemName->IsEmpty()){
 			wxMessageBox(_("Problem name cannot be empty!"));
 			return;
 		}
-		
+
 		if(m_filePickerProblemFile->GetPath() == wxEmptyString){
 			wxMessageBox(_("Problem's path cannot be empty!"));
 			return;
 		}
-		
+
 		// check input and output data path is not empty
 		if(m_filePickerProblemInputData->GetPath() == wxEmptyString){
 			wxMessageBox(_("Input data's path cannot be empty!"));
@@ -975,39 +988,95 @@ void AdminFrame::OnButtonClickProblemApply( wxCommandEvent& event ){
 			wxMessageBox(_("Output data's path cannot be empty!"));
 			return;
 		}
-		
+
 		//wchar_t *name = m_textCtrlProblemName->GetLabel().wchar_str();
 		wchar_t *name = new wchar_t [wcslen(m_textCtrlProblemName->GetLabel().c_str()) + 1];
 		wcscpy( name, m_textCtrlProblemName->GetLabel().c_str() );
-		
+
 		//wchar_t *p_path = m_filePickerProblemFile->GetPath().wchar_str();
 		wchar_t *p_path = new wchar_t [wcslen(m_filePickerProblemFile->GetPath().c_str()) + 1];
 		wcscpy( p_path, m_filePickerProblemFile->GetPath().c_str() );
-		
+
 		unsigned int time_limit = m_spinCtrlTimeLimitVal->GetValue();
 		//wchar_t *i_path = m_filePickerProblemInputData->GetPath().wchar_str();
 		wchar_t *i_path = new wchar_t [wcslen(m_filePickerProblemInputData->GetPath().c_str()) + 1];
 		wcscpy( i_path, m_filePickerProblemInputData->GetPath().c_str() );
-		
+
 		//wchar_t *o_path = m_filePickerProblemOutputData->GetPath().wchar_str();
 		wchar_t *o_path = new wchar_t [wcslen(m_filePickerProblemOutputData->GetPath().c_str()) + 1];
 		wcscpy( o_path, m_filePickerProblemOutputData->GetPath().c_str() );
-		
+
 		wprintf(L"%s\n", name);
 		wprintf(L"%s\n", p_path);
 		wprintf(L"%s\n", i_path);
 		wprintf(L"%s\n", o_path);
-		
+
 		adminproto_problem_add(server_ip, id, name, time_limit, p_path, i_path, o_path);
+		
+		delete name;
+		delete p_path;
+		delete i_path;
+		delete o_path;
 	}
 	else{
 		//edit
 		m_selectedProblem = -1;
+
+		unsigned int id = wxAtoi(m_textCtrlProblemID->GetLabel());
+
+		if(m_textCtrlProblemName->IsEmpty()){
+			wxMessageBox(_("Problem name cannot be empty!"));
+			return;
+		}
+
+		if(m_filePickerProblemFile->GetPath() == wxEmptyString){
+			wxMessageBox(_("Problem's path cannot be empty!"));
+			return;
+		}
+
+		// check input and output data path is not empty
+		if(m_filePickerProblemInputData->GetPath() == wxEmptyString){
+			wxMessageBox(_("Input data's path cannot be empty!"));
+			return;
+		}
+		if(m_filePickerProblemOutputData->GetPath() == wxEmptyString){
+			wxMessageBox(_("Output data's path cannot be empty!"));
+			return;
+		}
+
+		//wchar_t *name = m_textCtrlProblemName->GetLabel().wchar_str();
+		wchar_t *name = new wchar_t [wcslen(m_textCtrlProblemName->GetLabel().c_str()) + 1];
+		wcscpy( name, m_textCtrlProblemName->GetLabel().c_str() );
+
+		//wchar_t *p_path = m_filePickerProblemFile->GetPath().wchar_str();
+		wchar_t *p_path = new wchar_t [wcslen(m_filePickerProblemFile->GetPath().c_str()) + 1];
+		wcscpy( p_path, m_filePickerProblemFile->GetPath().c_str() );
+
+		unsigned int time_limit = m_spinCtrlTimeLimitVal->GetValue();
+		//wchar_t *i_path = m_filePickerProblemInputData->GetPath().wchar_str();
+		wchar_t *i_path = new wchar_t [wcslen(m_filePickerProblemInputData->GetPath().c_str()) + 1];
+		wcscpy( i_path, m_filePickerProblemInputData->GetPath().c_str() );
+
+		//wchar_t *o_path = m_filePickerProblemOutputData->GetPath().wchar_str();
+		wchar_t *o_path = new wchar_t [wcslen(m_filePickerProblemOutputData->GetPath().c_str()) + 1];
+		wcscpy( o_path, m_filePickerProblemOutputData->GetPath().c_str() );
+
+		wprintf(L"%s\n", name);
+		wprintf(L"%s\n", p_path);
+		wprintf(L"%s\n", i_path);
+		wprintf(L"%s\n", o_path);
+
+		adminproto_problem_mod(server_ip, id, name, time_limit, p_path, i_path, o_path);
+		
+		delete name;
+		delete p_path;
+		delete i_path;
+		delete o_path;
 	}
 	ProblemInfoClear();
 	ProblemInfoEnable(false);
-	
-	
+
+
 	return;
 }
 
@@ -1015,7 +1084,7 @@ void AdminFrame::OnListItemDeselectedClar( wxListEvent& event ){
 	m_selectedClar = -1;
 	ClarClear();
 	ClarEnable(false);
-	
+
 	return;
 }
 
@@ -1025,7 +1094,7 @@ void AdminFrame::OnListItemSelectedClar( wxListEvent& event ){
 	m_staticTextClarIDVal->SetLabel(wxString() << list_clar[event.GetIndex()].clar_id);
 	m_textCtrlQuestion->SetLabel(list_clar[event.GetIndex()].clar_msg);
 	m_textCtrlAnswer->SetLabel(list_clar[event.GetIndex()].result_msg);
-	
+
 	return;
 }
 
@@ -1035,7 +1104,7 @@ void AdminFrame::OnButtonClickClarReply( wxCommandEvent& event ){
 
 	wchar_t *result = new wchar_t [wcslen(m_textCtrlAnswer->GetLabel().c_str()) + 1];
 	wcscpy( result, m_textCtrlAnswer->GetLabel().c_str() );
-	
+
 	adminproto_clar_result(server_ip, m_selectedClar, 0, result);
 
 	for(int i = 0 ; i < m_listCtrlClars->GetItemCount() ; i++)
@@ -1043,7 +1112,7 @@ void AdminFrame::OnButtonClickClarReply( wxCommandEvent& event ){
 	m_selectedClar = -1;
 	ClarEnable(false);
 	ClarClear();
-	
+
 	return;
 }
 
@@ -1055,7 +1124,7 @@ void AdminFrame::OnTimerEvent(wxTimerEvent &event){
 		m_timer.Stop();
 		contestRunning = false;
 	}
-	
+
 	return;
 }
 
@@ -1064,6 +1133,6 @@ void AdminFrame::TimerCall(wxCommandEvent &event){
 		m_timer.Start(1000);
 	else if(event.GetInt() == 0 && m_timer.IsRunning() == 1)
 		m_timer.Stop();
-	
+
 	return;
 }

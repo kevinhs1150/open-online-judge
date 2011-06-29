@@ -18,9 +18,7 @@ int compile(wchar_t file_name[], wchar_t type[])
 {
     FILE *fptr1;
 	FILE *crPtr;  /* compile result file pointer */
-    wchar_t call[100];
 	wxString cCompile;
-    size_t call_mbsize;
 
 	/* check if out.exe exist */
     fptr1=fopen("out.exe","r");
@@ -143,7 +141,7 @@ int compile_result(){
 }
 
 int execute(unsigned int time_limit){
-    int i;
+    unsigned int i;
 	long pid;
 	FILE *rrPtr;  /* run result file pointer */
 
