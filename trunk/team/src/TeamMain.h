@@ -5,6 +5,42 @@
 #include "TeamApp.h"
 #include "gui.h"
 
+struct runListNode
+{
+	unsigned int run_id;
+	unsigned int problem_id;
+	struct runListNode *nextPtr;
+};
+typedef struct runListNode RunListNode;
+typedef RunListNode *RunListNodePtr;
+
+class RunLinkedList
+{
+	private:
+		RunListNodePtr headPtr;
+		RunListNodePtr tailPtr;
+
+		unsigned int items;
+
+		unsigned int tgt_pid;
+		int searchIndex;
+		RunListNodePtr searchPtr;
+
+	public:
+		RunLinkedList( void );
+		~RunLinkedList( void );
+
+		void Insert( unsigned int run_id, unsigned int problem_id );
+
+		/* search function */
+		void SetSearchProblemID( unsigned int problem_id );
+		void ResetSearch( void );
+
+		int SearchNext( void );  /* return index to next result, -1 for no result */
+
+		unsigned int &operator[]( unsigned int index );  /* get run_id of index */
+};
+
 class TeamFrame: public TeamGUI
 {
     private:
@@ -25,7 +61,8 @@ class TeamFrame: public TeamGUI
         ~TeamFrame();
         wxTimer m_timer;
         unsigned int m_timeleft;
-
+		
+		RunLinkedList runlist;
 };
 
 class ChangePassDialog : public ChangePassGUI
