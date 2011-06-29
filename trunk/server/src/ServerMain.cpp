@@ -1498,7 +1498,6 @@ void serverdb_sb_update( short desttype, unsigned int upd_acc_id, wchar_t *new_a
 	char *dest_ipaddr;
 
 	sqlite3_bind_int( ps_select_ipaddr_sdbsbu, 1, desttype );
-	sqlite3_sql( ps_select_ipaddr_sdbsbu );
 	while( ( sqlite3_rc = sqlite3_step( ps_select_ipaddr_sdbsbu ) ) == SQLITE_ROW )
 	{
 		dest_ipaddr = dyn_strcpy( sqlite3_column_text( ps_select_ipaddr_sdbsbu, 0 ) );
