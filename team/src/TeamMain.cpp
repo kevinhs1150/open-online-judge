@@ -740,7 +740,7 @@ void cb_problem_add( unsigned int problem_id, wchar_t *problem_name )
     for(;max_problem_id <= problem_id; max_problem_id++)
         TeamFrameGlobal->m_choiceProblem->Append(wxString() << _(""));
     mutexProblem.Unlock();
-    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << problem_name);
+    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << wxT("[") << problem_id << wxT("] ") << problem_name);
 
 	/* we must also check run list here to work around a bug where
 	 * run list may arrive earlier than problem list*/
@@ -772,7 +772,7 @@ void cb_problem_mod( unsigned int problem_id, wchar_t *problem_name )
 	long listCtrlIndex;
 
 	mutexProblem.Lock();
-    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << problem_name);
+    TeamFrameGlobal->m_choiceProblem->SetString(problem_id, wxString() << wxT("[") << problem_id << wxT("] ") << problem_name);
 	mutexProblem.Unlock();
 
 	/* check run list change */
