@@ -133,7 +133,7 @@ int tcp_connect( const char *conn_address, unsigned short conn_port )
 char *tcp_getaddr( int sockfd )
 {
 	struct sockaddr_in addr;
-	size_t len = sizeof( struct sockaddr_in );
+	socklen_t len = sizeof( struct sockaddr_in );
 	char *addr_str = malloc( 16 * sizeof( char ) );
 
 	if( getpeername( sockfd, (struct sockaddr *)&addr, &len ) < 0 )
@@ -474,18 +474,14 @@ int between( int test_value, int low_value, int high_value )
 
 char *proto_str_presend( const wchar_t *src )
 {
-	int mbsize;
 	char *str;
-	
 	str = u16_to_u8( src );
 	return str;
 }
 
 wchar_t *proto_str_postrecv( const char *src )
 {
-	int wcsize;
 	wchar_t *str;
-	
 	str = u8_to_u16( src );
 	return str;
 }
@@ -523,7 +519,7 @@ char *u16_to_u8( const wchar_t *src )
 		if( iconv_rc == 0 || ( iconv_rc == -1 && errno != E2BIG ) )
 			break;
 	}
-	
+
 	iconv_close( iconv_cd );
 
 #if PROTO_DBG > 0
@@ -589,7 +585,7 @@ wchar_t *u8_to_u16( const char *src )
 		if( iconv_rc == 0 || ( iconv_rc == -1 && errno != E2BIG ) )
 			break;
 	}
-	
+
 	iconv_close( iconv_cd );
 
 #if PROTO_DBG > 0

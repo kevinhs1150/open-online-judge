@@ -198,6 +198,7 @@ void *judgeproto_reqhand_thread( void *args )
 	free( recvbuf );
 	shutdown_wr_sp( sockfd );
 	pthread_exit( NULL );
+	return NULL;
 }
 
 

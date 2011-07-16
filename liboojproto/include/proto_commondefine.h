@@ -4,10 +4,12 @@
 #define PROTO_DBG 2
 
 /* include socket library */
+#include <unistd.h>
+
 #ifdef _WIN32 /* winsock2 */
 //	#include <windows.h>
 	#include <winsock2.h>
-//	#include <ws2tcpip.h>
+	#include <ws2tcpip.h>
 #elif __linux /* linux socket */
 	#include <sys/socket.h>
 	#include <arpa/inet.h>

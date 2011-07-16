@@ -164,5 +164,6 @@ void *proto_listen_thread( void *args )
 	close( proto_listenfd );
 
 	pthread_exit( NULL );
+	return NULL;
 }
 

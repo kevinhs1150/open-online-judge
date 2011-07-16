@@ -1,5 +1,12 @@
 >> Open Online Judge Protocol Implementation Change Log <<
 
+protocol 1
+released 2011.07.16
+ * common: Version bump.  I would consider it stable enough to go onto
+ next version.
+ * internal: Fixed -Wall warning messages, along with some strange bugs
+ discovered by it.
+
 protocol 0 revision 9
 released 2011.06.26
  * internal: Finally complete Unicode support with libiconv.

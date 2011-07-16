@@ -114,6 +114,8 @@ int serverproto_listen( const char *localaddr )
 #endif
 		return -1;
 	}
+	
+	return 0;
 }
 
 int serverproto_stop_listen( void )
@@ -181,7 +183,7 @@ void *serverproto_reqhand_thread( void *args )
 
 			free( account_id_str );
 		}
-		else if( RQID = OPID_PASSWD_CHANGE )
+		else if( RQID == OPID_PASSWD_CHANGE )
 		{
 			char *account_id_str = proto_str_split( msgptr, &msgptr );
 			char *old_password = proto_str_split( msgptr, &msgptr );
@@ -552,6 +554,7 @@ void *serverproto_reqhand_thread( void *args )
 	free( recvbuf );
 	shutdown_wr_sp( sockfd );
 	pthread_exit( NULL );
+	return NULL;
 }
 
 int serverproto_login_reply( const char *destip, short srctype, int confirmation, unsigned int account_id )
