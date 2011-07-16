@@ -187,6 +187,7 @@ void *adminproto_reqhand_thread( void *args )
 	free( recvbuf );
 	shutdown_wr_sp( sockfd );
 	pthread_exit( NULL );
+	return NULL;
 }
 
 int adminproto_login( const char *destip, const wchar_t *account, const char *password )
@@ -564,6 +565,6 @@ int adminproto_clar_sync( const char *destip )
 }
 
 /* not implemented yet */
-int adminproto_broadcast()
+/*int adminproto_broadcast()
 {
-}
+}*/

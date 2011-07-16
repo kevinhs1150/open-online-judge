@@ -94,7 +94,7 @@ wchar_t *u8_to_u16( const char *src );
 /* internal common listen functions
  * function defined in protointernal_listen.c */
 int proto_listen( const char *localaddr, unsigned short listen_bind_port, unsigned short vsftp_bind_port, void *(*cbthread)( void *) );
-int proto_activated( void );
+int proto_active( void );
 int proto_stop_listen( void );
 
 /* internal common listen request function -- handle requests common to all clients
