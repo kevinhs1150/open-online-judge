@@ -50,8 +50,4 @@
   
 
   _詳細指令的用法可參考_
-    * [http://code.google.com/p/candy2009/wiki/Subversion_Introduction 許秋婷老師的2009年大學部專題]
     * [http://svnbook.red-bean.com/nightly/en/index.html SVN Book(Version Control with Subversion)]
-
-　_可以利用以下頁面進行測試_
-    * [http://code.google.com/p/kevin-project-test/ kevin-project-test]
